@@ -16,12 +16,15 @@ class V4L2Camera : public CameraInterface
 {
 private:
     int _fd;
+
 	int _width; 
 	int _height;
 	int _pixelformat;
+    struct timeval _capture_time;
 	int _buffercount;
+	
+    int xioctl(int fd, int request, void *arg);
 
-	int xioctl(int fd, int request, void *arg);
     int v4l2_set_input();
     int v4l2_set_pixfmt();
     int v4l2_set_buffer();
@@ -35,6 +38,10 @@ private:
 protected:
     v4l2_buffer _bufferinfo;
 	buffer_t* _buffers;
+
+    int v4l2_set_brightness(unsigned int brightness);
+    int v4l2_set_exposure(unsigned int exposure);
+    int v4l2_set_iso(unsigned int iso);
 
 public:
     V4L2Camera(int device = 0);
@@ -52,6 +59,7 @@ public:
 	int getHeight();
 	void* getBuffer();
 	int getBufferLength();
+    double getV4L2CaptureTime();
 
 };
 

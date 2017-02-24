@@ -108,6 +108,52 @@ int V4L2Camera::v4l2_set_pixfmt()
 	return 0;
 }
 
+int V4L2Camera::v4l2_set_brightness(unsigned int brightness)
+{
+    struct v4l2_control control;
+    control.id = V4L2_CID_BRIGHTNESS;
+    control.value = brightness;
+    if (xioctl(_fd, VIDIOC_S_CTRL, &control) == -1){
+        std::cout << "Error while setting the brighness!" << std::endl;
+        return 1;
+    }
+    return 0;
+}
+
+int V4L2Camera::v4l2_set_exposure(unsigned int exposure)
+{
+    struct v4l2_control control;
+    control.id = V4L2_CID_EXPOSURE_AUTO;
+    control.value = 0; // manual
+    if (xioctl(_fd, VIDIOC_S_CTRL, &control) == -1){
+        std::cout << "Error while setting the exposure to manual!" << std::endl;
+        return 1;
+    }
+    control.id = V4L2_CID_EXPOSURE;
+    control.value = exposure;
+    if (xioctl(_fd, VIDIOC_S_CTRL, &control) == -1){
+        std::cout << "Error while setting the exposure!" << std::endl;
+    }
+    return 0;
+}
+
+int V4L2Camera::v4l2_set_iso(unsigned int iso)
+{
+    struct v4l2_control control;
+    control.id = V4L2_CID_ISO_SENSITIVITY_AUTO;
+    control.value = 0; // manual
+    if (xioctl(_fd, VIDIOC_S_CTRL, &control) == -1){
+        std::cout << "Error while setting the ISO to manual!" << std::endl;
+        return 1;
+    }
+    control.id = V4L2_CID_ISO_SENSITIVITY;
+    control.value = iso;
+    if (xioctl(_fd, VIDIOC_S_CTRL, &control) == -1){
+        std::cout << "Error while setting the iso!" << std::endl;
+    }
+    return 0;
+}
+
 int V4L2Camera::v4l2_set_buffer()
 {
 	// Inform about future buffers
@@ -208,6 +254,8 @@ int V4L2Camera::v4l2_dequeue_buffer()
 		return 1;
 	}
 
+    _capture_time = _bufferinfo.timestamp;
+
 	return 0;
 }
 
@@ -284,4 +332,9 @@ void* V4L2Camera::getBuffer()
 int V4L2Camera::getBufferLength()
 {
     return _buffers[_bufferinfo.index].length;
+}
+
+double V4L2Camera::getV4L2CaptureTime()
+{
+    return (double)_capture_time.tv_sec + _capture_time.tv_usec*1e-6;
 }
