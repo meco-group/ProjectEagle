@@ -35,12 +35,12 @@ public:
 
     bool shout(const std::string& header, const void* data, size_t size, const std::string& group);
     bool shout(const std::string& header, const void* data, size_t size, const std::vector<std::string>& groups);
-    bool shout(std::vector<const void*>& data, std::vector<size_t>& sizes, const std::string& group);
-    bool shout(std::vector<const void*>& data, std::vector<size_t>& sizes, const std::vector<std::string>& groups);
+    bool shout(const std::vector<const void*>& data, const std::vector<size_t>& sizes, const std::string& group);
+    bool shout(const std::vector<const void*>& data, const std::vector<size_t>& sizes, const std::vector<std::string>& groups);
     bool whisper(const std::string& header, const void* data, size_t size, const std::string& group);
     bool whisper(const std::string& header, const void* data, size_t size, const std::vector<std::string>& groups);
-    bool whisper(std::vector<const void*>& data, std::vector<size_t>& sizes, const std::string& group);
-    bool whisper(std::vector<const void*>& data, std::vector<size_t>& sizes, const std::vector<std::string>& groups);
+    bool whisper(const std::vector<const void*>& data, const std::vector<size_t>& sizes, const std::string& group);
+    bool whisper(const std::vector<const void*>& data, const std::vector<size_t>& sizes, const std::vector<std::string>& groups);
 
 };
 

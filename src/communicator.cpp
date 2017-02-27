@@ -79,16 +79,14 @@ bool Communicator::shout(const std::string& header, const void* data, size_t siz
 }
 
 bool Communicator::shout(const std::string& header, const void* data, size_t size, const std::vector<std::string>& groups) {
-    std::vector<const void*> dat({header.c_str(), data});
-    std::vector<size_t> sizes({strlen(header.c_str())+1, size});
-    return shout(dat, sizes, groups);
+    return shout(std::vector<const void*>{header.c_str(), data}, std::vector<size_t>{strlen(header.c_str())+1, size}, groups);
 }
 
-bool Communicator::shout(std::vector<const void*>& data, std::vector<size_t>& sizes, const std::string& group) {
+bool Communicator::shout(const std::vector<const void*>& data, const std::vector<size_t>& sizes, const std::string& group) {
     return shout(data, sizes, std::vector<std::string>({group}));
 }
 
-bool Communicator::shout(std::vector<const void*>& data, std::vector<size_t>& sizes, const std::vector<std::string>& groups) {
+bool Communicator::shout(const std::vector<const void*>& data, const std::vector<size_t>& sizes, const std::vector<std::string>& groups) {
     zmsg_t* msg = pack(data, sizes);
     for (int i=0; i<groups.size(); i++) {
         if (zyre_shout(_node, groups[i].c_str(), &msg) != 0) {
@@ -105,16 +103,14 @@ bool Communicator::whisper(const std::string& header, const void* data, size_t s
 }
 
 bool Communicator::whisper(const std::string& header, const void* data, size_t size, const std::vector<std::string>& peers) {
-    std::vector<const void*> dat({header.c_str(), data});
-    std::vector<size_t> sizes({strlen(header.c_str())+1, size});
-    return whisper(dat, sizes, peers);
+    return whisper(std::vector<const void*>{header.c_str(), data}, std::vector<size_t>{strlen(header.c_str())+1, size}, peers);
 }
 
-bool Communicator::whisper(std::vector<const void*>& data, std::vector<size_t>& sizes, const std::string& peer) {
+bool Communicator::whisper(const std::vector<const void*>& data, const std::vector<size_t>& sizes, const std::string& peer) {
     return whisper(data, sizes, std::vector<std::string>{peer});
 }
 
-bool Communicator::whisper(std::vector<const void*>& data, std::vector<size_t>& sizes, const std::vector<std::string>& peers) {
+bool Communicator::whisper(const std::vector<const void*>& data, const std::vector<size_t>& sizes, const std::vector<std::string>& peers) {
     zmsg_t* msg = pack(data, sizes);
     for (int i=0; i<peers.size(); i++) {
         if (zyre_whisper(_node, peers[i].c_str(), &msg) != 0) {
