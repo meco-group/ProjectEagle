@@ -31,16 +31,16 @@ public:
     void debug();
     std::vector<std::string> mygroups();
     std::vector<std::string> allgroups();
-    bool shout(zmsg_t* msg, const std::string& group);
-    bool shout(const std::string& header, const void* data,
-        size_t size, const std::string& group);
-    bool shout(const std::string& header, const void* data,
-        size_t size, const std::vector<std::string>& groups);
-    bool whisper(zmsg_t* msg, const std::string& group);
-    bool whisper(const std::string& header, const void* data,
-        size_t size, const std::string& peer);
-    bool whisper(const std::string& header, const void* data,
-        size_t size, const std::vector<std::string>& peers);
+    std::vector<std::string> peers();
+
+    bool shout(const std::string& header, const void* data, size_t size, const std::string& group);
+    bool shout(const std::string& header, const void* data, size_t size, const std::vector<std::string>& groups);
+    bool shout(std::vector<const void*>& data, std::vector<size_t>& sizes, const std::string& group);
+    bool shout(std::vector<const void*>& data, std::vector<size_t>& sizes, const std::vector<std::string>& groups);
+    bool whisper(const std::string& header, const void* data, size_t size, const std::string& group);
+    bool whisper(const std::string& header, const void* data, size_t size, const std::vector<std::string>& groups);
+    bool whisper(std::vector<const void*>& data, std::vector<size_t>& sizes, const std::string& group);
+    bool whisper(std::vector<const void*>& data, std::vector<size_t>& sizes, const std::vector<std::string>& groups);
 
 };
 
