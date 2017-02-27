@@ -9,7 +9,6 @@ int main(void)
 	int nof = 100;
 
     OPICamera cam;
-    cam.configure();
 	cam.start();
     cv::Mat im;
 

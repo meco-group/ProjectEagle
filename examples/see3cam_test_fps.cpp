@@ -10,7 +10,6 @@ int main(void)
 
     See3Camera cam(1);
 	cam.format(1280,720,V4L2_PIX_FMT_Y16);
-    cam.configure();
 	cam.start();
     cv::Mat im;
 

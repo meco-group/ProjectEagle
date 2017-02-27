@@ -5,7 +5,6 @@
 int main(void)
 {
 	LatitudeCamera cam(0);
-	cam.configure();
 	cam.start();
 
     cv::Mat im;
