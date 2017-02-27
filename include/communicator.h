@@ -18,6 +18,7 @@ private:
     void addToGroup(const std::string& group, const std::string& peer);
     void removeFromGroup(const std::string& group, const std::string& peer);
     zmsg_t* pack(const std::vector<const void*>& frames, const std::vector<size_t>& sizes);
+    bool unpack(zmsg_t* msg, std::vector<const void*>& frames, std::vector<size_t>& sizes);
 
 public:
     Communicator(const std::string& name, const std::string& iface, int port);
@@ -42,6 +43,14 @@ public:
     bool whisper(const std::vector<const void*>& data, const std::vector<size_t>& sizes, const std::string& group);
     bool whisper(const std::vector<const void*>& data, const std::vector<size_t>& sizes, const std::vector<std::string>& groups);
 
+    // non-blocking
+    bool receive(zmsg_t* msg, std::string& peer);
+    bool receive(std::vector<const void*>& data, std::vector<size_t>& sizes, std::string& peer);
+    bool receive(std::string& header, const void* data, size_t& size, std::string& peer);
+
+    // blocking
+    bool listen(zmsg_t* msg, std::string& peer);
+    bool listen(std::vector<const void*>& data, std::vector<size_t>& sizes, std::string& peer);
 };
 
 #endif //COMMUNICATOR_H

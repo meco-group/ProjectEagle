@@ -122,6 +122,60 @@ bool Communicator::whisper(const std::vector<const void*>& data, const std::vect
     return true;
 }
 
+bool Communicator::receive(zmsg_t* msg, std::string& peer) {
+    void* which = zpoller_wait(_poller, 0);
+    if (which != zyre_socket(_node)) {
+        return false;
+    }
+    zyre_event_t* event = zyre_event_new(_node);
+    const char* cmd = zyre_event_type(event);
+    if (streq(cmd, "SHOUT") || streq(cmd, "WHISPER")) {
+        msg = zyre_event_msg(event);
+        peer = std::string(zyre_event_peer_name(event));
+        zyre_event_destroy(&event);
+        return true;
+    }
+    zyre_event_destroy(&event);
+    return false;
+}
+
+bool Communicator::receive(std::vector<const void*>& data, std::vector<size_t>& sizes, std::string& peer) {
+    zmsg_t* msg;
+    if (!receive(msg, peer)) {
+        zmsg_destroy(&msg);
+        return false;
+    }
+    if (!unpack(msg, data, sizes)) {
+        zmsg_destroy(&msg);
+        return false;
+    }
+    zmsg_destroy(&msg);
+    return true;
+}
+
+bool Communicator::receive(std::string& header, const void* data, size_t& size, std::string& peer) {
+    std::vector<const void*> dat;
+    std::vector<size_t> sizes;
+    if (!receive(dat, sizes, peer)) {
+        return false;
+    }
+    if (dat.size() == 2) {
+        header = std::string(static_cast<const char*>(dat[0]));
+        data = dat[1];
+        size = sizes[1];
+        return true;
+    }
+    return false;
+}
+
+bool Communicator::listen(zmsg_t* msg, std::string& peer) {
+    while (!receive(msg, peer)) {};
+    return (msg != NULL);
+}
+
+bool Communicator::listen(std::vector<const void*>& data, std::vector<size_t>& sizes, std::string& peer) {
+    while (!receive(data, sizes, peer)) {};
+    return true;
 }
 
 zmsg_t* Communicator::pack(const std::vector<const void*>& frames,
@@ -131,6 +185,23 @@ zmsg_t* Communicator::pack(const std::vector<const void*>& frames,
         zmsg_pushmem(msg, frames[i], sizes[i]);
     }
     return msg;
+}
+
+bool Communicator::unpack(zmsg_t* msg, std::vector<const void*>& frames, std::vector<size_t>& sizes) {
+    if (msg == NULL) {
+        return false;
+    }
+    zframe_t* frame = zmsg_next(msg);
+    std::vector<const void*> frames_(0);
+    std::vector<size_t> sizes_(0);
+    while (frame != NULL) {
+        frames_.push_back(zframe_data(frame));
+        sizes_.push_back(zframe_size(frame));
+        frame = zmsg_next(msg);
+    }
+    frames = frames_;
+    sizes = sizes_;
+    return true;
 }
 
 bool Communicator::start() {
@@ -145,6 +216,7 @@ bool Communicator::start() {
 bool Communicator::stop() {
     zyre_stop(_node);
     zyre_destroy(&_node);
+    zpoller_destroy(&_poller);
 }
 
 void Communicator::addToGroup(const std::string& group, const std::string& peer) {
