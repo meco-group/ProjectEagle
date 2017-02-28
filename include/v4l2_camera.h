@@ -45,7 +45,6 @@ protected:
 
 public:
     V4L2Camera(int device = 0);
-    bool configure();
     bool start();
     bool stop();
 

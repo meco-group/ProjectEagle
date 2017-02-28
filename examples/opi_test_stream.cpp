@@ -7,7 +7,6 @@
 int main(void)
 {
     OPICamera cam(0);
-    cam.configure();
 	cam.start();
 
     Streamer streamer("10.92.191.255",60000);

@@ -270,16 +270,12 @@ int V4L2Camera::v4l2_queue_buffer()
 	return 0;
 }
 
-bool V4L2Camera::configure()
+bool V4L2Camera::start()
 {
     v4l2_set_input();
     v4l2_set_pixfmt();
     v4l2_set_buffer();
-}
-
-bool V4L2Camera::start()
-{
-    return v4l2_start_capture() == 0;
+    v4l2_start_capture();
 }
 
 bool V4L2Camera::read(cv::Mat &img)

@@ -6,7 +6,6 @@
 int main(void)
 {
 	OPICamera cam(0);
-    cam.configure();
 	cam.start();
 	
     cv::Mat im;
