@@ -11,8 +11,8 @@ find_package(ZMQ REQUIRED)
 find_package(CZMQ REQUIRED)
 find_package(ZYRE REQUIRED)
 
-set (SOURCE_FILES src/camera_interface.cpp src/v4l2_camera.cpp src/latitude_camera.cpp src/opi_camera.cpp src/streamer.cpp src/communicator.cpp)
-set (HEADER_FILES include/camera_interface.h include/v4l2_camera.h include/latitude_camera.h include/opi_camera.h include/streamer.h include/communicator.h)
+set (SOURCE_FILES src/camera_interface.cpp src/v4l2_camera.cpp src/latitude_camera.cpp src/opi_camera.cpp src/see3_camera.cpp src/streamer.cpp src/communicator.cpp)
+set (HEADER_FILES include/camera_interface.h include/v4l2_camera.h include/latitude_camera.h include/opi_camera.h include/see3_camera.h include/streamer.h include/communicator.h)
 set (LIBRARIES ${OpenCV_LIBS} ${ZMQ_LIBRARIES} ${CZMQ_LIBRARIES} ${ZYRE_LIBRARIES})
 
 include_directories( include ${ZMQ_INCLUDE_DIRS} ${ZMQ_INCLUDE_DIRS} ${CZMQ_INCLUDE_DIRS}  ${ZYRE_INCLUDE_DIRS})
