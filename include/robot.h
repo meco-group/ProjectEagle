@@ -12,36 +12,30 @@
 #include <opencv2/highgui/highgui.hpp>
 
 class Robot {
-    private:
-        std::vector<double> _pose;
-        std::vector<double> _ref_x;
-        std::vector<double> _ref_y;
-        std::string _name;
-        std::vector<int> _global_marker_locations_px;
-        cv::RotatedRect _box;
-        bool _detected;
-        int _width;
-        int _height;
-        std::vector<double> _local_marker_locations_m;
 
-        void createBox();
-        std::vector<double> transform(const std::vector<double>& point, int pixelspermeter, int height);
-        std::vector<double> invtransform(const std::vector<double>& point, int pixelspermeter, int height);
-        void mixWithWhite(const cv::Scalar& color, cv::Scalar& color_w, double perc_white);
+    private:
+        uint _code;
+        double _width;
+        double _height;
+        cv::Point2f _position;
+        double _orientation;
+        std::vector<cv::Point2f> _markers;
+        std::vector<cv::Point2f> _vertices;
+        bool _detected;
+        cv::Scalar _color;
+
+        void markers2pose(const std::vector<cv::Point2f>& markers, cv::Point2f& position, double& orientation) const;
+        void pose2vertices(const cv::Point2f& position, double orientation, std::vector<cv::Point2f>& vertices) const;
 
     public:
-        Robot(int width, int height, std::vector<double>& local_marker_locations_m);
+        Robot(uint code, double width, double height);
+        Robot(uint code, double width, double height, const cv::Scalar& color);
+        void update(const std::vector<cv::Point2f>& markers);
+        bool detected() const;
+        uint code() const;
         void reset();
-        void setMarkers(const std::vector<int>& marker_locations_px);
-        std::string getName();
-        bool detected();
-        cv::RotatedRect getBox();
-        double getBottomTopDistance();
-        void getMarkers(std::vector<double>& marker_vector, int pixelspermeter, int height);
-        void setPose(const std::vector<double>& pose);
-        void setRef(const std::vector<double>& ref_x, const std::vector<double>& ref_y);
-        void getTopMarkers(std::vector<cv::Mat>& top_markers);
-        void draw(cv::Mat& frame, const cv::Scalar& color, int pixelspermeter);
+        std::vector<cv::Point2f> vertices() const;
+        void draw(cv::Mat& frame) const;
 };
 
 #endif //ROBOT_H
