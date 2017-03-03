@@ -35,7 +35,7 @@ class Robot {
         uint code() const;
         void reset();
         std::vector<cv::Point2f> vertices() const;
-        void draw(cv::Mat& frame) const;
+        void draw(cv::Mat& frame, const cv::Matx23f& world2cam_tf) const;
 };
 
 #endif //ROBOT_H

@@ -14,7 +14,8 @@ class Detector {
         cv::SimpleBlobDetector _blob_detector;
         cv::Mat _background;
         cv::Mat _cont_mask;
-        cv::Size _frame_size;
+        cv::Matx23f _cam2world_tf;
+        cv::Matx23f _world2cam_tf;
 
         void init_blob();
         void init_background();
@@ -27,6 +28,7 @@ class Detector {
         void detect_obstacles(const cv::Mat& frame, const std::vector<std::vector<cv::Point> >& contours, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
         void filter_obstacles(const std::vector<std::vector<cv::Point>>& contours, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
         void sort_obstacles(std::vector<Obstacle*>& obstacles);
+        void init_transformations(const cv::Mat& frame);
 
         std::vector<cv::Point2f> cam2worldframe(const std::vector<cv::Point2f>& points);
         cv::Point2f cam2worldframe(const cv::Point2f& point);

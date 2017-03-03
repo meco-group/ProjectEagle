@@ -21,8 +21,15 @@ void Detector::init_blob() {
 void Detector::init_background() {
 }
 
+void Detector::init_transformations(const cv::Mat& frame) {
+    int height = frame.size().height;
+    double p2m = 1./((double)_params["pixelspermeter"]);
+    _cam2world_tf = cv::Matx23f(p2m, 0, 0, 0, -p2m, p2m*height);
+    _world2cam_tf = cv::Matx23f(1./p2m, 0, 0, 0, -1./p2m, height);
+}
+
 void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles) {
-    _frame_size = frame.size();
+    init_transformations(frame);
     std::vector<std::vector<cv::Point> > contours;
     if (!subtract_background(frame, contours)) {
         return; // no contours were found
@@ -35,26 +42,26 @@ void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, s
 }
 
 void Detector::draw(cv::Mat& frame, const std::vector<Robot*>& robots, const std::vector<Obstacle*>& obstacles) {
-    cv::Size _frame_size = frame.size();
+    cv::Size size = frame.size();
     // coordinate system
     cv::Scalar gray(77, 76, 75);
-    cv::circle(frame, cv::Point2i(0, _frame_size.height), 5, gray, -2);
-    cv::line(frame, cv::Point2i(0, _frame_size.height), cv::Point2i(20, _frame_size.height), gray, 2);
-    cv::line(frame, cv::Point2i(0, _frame_size.height), cv::Point2i(0, _frame_size.height-20), gray, 2);
+    cv::circle(frame, cv::Point2i(0, size.height), 5, gray, -2);
+    cv::line(frame, cv::Point2i(0, size.height), cv::Point2i(20, size.height), gray, 2);
+    cv::line(frame, cv::Point2i(0, size.height), cv::Point2i(0, size.height-20), gray, 2);
     int ppm = (int)_params["pixelspermeter"];
-    for (int i=0; i<(_frame_size.height/ppm); i++) {
-        cv::line(frame, cv::Point2i(0, _frame_size.height-(i+1)*ppm), cv::Point2i(5, _frame_size.height-(i+1)*ppm), gray, 2);
+    for (int i=0; i<(size.height/ppm); i++) {
+        cv::line(frame, cv::Point2i(0, size.height-(i+1)*ppm), cv::Point2i(5, size.height-(i+1)*ppm), gray, 2);
     }
-    for (int i=0; i<(_frame_size.width/ppm); i++) {
-        cv::line(frame, cv::Point2i((i+1)*ppm, _frame_size.height), cv::Point2i((i+1)*ppm, _frame_size.height-5), gray, 2);
+    for (int i=0; i<(size.width/ppm); i++) {
+        cv::line(frame, cv::Point2i((i+1)*ppm, size.height), cv::Point2i((i+1)*ppm, size.height-5), gray, 2);
     }
     // obstacles
     for (uint i=0; i<obstacles.size(); i++) {
-        obstacles[i]->draw(frame);
+        obstacles[i]->draw(frame, _world2cam_tf);
     }
     // robots
     for (uint i=0; i<robots.size(); i++) {
-        robots[i]->draw(frame);
+        robots[i]->draw(frame, _world2cam_tf);
     }
 }
 
@@ -280,27 +287,21 @@ void Detector::sort_obstacles(std::vector<Obstacle*>& obstacles) {
 }
 
 cv::Point2f Detector::cam2worldframe(const cv::Point2f& point) {
-    double p2m = 1./((double)_params["pixelspermeter"]);
-    return cv::Point2f(p2m*point.x, p2m*(_frame_size.height-point.y));
+    return cam2worldframe(std::vector<cv::Point2f>{point})[0];
 }
 
 std::vector<cv::Point2f> Detector::cam2worldframe(const std::vector<cv::Point2f>& points) {
-    std::vector<cv::Point2f> ret(points.size());
-    for (int i=0; i<ret.size(); i++) {
-        ret[i] = cam2worldframe(points[i]);
-    }
+    std::vector<cv::Point2f> ret;
+    cv::transform(points, ret, _cam2world_tf);
     return ret;
 }
 
 cv::Point2f Detector::world2camframe(const cv::Point2f& point) {
-    double m2p = (double)_params["pixelspermeter"];
-    return cv::Point2f(m2p*point.x, _frame_size.height-m2p*point.y);
+    return world2camframe(std::vector<cv::Point2f>{point})[0];
 }
 
 std::vector<cv::Point2f> Detector::world2camframe(const std::vector<cv::Point2f>& points) {
-    std::vector<cv::Point2f> ret(points.size());
-    for (int i=0; i<ret.size(); i++) {
-        ret[i] = world2camframe(points[i]);
-    }
+    std::vector<cv::Point2f> ret;
+    cv::transform(points, ret, _world2cam_tf);
     return ret;
 }
