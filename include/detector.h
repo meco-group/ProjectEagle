@@ -1,58 +1,44 @@
 #ifndef DETECTOR_H
 #define DETECTOR_H
 
-// #define DEBUG
-
-#ifdef DEBUG
-    #define DEBUG_PRINT(x) std::cout << x << std::endl;
-#else
-    #define DEBUG_PRINT(x) //std::cout << x << std::endl;
-#endif
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/opencv.hpp"
 #include "robot.h"
+#include "obstacle.h"
 
 class Detector {
     private:
-        std::vector<double> _marker_params;
-        cv::SimpleBlobDetector* _blob_detector;
+        cv::FileStorage _params;
+        cv::SimpleBlobDetector _blob_detector;
         cv::Mat _background;
-        cv::Mat _mask;
+        cv::Mat _cont_mask;
+        cv::Matx23f _cam2world_tf;
+        cv::Matx23f _world2cam_tf;
 
-        int _nbit_x;
-        int _nbit_y;
-        double _triangle_ratio;
-        double _qr_rel_pos;
-        double _qr_rel_width;
-        int _threshold_bgst;
-        double _threshold_kp;
-        double _threshold_top;
-        double _min_robot_area;
-        double _min_obstacle_area;
-        int _max_detectable_obstacles;
-        int _pixelspermeter;
-        int _frame_height;
+        void init_blob();
+        void init_background();
+        bool subtract_background(const cv::Mat& frame, std::vector<std::vector<cv::Point>>& contours);
+        void detect_robots(const cv::Mat& frame, const std::vector<std::vector<cv::Point>>& contours, const std::vector<Robot*>& robots);
+        void find_robots(cv::Mat& roi, const cv::Point2f& roi_location, const std::vector<Robot*>& robots);
+        void decode_robot(const cv::Mat& roi, const cv::Point2f& roi_location, const std::vector<cv::Point2f>& points, const std::vector<Robot*>& robots);
+        bool get_markers(const std::vector<cv::Point2f>& points, std::vector<cv::Point2f>& markers);
+        bool subtract_robots(std::vector<std::vector<cv::Point>>& contours, const std::vector<Robot*>& robots);
+        void detect_obstacles(const cv::Mat& frame, const std::vector<std::vector<cv::Point> >& contours, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
+        void filter_obstacles(const std::vector<std::vector<cv::Point>>& contours, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
+        void sort_obstacles(std::vector<Obstacle*>& obstacles);
+        void init_transformations(const cv::Mat& frame);
 
-        void initDetector();
-        void backgroundSubtraction(const cv::Mat& frame, std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy);
-        void detectRobots(const cv::Mat& frame, const std::vector<std::vector<cv::Point> >& contours, std::vector<Robot*>& robots);
-        bool findRobots(cv::Mat& roi, const std::vector<int>& roi_location, std::vector<int>& marker_locations, std::vector<int>& robot_indices);
-        int isRobot(cv::Mat& roi, const std::vector<cv::Point2f>& points, std::vector<double>& robot_markers);
-        int getTopIndex(const std::vector<cv::Point2f>& points);
-        void subtractRobots(std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Vec4i>& hierarchy, std::vector<Robot*>& robots);
-        void detectObstacles(const cv::Mat& frame, const std::vector<std::vector<cv::Point> >& contours, std::vector<double>& obstacle_data, const std::vector<Robot*>& robots);
-        void filterObstacles(const std::vector<cv::RotatedRect>& rectangles, const std::vector<std::vector<double> >& circles, std::vector<double>& obstacle_data, const std::vector<Robot*>& robots);
-        void addObstacle(const cv::RotatedRect& rectangle, const std::vector<double>& circle, std::vector<std::vector<double>>& obstacles, std::vector<double>& areas);
-        void sortObstacles(std::vector<std::vector<double> >& obstacles, std::vector<double>& areas);
+        std::vector<cv::Point2f> cam2worldframe(const std::vector<cv::Point2f>& points);
+        cv::Point2f cam2worldframe(const cv::Point2f& point);
+        std::vector<cv::Point2f> world2camframe(const std::vector<cv::Point2f>& points);
+        cv::Point2f world2camframe(const cv::Point2f& point);
 
     public:
-        Detector(const std::vector<double>& marker_params, int threshold_bgst, double threshold_kp, double threshold_top, double min_robot_area, double min_obstacle_area, int max_detectable_obstacles, int pixelspermeter);
-        bool start(const cv::Mat& background);
-        void update(const cv::Mat& frame, std::vector<Robot*>& robots, std::vector<double>& obstacle_data);
+        Detector(const std::string& param_file);
+        void search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
+        void draw(cv::Mat& frame, const std::vector<Robot*>& robots, const std::vector<Obstacle*>& obstacles);
 };
-
 
 #endif //DETECTOR_H

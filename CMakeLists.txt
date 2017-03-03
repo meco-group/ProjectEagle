@@ -1,30 +1,39 @@
 cmake_minimum_required(VERSION 2.8)
-project( OPIcam )
-find_package( OpenCV REQUIRED )
-add_compile_options(-std=c++11)
+project( ProjectEagle )
 
-set (SOURCE_FILES src/camera_interface.cpp src/v4l2_camera.cpp src/latitude_camera.cpp src/opi_camera.cpp src/see3_camera.cpp src/streamer.cpp)
-set (HEADER_FILES include/camera_interface.h include/v4l2_camera.h include/latitude_camera.h include/opi_camera.h include/see3_camera.h include/streamer.h)
-include_directories( include )
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
+ADD_DEFINITIONS(-DSWM_ZYRE_CONFIG_DIR="${CMAKE_HOME_DIRECTORY}")
+ADD_DEFINITIONS(-std=c++11)
+
+find_package(OpenCV REQUIRED)
+find_package(ZMQ REQUIRED)
+find_package(CZMQ REQUIRED)
+find_package(ZYRE REQUIRED)
+
+set (SOURCE_FILES src/camera_interface.cpp src/v4l2_camera.cpp src/latitude_camera.cpp src/opi_camera.cpp src/see3_camera.cpp src/streamer.cpp src/communicator.cpp src/robot.cpp src/obstacle.cpp src/detector.cpp)
+set (HEADER_FILES include/camera_interface.h include/v4l2_camera.h include/latitude_camera.h include/opi_camera.h include/see3_camera.h include/streamer.h include/communicator.h include/robot.h include/obstacle.h include/detector.h)
+set (LIBRARIES ${OpenCV_LIBS} ${ZMQ_LIBRARIES} ${CZMQ_LIBRARIES} ${ZYRE_LIBRARIES})
+
+include_directories( include ${ZMQ_INCLUDE_DIRS} ${ZMQ_INCLUDE_DIRS} ${CZMQ_INCLUDE_DIRS}  ${ZYRE_INCLUDE_DIRS})
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_executable( LatitudeViewer examples/latitude_test.cpp ${SOURCE_FILES} ${HEADER_FILES} )
-target_link_libraries( LatitudeViewer ${OpenCV_LIBS} )
-
 add_executable( See3Viewer examples/see3cam_test.cpp ${SOURCE_FILES} ${HEADER_FILES} )
-target_link_libraries( See3Viewer ${OpenCV_LIBS} )
-
 add_executable( See3FPS examples/see3cam_test_fps.cpp ${SOURCE_FILES} ${HEADER_FILES} )
-target_link_libraries( See3FPS ${OpenCV_LIBS} )
-
 add_executable( OPIcapture examples/opi_test_capture.cpp ${SOURCE_FILES} ${HEADER_FILES} )
-target_link_libraries( OPIcapture ${OpenCV_LIBS} )
-
 add_executable( OPIfps examples/opi_test_fps.cpp ${SOURCE_FILES} ${HEADER_FILES} )
-target_link_libraries( OPIfps ${OpenCV_LIBS} )
-
 add_executable( OPIstream examples/opi_test_stream.cpp ${SOURCE_FILES} ${HEADER_FILES} )
-target_link_libraries( OPIstream ${OpenCV_LIBS} )
+add_executable( Communicator examples/communicator_test.cpp ${SOURCE_FILES} ${HEADER_FILES} )
+add_executable( Detector examples/detector_test.cpp ${SOURCE_FILES} ${HEADER_FILES} )
+target_link_libraries( LatitudeViewer ${LIBRARIES} )
+target_link_libraries( See3Viewer ${LIBRARIES} )
+target_link_libraries( See3FPS ${LIBRARIES} )
+target_link_libraries( OPIcapture ${LIBRARIES} )
+target_link_libraries( OPIfps ${LIBRARIES} )
+target_link_libraries( OPIstream ${LIBRARIES} )
+target_link_libraries( Communicator ${LIBRARIES})
+target_link_libraries( Detector ${LIBRARIES})
