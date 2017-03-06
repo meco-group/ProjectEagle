@@ -7,6 +7,7 @@
 #include <math.h>
 #include <string>
 #include <vector>
+#include "protocol.h"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -36,6 +37,7 @@ class Robot {
         void reset();
         std::vector<cv::Point2f> vertices() const;
         void draw(cv::Mat& frame, const cv::Matx23f& world2cam_tf) const;
+        eagle::marker_t serialize() const;
 };
 
 #endif //ROBOT_H

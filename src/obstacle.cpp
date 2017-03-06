@@ -12,6 +12,16 @@ void Circle::draw(cv::Mat& frame, const cv::Matx23f& world2cam_tf) const {
     cv::circle(frame, position_cam[0], _radius*world2cam_tf(0,0), gray, 2);
 }
 
+eagle::obstacle_t Circle::serialize() const {
+    eagle::obstacle_t ret;
+    ret.id = 0;
+    ret.shape = eagle::CIRCLE;
+    ret.p1 = {_position.x, _position.y};
+    ret.p2 = {_position.x+_radius, _position.y};
+    ret.p3 = {_position.x, _position.y+_radius};
+    return ret;
+}
+
 Rectangle::Rectangle(const cv::Point2f& position, double orientation, double width, double height) :
     Obstacle(position), _orientation(orientation), _width(width), _height(height) {
     pose2vertices(position, orientation, _vertices);
@@ -36,4 +46,14 @@ void Rectangle::draw(cv::Mat& frame, const cv::Matx23f& world2cam_tf) const {
     for (uint i=0; i<n; i++) {
         cv::line(frame, vertices_cam[i], vertices_cam[(i+1)%n], gray, 2);
     }
+}
+
+eagle::obstacle_t Rectangle::serialize() const {
+    eagle::obstacle_t ret;
+    ret.id = 0;
+    ret.shape = eagle::RECTANGLE;
+    ret.p1 = {_position.x-0.5*_width*cos(_orientation)+0.5*_height*sin(_orientation), _position.y-0.5*_width*sin(_orientation)-0.5*_height*cos(_orientation)};
+    ret.p2 = {_position.x+0.5*_width*cos(_orientation)+0.5*_height*sin(_orientation), _position.y+0.5*_width*sin(_orientation)-0.5*_height*cos(_orientation)};
+    ret.p3 = {_position.x+0.5*_width*cos(_orientation)-0.5*_height*sin(_orientation), _position.y+0.5*_width*sin(_orientation)+0.5*_height*cos(_orientation)};
+    return ret;
 }

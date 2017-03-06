@@ -58,3 +58,7 @@ void Robot::draw(cv::Mat& frame, const cv::Matx23f& world2cam_tf) const {
     //     cv::line(frame, vertices_cam[i], vertices_cam[(i+1)%n], _color, 2);
     // }
 }
+
+eagle::marker_t Robot::serialize() const {
+    return {(int)_code, _position.x, _position.y, _orientation};
+}

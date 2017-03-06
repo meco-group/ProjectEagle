@@ -7,7 +7,7 @@ namespace eagle {
     	ROBOT = 0,
     	OBSTACLE = 1
     } msg_id_t;
-    
+
     typedef enum shape_t {
         TRIANGLE = 0,
         SQUARE = 1,
@@ -15,25 +15,25 @@ namespace eagle {
         CIRCLE = 3,
         ELLIPSOID = 4
     } shape_t;
-    
+
     typedef struct point_t {
         double x;
-        double y;           
+        double y;
     } point_t;
-    
+
     /* protocol messages */
     typedef struct header_t {
     	msg_t id;
     	unsigned long time;
     } header_t;
-    
-    typedef struct robot_t {
+
+    typedef struct marker_t {
         int id;
         double x;
         double y;
         double t;
     } robot_t;
-    
+
     typedef struct obstacle_t {
         int id;
         shape_t shape;
