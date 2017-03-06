@@ -1,9 +1,20 @@
 #include "detector.h"
 
-Detector::Detector(const std::string& param_file) {
-    _params = cv::FileStorage(param_file, cv::FileStorage::READ);
-    init_blob();
-    init_background();
+Detector::Detector(const std::string& param_file, const cv::Mat& background) :
+    _background(background) {
+    // _params = cv::FileStorage(param_file, cv::FileStorage::READ);
+    read_parameters(param_file);
+    // init_blob();
+}
+
+Detector::Detector(const std::string& param_file, const std::string& background_path) {
+    cv::Mat background = cv::imread(background_path, CV_LOAD_IMAGE_COLOR);
+    if (!background.data) {
+        std::cout << "Could not open " << background_path << "!" << std::endl;
+    }
+    Detector(param_file, background);
+}
+
 
 }
 

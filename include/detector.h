@@ -36,7 +36,8 @@ class Detector {
         cv::Point2f world2camframe(const cv::Point2f& point);
 
     public:
-        Detector(const std::string& param_file);
+        Detector(const std::string& param_file, const cv::Mat& background);
+        Detector(const std::string& param_file, const std::string& background_path);
         void search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
         void draw(cv::Mat& frame, const std::vector<Robot*>& robots, const std::vector<Obstacle*>& obstacles);
 };
