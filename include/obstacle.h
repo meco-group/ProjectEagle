@@ -31,6 +31,7 @@ class Rectangle : public Obstacle {
         double _width;
         double _height;
         std::vector<cv::Point2f> _vertices;
+        cv::RotatedRect _box;
 
         void pose2vertices(const cv::Point2f& position, double orientation, std::vector<cv::Point2f>& vertices) const;
 

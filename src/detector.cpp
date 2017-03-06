@@ -10,7 +10,8 @@ Detector::Detector(const std::string& param_file, const std::string& background_
     if (!background.data) {
         std::cout << "Could not open " << background_path << "!" << std::endl;
     }
-    Detector(param_file, background);
+    read_parameters(param_file);
+    _background = background;
 }
 
 void Detector::read_parameters(const std::string& param_file) {
@@ -24,8 +25,8 @@ void Detector::read_parameters(const std::string& param_file) {
     _qr_posy = (double)params["markers"]["qr_posy"];
     _qr_sizex = (double)params["markers"]["qr_sizex"];
     _qr_sizey = (double)params["markers"]["qr_sizey"];
-    _qr_nbitx = (double)params["markers"]["qr_nbitx"];
-    _qr_nbity = (double)params["markers"]["qr_nbity"];
+    _qr_nbitx = (int)params["markers"]["qr_nbitx"];
+    _qr_nbity = (int)params["markers"]["qr_nbity"];
     _th_triangle_ratio = (double)params["thresholds"]["triangle_ratio"];
     _th_top_marker = (double)params["thresholds"]["top_marker"];
     _th_bg_subtraction = (int)params["thresholds"]["bg_subtraction"];
@@ -81,7 +82,9 @@ void Detector::draw(cv::Mat& frame, const std::vector<Robot*>& robots, const std
     }
     // robots
     for (uint i=0; i<robots.size(); i++) {
-        robots[i]->draw(frame, _world2cam_tf);
+        if (robots[i]->detected()) {
+            robots[i]->draw(frame, _world2cam_tf);
+        }
     }
 }
 
@@ -124,6 +127,7 @@ void Detector::find_robots(cv::Mat& roi, const cv::Point2f& roi_location, const 
     if (blobs.size() < 3) {
         return;
     }
+
     // get all possible combinations of 3 points
     std::vector<cv::Point2f> points(3);
     std::vector<bool> selector(blobs.size());
@@ -174,7 +178,7 @@ void Detector::decode_robot(const cv::Mat& roi, const cv::Point2f& roi_location,
         if (code == robots[i]->code()) {
             std::vector<cv::Point2f> markers_glob(3);
             for (int i=0; i<3; i++) {
-                markers_glob[i] = markers[i] + roi_location;
+                markers_glob[i] = 0.5*markers[i] + roi_location;
             }
             robots[i]->update(cam2worldframe(markers_glob));
             return;
@@ -216,7 +220,7 @@ bool Detector::get_markers(const std::vector<cv::Point2f>& points, std::vector<c
     // order markers: left - right - top
     markers.resize(3);
     double cp = (points[btm_ind[1]]-points[btm_ind[0]]).cross(points[top_ind]-points[btm_ind[0]]);
-    if (cp >= 0) {
+    if (cp <= 0) {
         markers[0] = points[btm_ind[0]];
         markers[1] = points[btm_ind[1]];
     } else {
@@ -228,14 +232,19 @@ bool Detector::get_markers(const std::vector<cv::Point2f>& points, std::vector<c
 }
 
 bool Detector::subtract_robots(std::vector<std::vector<cv::Point>>& contours, const std::vector<Robot*>& robots) {
-    std::vector<std::vector<cv::Point2f>> robocontours(0);
+    std::vector<std::vector<cv::Point>> robocontours(0);
     for (uint k=0; k<robots.size(); k++) {
         if (robots[k]->detected()) {
-            robocontours.push_back(world2camframe(robots[k]->vertices()));
+            std::vector<cv::Point2f> vert = robots[k]->vertices();
+            std::vector<cv::Point> vert2(vert.size());
+            for (uint l=0; l<vert.size(); l++) {
+                vert2[l] = cv::Point(vert[l].x, vert[l].y);
+            }
+            robocontours.push_back(vert2);
         }
     }
     // remove robots from mask
-    cv::drawContours(_cont_mask, robocontours, 0, cv::Scalar(0,0,0), -1);
+    cv::drawContours(_cont_mask, robocontours, -1, cv::Scalar(0,0,0), -1);
     // find new contours
     std::vector<cv::Vec4i> hierarchy;
     cv::findContours(_cont_mask, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
@@ -266,7 +275,7 @@ void Detector::filter_obstacles(const std::vector<std::vector<cv::Point>>& conto
     for (uint i=0; i<contours.size(); i++) {
         rect = cv::minAreaRect(contours[i]);
         for (uint j=0; j<robots.size(); j++) {
-            if (cv::pointPolygonTest(world2camframe(robots[j]->vertices()), rect.center, false) > 0) {
+            if (robots[j]->detected() && cv::pointPolygonTest(world2camframe(robots[j]->vertices()), rect.center, false) > 0) {
                 add = false; // obstacle is within a robot
             }
         }
@@ -278,7 +287,7 @@ void Detector::filter_obstacles(const std::vector<std::vector<cv::Point>>& conto
         if (add) {
             cv::minEnclosingCircle(contours[i], center, radius);
             if (rect.size.width*rect.size.height < M_PI*pow(radius, 2)) {
-                obstacles.push_back(new Rectangle(cam2worldframe(rect.center), -rect.angle, rect.size.width*_pixel2meter, rect.size.height*_pixel2meter));
+                obstacles.push_back(new Rectangle(cam2worldframe(rect.center), -rect.angle*(M_PI/180.), rect.size.width*_pixel2meter, rect.size.height*_pixel2meter));
             } else {
                 obstacles.push_back(new Circle(cam2worldframe(center), radius*_pixel2meter));
             }

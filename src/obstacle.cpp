@@ -34,6 +34,6 @@ void Rectangle::draw(cv::Mat& frame, const cv::Matx23f& world2cam_tf) const {
     cv::transform(_vertices, vertices_cam, world2cam_tf);
     int n = vertices_cam.size();
     for (uint i=0; i<n; i++) {
-        cv::line(frame, vertices_cam[i], vertices_cam[(i+1)/n], gray, 2);
+        cv::line(frame, vertices_cam[i], vertices_cam[(i+1)%n], gray, 2);
     }
 }

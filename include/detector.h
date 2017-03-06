@@ -26,8 +26,8 @@ class Detector {
         double _qr_posy;
         double _qr_sizex;
         double _qr_sizey;
-        double _qr_nbitx;
-        double _qr_nbity;
+        int _qr_nbitx;
+        int _qr_nbity;
         double _th_triangle_ratio;
         double _th_top_marker;
         int _th_bg_subtraction;
