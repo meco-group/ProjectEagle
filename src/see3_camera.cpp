@@ -5,7 +5,6 @@ See3Camera::See3Camera(int device) :
     V4L2Camera(device)
 {
     format(1280, 720, V4L2_PIX_FMT_Y16);
-    setBrightness(20);
 }
 
 int See3Camera::process_buffer(cv::Mat &img)
@@ -114,4 +113,18 @@ bool See3Camera::setISO(int iso){
     }
 
     return v4l2_set_iso(iso) == 0;
+}
+
+bool See3Camera::read(cv::Mat &img)
+{
+    V4L2Camera::read(img);
+    // flip
+    cv::flip(img, img, -1);
+    // crop a little bit
+    int width = img.size().width;
+    int height = img.size().height;
+    double crop_ratio = 0.85;
+    cv::Rect roi(0.5*(width-crop_ratio*width), 0.5*(height-crop_ratio*height), crop_ratio*width, crop_ratio*height);
+    img = img(roi);
+    return true;
 }

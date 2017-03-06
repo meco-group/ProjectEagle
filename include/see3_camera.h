@@ -17,6 +17,8 @@ private:
 public:
     See3Camera(int device = 0);
 
+    virtual bool read(cv::Mat &img);
+
     bool setResolution(const std::vector<int>& resolution);
     bool setBrightness(int brightness);
     bool setExposure(int exposure);
