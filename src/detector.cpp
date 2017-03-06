@@ -52,6 +52,9 @@ void Detector::init_transformations(const cv::Mat& frame) {
 
 void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles) {
     init_transformations(frame);
+    for (uint k=0; k<robots.size(); k++) {
+        robots[k]->reset();
+    }
     std::vector<std::vector<cv::Point> > contours;
     if (!subtract_background(frame, contours)) {
         return; // no contours were found
