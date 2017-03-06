@@ -2,9 +2,7 @@
 
 Detector::Detector(const std::string& param_file, const cv::Mat& background) :
     _background(background) {
-    // _params = cv::FileStorage(param_file, cv::FileStorage::READ);
     read_parameters(param_file);
-    // init_blob();
 }
 
 Detector::Detector(const std::string& param_file, const std::string& background_path) {
@@ -15,28 +13,40 @@ Detector::Detector(const std::string& param_file, const std::string& background_
     Detector(param_file, background);
 }
 
-
+void Detector::read_parameters(const std::string& param_file) {
+    cv::FileStorage params(param_file, cv::FileStorage::READ);
+    _meter2pixel = (double)params["pixelspermeter"];
+    _pixel2meter = 1./_meter2pixel;
+    _min_robot_area = (double)params["min_robot_area"];
+    _min_obstacle_area = (double)params["min_obstacle_area"];
+    _triangle_ratio = (double)params["markers"]["triangle_ratio"];
+    _qr_posx = (double)params["markers"]["qr_posx"];
+    _qr_posy = (double)params["markers"]["qr_posy"];
+    _qr_sizex = (double)params["markers"]["qr_sizex"];
+    _qr_sizey = (double)params["markers"]["qr_sizey"];
+    _qr_nbitx = (double)params["markers"]["qr_nbitx"];
+    _qr_nbity = (double)params["markers"]["qr_nbity"];
+    _th_triangle_ratio = (double)params["thresholds"]["triangle_ratio"];
+    _th_top_marker = (double)params["thresholds"]["top_marker"];
+    _th_bg_subtraction = (int)params["thresholds"]["bg_subtraction"];
+    init_blob(params);
 }
 
-void Detector::init_blob() {
+void Detector::init_blob(const cv::FileStorage& params) {
     cv::SimpleBlobDetector::Params blob_par;
-    blob_par.minThreshold = (int)_params["blob"]["minThreshold"];
-    blob_par.maxThreshold = (int)_params["blob"]["maxThreshold"];
-    blob_par.filterByArea = (int)_params["blob"]["filterByArea"];
-    blob_par.minArea = (int)_params["blob"]["minArea"];
-    blob_par.filterByCircularity = (int)_params["blob"]["filterByCircularity"];
-    blob_par.minCircularity = (double)_params["blob"]["minCircularity"];
+    blob_par.minThreshold = (int)params["blob"]["minThreshold"];
+    blob_par.maxThreshold = (int)params["blob"]["maxThreshold"];
+    blob_par.filterByArea = (int)params["blob"]["filterByArea"];
+    blob_par.minArea = (int)params["blob"]["minArea"];
+    blob_par.filterByCircularity = (int)params["blob"]["filterByCircularity"];
+    blob_par.minCircularity = (double)params["blob"]["minCircularity"];
     _blob_detector = cv::SimpleBlobDetector(blob_par);
-}
-
-void Detector::init_background() {
 }
 
 void Detector::init_transformations(const cv::Mat& frame) {
     int height = frame.size().height;
-    double p2m = 1./((double)_params["pixelspermeter"]);
-    _cam2world_tf = cv::Matx23f(p2m, 0, 0, 0, -p2m, p2m*height);
-    _world2cam_tf = cv::Matx23f(1./p2m, 0, 0, 0, -1./p2m, height);
+    _cam2world_tf = cv::Matx23f(_pixel2meter, 0, 0, 0, -_pixel2meter, _pixel2meter*height);
+    _world2cam_tf = cv::Matx23f(_meter2pixel, 0, 0, 0, -_meter2pixel, height);
 }
 
 void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles) {
@@ -59,12 +69,11 @@ void Detector::draw(cv::Mat& frame, const std::vector<Robot*>& robots, const std
     cv::circle(frame, cv::Point2i(0, size.height), 5, gray, -2);
     cv::line(frame, cv::Point2i(0, size.height), cv::Point2i(20, size.height), gray, 2);
     cv::line(frame, cv::Point2i(0, size.height), cv::Point2i(0, size.height-20), gray, 2);
-    int ppm = (int)_params["pixelspermeter"];
-    for (int i=0; i<(size.height/ppm); i++) {
-        cv::line(frame, cv::Point2i(0, size.height-(i+1)*ppm), cv::Point2i(5, size.height-(i+1)*ppm), gray, 2);
+    for (int i=0; i<(size.height*_pixel2meter); i++) {
+        cv::line(frame, cv::Point2i(0, size.height-(i+1)*_meter2pixel), cv::Point2i(5, size.height-(i+1)*_meter2pixel), gray, 2);
     }
-    for (int i=0; i<(size.width/ppm); i++) {
-        cv::line(frame, cv::Point2i((i+1)*ppm, size.height), cv::Point2i((i+1)*ppm, size.height-5), gray, 2);
+    for (int i=0; i<(size.width*_pixel2meter); i++) {
+        cv::line(frame, cv::Point2i((i+1)*_meter2pixel, size.height), cv::Point2i((i+1)*_meter2pixel, size.height-5), gray, 2);
     }
     // obstacles
     for (uint i=0; i<obstacles.size(); i++) {
@@ -80,7 +89,7 @@ bool Detector::subtract_background(const cv::Mat& frame, std::vector<std::vector
     cv::Mat mask_copy;
     cv::absdiff(_background, frame, _cont_mask);
     cv::cvtColor(_cont_mask, _cont_mask, CV_RGB2GRAY);
-    cv::threshold(_cont_mask, _cont_mask, (int)_params["bgsubtraction_th"], 255, cv::THRESH_BINARY);
+    cv::threshold(_cont_mask, _cont_mask, _th_bg_subtraction, 255, cv::THRESH_BINARY);
     _cont_mask.copyTo(mask_copy);
     std::vector<cv::Vec4i> hierarchy;
     cv::findContours(mask_copy, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
@@ -97,7 +106,7 @@ void Detector::detect_robots(const cv::Mat& frame, const std::vector<std::vector
     cv::Mat roi;
     for (uint i=0; i<contours.size(); i++) {
         cv::convexHull(contours[i], contour);
-        if (cv::contourArea(contour) > (double)_params["minrobotarea"]*pow((double)_params["pixelspermeter"], 2)) {
+        if (cv::contourArea(contour) > _min_robot_area*pow(_meter2pixel, 2)) {
             roi_rectangle = cv::boundingRect(contour);
             roi_location = cv::Point2f(roi_rectangle.x, roi_rectangle.y);
             frame(roi_rectangle).copyTo(roi);
@@ -138,12 +147,11 @@ void Detector::decode_robot(const cv::Mat& roi, const cv::Point2f& roi_location,
         return;
     }
     // decode QR
-    cv::Point2f midbottom = 0.5*(markers[0]+markers[1]);
-    cv::Point2f midpoint = midbottom + (double)_params["qr_rel_pos"]*(markers[2]-midbottom);
-    double height = cv::norm(markers[2] - midbottom);
-    double step_size = 0.25*height*(double)_params["qr_rel_width"];
-    cv::Point2f step_x = 0.25*(double)_params["qr_rel_width"]*(markers[2]-midbottom);
-    cv::Point2f step_y = cv::Point2f(-step_x.y, step_x.x);
+    cv::Point2f zero = 0.5*(markers[0]+markers[1]);
+    cv::Point2f step_x = (1./(_qr_nbitx))*_qr_sizex*(markers[2]-zero);
+    cv::Point2f step_y = -(1./(_qr_nbity))*_qr_sizey*(markers[0]-zero);
+    cv::Point2f upperleft_qr = zero + (_qr_posx - 0.5*_qr_sizex)*(markers[2]-zero) + (_qr_posy + 0.5*_qr_sizey)*(markers[0]-zero);
+    upperleft_qr += 0.5*step_x + 0.5*step_y;
     cv::Mat roi_mask;
     roi.copyTo(roi_mask);
     // cv::GaussianBlur(roi_mask, roi_mask, cv::Size(5, 5), 1, 1);
@@ -152,9 +160,9 @@ void Detector::decode_robot(const cv::Mat& roi, const cv::Point2f& roi_location,
     cv::Point2f point;
     uint code = 0;
     uint bit_selector = 1;
-    for (int k=0; k<2; k++) {
-        for (int l=0; l<2; l++) {
-            point = midpoint - pow(-1, k)*step_x - pow(-1, l)*step_y;
+    for (int k=0; k<_qr_nbitx; k++) {
+        for (int l=0; l<_qr_nbity; l++) {
+            point = upperleft_qr + k*step_x + l*step_y;
             color = roi_mask.at<uchar>(point);
             if (color.val[0] == 0) {
                 code |= (bit_selector << (k+2*l));
@@ -181,12 +189,11 @@ bool Detector::get_markers(const std::vector<cv::Point2f>& points, std::vector<c
     dist[1] = cv::norm(points[1] - points[2]);
     dist[2] = cv::norm(points[2] - points[0]);
     int top_ind;
-    double top_th = (double)_params["top_th"];
-    if (fabs(dist[0]-dist[1])/dist[1] < top_th) {
+    if (fabs(dist[0]-dist[1])/dist[1] < _th_top_marker) {
         top_ind = 1;
-    } else if (fabs(dist[1]-dist[2])/dist[2] < top_th) {
+    } else if (fabs(dist[1]-dist[2])/dist[2] < _th_top_marker) {
         top_ind = 2;
-    } else if (fabs(dist[0]-dist[2])/dist[2] < top_th) {
+    } else if (fabs(dist[0]-dist[2])/dist[2] < _th_top_marker) {
         top_ind = 0;
     } else {
         return false;
@@ -203,7 +210,7 @@ bool Detector::get_markers(const std::vector<cv::Point2f>& points, std::vector<c
     cv::Point2f midbottom = 0.5*(points[btm_ind[0]]+points[btm_ind[1]]);
     double width = cv::norm(points[btm_ind[0]] - points[btm_ind[1]]);
     double height = cv::norm(points[top_ind] - midbottom);
-    if (fabs(height/width - (double)_params["triangle_ratio"])/(double)_params["triangle_ratio"] > (double)_params["triangle_th"]) {
+    if (fabs(height/width - _triangle_ratio)/_triangle_ratio > _th_triangle_ratio) {
         return false;
     }
     // order markers: left - right - top
@@ -244,7 +251,7 @@ void Detector::detect_obstacles(const cv::Mat& frame, const std::vector<std::vec
     std::vector<std::vector<cv::Point>> obstacle_contours(0);
     for (uint i=0; i<contours.size(); i++) {
         cv::convexHull(contours[i], contour);
-        if (cv::contourArea(contour) > (double)_params["min_obstacle_area"]*pow((double)_params["pixelspermeter"], 2)) {
+        if (cv::contourArea(contour) > _min_obstacle_area*pow(_meter2pixel, 2)) {
             obstacle_contours.push_back(contour);
         }
     }
@@ -270,11 +277,10 @@ void Detector::filter_obstacles(const std::vector<std::vector<cv::Point>>& conto
         }
         if (add) {
             cv::minEnclosingCircle(contours[i], center, radius);
-            double p2m = 1.0/((double)_params["pixelspermeter"]);
             if (rect.size.width*rect.size.height < M_PI*pow(radius, 2)) {
-                obstacles.push_back(new Rectangle(cam2worldframe(rect.center), -rect.angle, rect.size.width*p2m, rect.size.height*p2m));
+                obstacles.push_back(new Rectangle(cam2worldframe(rect.center), -rect.angle, rect.size.width*_pixel2meter, rect.size.height*_pixel2meter));
             } else {
-                obstacles.push_back(new Circle(cam2worldframe(center), radius*p2m));
+                obstacles.push_back(new Circle(cam2worldframe(center), radius*_pixel2meter));
             }
         }
     }

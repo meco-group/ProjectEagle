@@ -10,15 +10,30 @@
 
 class Detector {
     private:
-        cv::FileStorage _params;
         cv::SimpleBlobDetector _blob_detector;
         cv::Mat _background;
         cv::Mat _cont_mask;
         cv::Matx23f _cam2world_tf;
         cv::Matx23f _world2cam_tf;
 
-        void init_blob();
-        void init_background();
+        // parameters
+        double _pixel2meter;
+        double _meter2pixel;
+        double _min_robot_area;
+        double _min_obstacle_area;
+        double _triangle_ratio;
+        double _qr_posx;
+        double _qr_posy;
+        double _qr_sizex;
+        double _qr_sizey;
+        double _qr_nbitx;
+        double _qr_nbity;
+        double _th_triangle_ratio;
+        double _th_top_marker;
+        int _th_bg_subtraction;
+
+        void read_parameters(const std::string& param_file);
+        void init_blob(const cv::FileStorage& params);
         bool subtract_background(const cv::Mat& frame, std::vector<std::vector<cv::Point>>& contours);
         void detect_robots(const cv::Mat& frame, const std::vector<std::vector<cv::Point>>& contours, const std::vector<Robot*>& robots);
         void find_robots(cv::Mat& roi, const cv::Point2f& roi_location, const std::vector<Robot*>& robots);
