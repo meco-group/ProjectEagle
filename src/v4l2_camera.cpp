@@ -11,7 +11,7 @@
 #include <signal.h>
 #include <assert.h>
 #include <getopt.h>
-#include <unistd.h> 
+#include <unistd.h>
 #include <cstdlib>
 #include <iostream>
 #include "v4l2_camera.h"
@@ -55,9 +55,9 @@ int V4L2Camera::v4l2_set_input()
 		input.index = ++count;
 	}
 	count -= 1;
-	
+
 	assert(count > -1);
-	
+
 	if(xioctl(_fd, VIDIOC_S_INPUT, &count) == -1) {
 		printf("Error selecting input %d\n", count);
 		return 1;
@@ -72,11 +72,11 @@ int V4L2Camera::v4l2_set_pixfmt()
 	 * in gc2035 driver, tested with:
 	 * -- 422P/YU12/YV12/NV16/NV12/NV61/NV21/UYVY
 	 * others will be ignored
-	 * 
+	 *
 	 */
 	struct v4l2_format fmt;
 	CLEAR(fmt);
-	
+
 	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	fmt.fmt.pix.width = _width;        // ignored by gc2035 driver
 	fmt.fmt.pix.height = _height;      // ignored by gc2035 driver
@@ -161,12 +161,12 @@ int V4L2Camera::v4l2_set_buffer()
 	bufrequest.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	bufrequest.memory = V4L2_MEMORY_MMAP;
 	bufrequest.count = _buffercount; //1;
-	 
+
 	if(xioctl(_fd, VIDIOC_REQBUFS, &bufrequest) < 0){
 	    perror("VIDIOC_REQBUFS");
 		return 1;
 	}
-	
+
 	// Allocate the vector with bufferinfo
 	_buffers = new buffer_t[_buffercount];
 
@@ -174,11 +174,11 @@ int V4L2Camera::v4l2_set_buffer()
 	for (int i = 0; i < _buffercount; i++) {
 		struct v4l2_buffer _bufferinfo;
 		CLEAR(_bufferinfo);
-		 
+
 		_bufferinfo.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		_bufferinfo.memory = V4L2_MEMORY_MMAP;
 		_bufferinfo.index = i;
-		 
+
 		if(xioctl(_fd, VIDIOC_QUERYBUF, &_bufferinfo) < 0){
 			perror("VIDIOC_QUERYBUF");
 			return 1;
@@ -194,13 +194,13 @@ int V4L2Camera::v4l2_set_buffer()
 			_fd,
 			_bufferinfo.m.offset
 		);
-		 
+
 		if(_buffers[i].data == MAP_FAILED){
 			perror("mmap");
 			return 1;
 		}
 		memset(_buffers[i].data, 0, _buffers[i].length);
-	}	
+	}
 
 	return 0;
 }
@@ -213,7 +213,7 @@ int V4L2Camera::v4l2_start_capture()
 		_bufferinfo.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		_bufferinfo.memory = V4L2_MEMORY_MMAP;
 		_bufferinfo.index = i; /* Queueing buffer i. */
-	
+
 		if (xioctl(_fd, VIDIOC_QBUF, &_bufferinfo) < 0) {
 			perror("VIDIOC_QBUF");
 			return 1;
@@ -225,8 +225,8 @@ int V4L2Camera::v4l2_start_capture()
 	    perror("VIDIOC_STREAMON");
 		return 1;
 	}
-    
-    return 0; 
+
+    return 0;
 }
 
 int V4L2Camera::v4l2_stop_capture()
@@ -235,7 +235,7 @@ int V4L2Camera::v4l2_stop_capture()
 	    perror("VIDIOC_STREAMOFF");
 		return 1;
 	}
-	
+
 	close(_fd);
 	_fd = -1;
 
@@ -280,10 +280,11 @@ bool V4L2Camera::start()
 
 bool V4L2Camera::read(cv::Mat &img)
 {
+    cv::Mat img_;
 	v4l2_dequeue_buffer();
-	process_buffer(img);
+	process_buffer(img_);
 	v4l2_queue_buffer();
-
+    cv::undistort(img_, img, _camera_matrix, _distortion_vector);
 	return true;
 }
 

@@ -4,9 +4,10 @@
 #include "camera_interface.h"
 #include <linux/videodev2.h>
 #include <opencv2/core/core.hpp>
+#include "opencv2/imgproc/imgproc.hpp"
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
-	
+
 typedef struct buffer_t {
 	void *data;
 	size_t length;
@@ -17,12 +18,12 @@ class V4L2Camera : public CameraInterface
 private:
     int _fd;
 
-	int _width; 
+	int _width;
 	int _height;
 	int _pixelformat;
     struct timeval _capture_time;
 	int _buffercount;
-	
+
     int xioctl(int fd, int request, void *arg);
 
     int v4l2_set_input();
