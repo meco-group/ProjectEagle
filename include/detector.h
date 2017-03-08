@@ -10,7 +10,7 @@
 
 class Detector {
     private:
-        cv::SimpleBlobDetector _blob_detector;
+        cv::Ptr<cv::SimpleBlobDetector> _blob_detector;
         cv::Mat _background;
         cv::Mat _cont_mask;
         cv::Matx23f _cam2world_tf;
