@@ -230,6 +230,8 @@ bool Communicator::receive(void* header, void* data,
     if (dat.size() == 2) {
         memcpy(header, dat[0], sizes[0]);
         memcpy(data, dat[1], sizes[1]);
+        hsize = sizes[0];
+        dsize = sizes[1];
         return true;
     }
     return false;
