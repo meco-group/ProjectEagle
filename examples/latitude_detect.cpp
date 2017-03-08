@@ -1,33 +1,107 @@
 #include "latitude_camera.h"
 #include "detector.h"
+#include "communicator.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
 int main(void)
 {
+    // setup the camera
 	LatitudeCamera cam(0);
-    Detector detector;
-
-    BallBot MECOBB1(0);
-    Ourbot dave(5);
-    Ourbot kurt(3);
-    std::vector< Robot* > robots = std::vector< Robot* >{&MECOBB1, &dave, &kurt};
-    std::vector< Obstacle > obstacles;
-
 	cam.start();
-    detector.start();
 
-    cv::Mat im;
-    cv::namedWindow("image",cv::WINDOW_AUTOSIZE);
+    // setup the communication
+    Communicator com("eagle", "eth0");
+    com.start();
+    com.join("EAGLE");
 
-    while(true){
-        cam.read(im);
-        detector.update(im, robots, obstacles);
-        detector.draw(im, robots, obstacles);
-        imshow("image",im);
-        cv::waitKey(1);
+    // capture and save background
+    cv::Mat frame, background;
+    cam.read(frame);
+    background = cv::Mat(frame.size(), CV_32FC3, cv::Scalar(0,0,0));
+    for (int i=0; i<50; i++) {
+        cam.read(frame);
+        cv::accumulate(frame, background);
     }
-    
-    cam.stop();
-}
+    background /= 50;
+    background.convertTo(background, CV_8UC3);
+    //cv::imwrite("background.png", background);
+    imshow("image", background);
+    cv::waitKey(2000);
 
+    // create detector
+    Detector detector("../config/detector.yml", background);
+
+    // start detecting
+    cv::Mat im;
+    cv::namedWindow("image", cv::WINDOW_AUTOSIZE);
+
+    // Make a robot which the camera should find
+    Robot BB1(0, 0.55, 0.4, cv::Scalar(17, 110, 138));
+    std::vector< Robot* > robots = std::vector< Robot* >{&BB1};
+    std::vector< Obstacle* > obstacles;
+
+     int j = 0;
+    // main execution loop
+    while (j < 300) {
+        j++;
+        // Detect the robots/obstacles
+        cam.read(im);
+        detector.search(im, robots, obstacles);
+
+        // Send information to interested listeners
+        int i = 0;
+        int k = 0;
+
+        // pack robots
+        size_t n_detected_robots = 0;
+        eagle::header_t mheaders[robots.size()];
+        eagle::marker_t markers[robots.size()];
+        for (k = 0; k < robots.size(); k++) {
+            if( robots[k]->detected() ) {
+                mheaders[n_detected_robots].id = eagle::MARKER;
+                mheaders[n_detected_robots].time = 0;
+                markers[n_detected_robots++] = robots[k]->serialize();
+            }
+        }
+        // pack obstacles
+        eagle::header_t oheaders[obstacles.size()];
+        eagle::obstacle_t obs[obstacles.size()];
+        for (k = 0; k < obstacles.size(); k++) {
+            oheaders[k].id = eagle::OBSTACLE;
+            oheaders[k].time = 0;
+            obs[k] = obstacles[k]->serialize();
+        }
+
+        // make data and size vector
+        std::vector< size_t > sizes = std::vector< size_t >(2*n_detected_robots + 2*obstacles.size(),0);
+        std::vector< const void* > data = std::vector< const void* >(sizes.size());
+
+        for (k = 0; k < n_detected_robots; k++) {
+            sizes[i] = sizeof(eagle::header_t);
+            data[i++] = (const void*)(&mheaders[k]);
+            sizes[i] = sizeof(eagle::marker_t);
+            data[i++] = (const void*)(&markers[k]);
+        }
+
+        for (k = 0; k < obstacles.size(); k++) {
+            sizes[i] = sizeof(eagle::header_t);
+            data[i++] = (const void*)(&oheaders[k]);
+            sizes[i] = sizeof(eagle::obstacle_t);
+            data[i++] = (const void*)(&obs[k]);
+        }
+
+        // send everything
+        com.shout(data, sizes, "EAGLE");
+
+        // Draw everything to give some feedback
+        detector.draw(im, robots, obstacles);
+        imshow("image", im);
+        cv::waitKey(10);
+    }
+
+    // stop the program
+    cam.stop();
+    com.leave("EAGLE");
+    com.stop();
+}
