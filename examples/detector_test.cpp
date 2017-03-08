@@ -1,5 +1,4 @@
 #include "detector.h"
-#include "latitude_camera.h"
 #include "see3_camera.h"
 
 int main(void) {
