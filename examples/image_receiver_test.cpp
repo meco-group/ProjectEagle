@@ -4,7 +4,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 int main(void) {
-    Communicator com("eagle", "eth0");
+    Communicator com("eagle", "wlan0");
     com.start();
     com.join("EAGLE");
 
