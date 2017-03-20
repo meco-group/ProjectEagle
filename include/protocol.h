@@ -4,9 +4,10 @@
 namespace eagle {
     /* helpers */
     typedef enum msg_t {
-    	ROBOT = 0,
-    	OBSTACLE = 1
-    } msg_id_t;
+    	MARKER = 0,
+    	OBSTACLE = 1,
+        IMAGE = 2
+    } msg_t;
 
     typedef enum shape_t {
         TRIANGLE = 0,

@@ -41,7 +41,7 @@ void Detector::init_blob(const cv::FileStorage& params) {
     blob_par.minArea = (int)params["blob"]["minArea"];
     blob_par.filterByCircularity = (int)params["blob"]["filterByCircularity"];
     blob_par.minCircularity = (double)params["blob"]["minCircularity"];
-    _blob_detector = cv::SimpleBlobDetector(blob_par);
+    _blob_detector = cv::SimpleBlobDetector::create(blob_par);
 }
 
 void Detector::init_transformations(const cv::Mat& frame) {
@@ -126,7 +126,7 @@ void Detector::find_robots(cv::Mat& roi, const cv::Point2f& roi_location, const 
     cv::cvtColor(roi, roi, CV_RGB2GRAY);
     std::vector<cv::KeyPoint> blobs;
     cv::resize(roi, roi, cv::Size(), 2, 2);
-    _blob_detector.detect(roi, blobs);
+    _blob_detector->detect(roi, blobs);
     if (blobs.size() < 3) {
         return;
     }
