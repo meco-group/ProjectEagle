@@ -280,12 +280,23 @@ bool Communicator::listen(void* header, void* data,
     return true;
 }
 
-zmsg_t* Communicator::pack(const std::vector<const void*>& frames,
-    const std::vector<size_t>& sizes) {
-    zmsg_t* msg = zmsg_new();
-    for (int i=frames.size()-1; i>=0; i--) {
-        zmsg_pushmem(msg, frames[i], sizes[i]);
+
+zmsg_t* Communicator::pack(const std::vector<const void*>& frames, const std::vector<size_t>& sizes) {
+    size_t buffer_size = 0;
+    for (int i=0; i<sizes.size(); i++) {
+        buffer_size += sizeof(size_t);
+        buffer_size += sizes[i];
     }
+    void* buffer = malloc(buffer_size);
+    unsigned int offset = 0;
+    for (int i=0; i<frames.size(); i++) {
+        memcpy(buffer+offset, &sizes[i], sizeof(sizes[i]));
+        offset += sizeof(sizes[i]);
+        memcpy(buffer+offset, frames[i], sizes[i]);
+        offset += sizes[i];
+    }
+    zmsg_t* msg = zmsg_new();
+    zmsg_pushmem(msg, buffer, buffer_size);
     return msg;
 }
 
@@ -296,15 +307,51 @@ bool Communicator::unpack(zmsg_t* msg, std::vector<void*>& frames, std::vector<s
     zframe_t* frame = zmsg_first(msg);
     std::vector<void*> frames_(0);
     std::vector<size_t> sizes_(0);
+    void* buffer = zframe_data(frame);
+    size_t buffer_size = zframe_size(frame);
+
     void* pntr;
-    while (frame != NULL) {
-        pntr = malloc(zframe_size(frame));
-        memcpy(pntr, zframe_data(frame), zframe_size(frame));
+    size_t size;
+    unsigned int offset = 0;
+    while(offset < buffer_size) {
+        memcpy(&size, buffer+offset, sizeof(size_t));
+        pntr = malloc(size);
+        offset += sizeof(size_t);
+        memcpy(pntr, buffer+offset, size);
+        offset += size;
         frames_.push_back(pntr);
-        sizes_.push_back(zframe_size(frame));
-        frame = zmsg_next(msg);
+        sizes_.push_back(size);
     }
     frames = frames_;
     sizes = sizes_;
     return true;
 }
+
+// zmsg_t* Communicator::pack(const std::vector<const void*>& frames,
+//     const std::vector<size_t>& sizes) {
+//     zmsg_t* msg = zmsg_new();
+//     for (int i=frames.size()-1; i>=0; i--) {
+//         zmsg_pushmem(msg, frames[i], sizes[i]);
+//     }
+//     return msg;
+// }
+
+// bool Communicator::unpack(zmsg_t* msg, std::vector<void*>& frames, std::vector<size_t>& sizes) {
+//     if (msg == NULL) {
+//         return false;
+//     }
+//     zframe_t* frame = zmsg_first(msg);
+//     std::vector<void*> frames_(0);
+//     std::vector<size_t> sizes_(0);
+//     void* pntr;
+//     while (frame != NULL) {
+//         pntr = malloc(zframe_size(frame));
+//         memcpy(pntr, zframe_data(frame), zframe_size(frame));
+//         frames_.push_back(pntr);
+//         sizes_.push_back(zframe_size(frame));
+//         frame = zmsg_next(msg);
+//     }
+//     frames = frames_;
+//     sizes = sizes_;
+//     return true;
+// }
