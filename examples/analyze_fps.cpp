@@ -1,4 +1,5 @@
-#include "opi_camera.h"
+#include "libcam.h"
+#include "examples_config.h"
 #include <ctime>
 #include <iostream>
 #include <opencv2/core/core.hpp>
@@ -6,9 +7,10 @@
 
 int main(void)
 {
-	int nof = 100;
+	int nof = 0;
+	int dt = 10; //average over 10 seconds
 
-    OPICamera cam;
+    EXAMPLE_CAMERA_T cam(EXAMPLE_CAMERA_INDEX);
 	cam.start();
     cv::Mat im;
 
@@ -17,27 +19,20 @@ int main(void)
     std::cout << "Chrono: start!" << std::endl;
 	time(&begin);
 	
-	// Start loop
-    for(int k=0;k<nof;k++){
+	// Read as many frames as possible
+    do {
         cam.read(im);
+		nof++;	
+		time(&end);
+	} while(difftime(end,begin) < dt);
 
-//        std::vector<int> compression_params;
-//        compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
-//        compression_params.push_back(95);
-//    
-//        std::vector<uchar>buffer;
-//        //buffer.reserve()
-//        bool succes = cv::imencode(".jpg",im,buffer,compression_params);
-    }
-    
     // Stop chrono
-    time(&end);
     std::cout << "Chrono: stop!" << std::endl;
     int duration = difftime(end,begin);
     double fps = nof/(double)duration;
     
     // print results
-    std::cout << "Duration:" << duration << "[s]" << std::endl;
+    std::cout << "Duration:" << duration << " [s]" << std::endl;
 	std::cout << "FPS:" << fps << std::endl;
 
     cam.stop();

@@ -1,20 +1,20 @@
-#include "latitude_camera.h"
+#include "libcam.h"
+#include "examples_config.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
 int main(void)
 {
-	LatitudeCamera cam(0);
+	EXAMPLE_CAMERA_T cam(EXAMPLE_CAMERA_INDEX);
 	cam.start();
 
     cv::Mat im;
-    cv::namedWindow("image",cv::WINDOW_AUTOSIZE);
+    cv::namedWindow("Viewer",cv::WINDOW_AUTOSIZE);
 
     while(true){
         cam.read(im);
-        imshow("image",im);
+        imshow("Viewer",im);
         cv::waitKey(1);
-        //std::cout << "image" << std::endl;
     }
     
     cam.stop();
