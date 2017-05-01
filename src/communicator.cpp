@@ -280,6 +280,10 @@ bool Communicator::listen(void* header, void* data,
     return true;
 }
 
+/* Low level packing and unpacking
+ * Force 32 bit unsigned integer types for the packing as the size of size_t may differ depending on the architecture (32 vs 64 bit).
+ */
+typedef uint32_t communicator_size_t;
 
 zmsg_t* Communicator::pack(const std::vector<const void*>& frames, const std::vector<size_t>& sizes) {
     size_t buffer_size = 0;
@@ -289,8 +293,10 @@ zmsg_t* Communicator::pack(const std::vector<const void*>& frames, const std::ve
     }
     void* buffer = malloc(buffer_size);
     unsigned int offset = 0;
+    communicator_size_t size_caster;
     for (int i=0; i<frames.size(); i++) {
-        memcpy(buffer+offset, &sizes[i], sizeof(sizes[i]));
+        size_caster = sizes[i];
+        memcpy(buffer+offset, &size_caster, sizeof(size_caster));
         offset += sizeof(sizes[i]);
         memcpy(buffer+offset, frames[i], sizes[i]);
         offset += sizes[i];
@@ -309,14 +315,14 @@ bool Communicator::unpack(zmsg_t* msg, std::vector<void*>& frames, std::vector<s
     std::vector<size_t> sizes_(0);
     void* buffer = zframe_data(frame);
     size_t buffer_size = zframe_size(frame);
-
+	
     void* pntr;
-    size_t size;
+    communicator_size_t size;
     unsigned int offset = 0;
     while(offset < buffer_size) {
-        memcpy(&size, buffer+offset, sizeof(size_t));
+        memcpy(&size, buffer+offset, sizeof(communicator_size_t));
         pntr = malloc(size);
-        offset += sizeof(size_t);
+        offset += sizeof(communicator_size_t);
         memcpy(pntr, buffer+offset, size);
         offset += size;
         frames_.push_back(pntr);
