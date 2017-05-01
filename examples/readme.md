@@ -9,6 +9,8 @@ Estimate the framerate for the camera.
 ## 4. AnalyzeCompression
 * Estimate the framerate with compression.
 * Estimate the ratio of compression time and capturing time.
+## 5. ImageTransmitter - ImageReceiver
+Transmit images for as long as a receiver is listening. The ImageTransmitter-ImageReceiver pair should be run together as a video transmission demo.
 
 # ToDo-list
 

@@ -1,3 +1,4 @@
+#include "examples_config.h"
 #include "communicator.h"
 #include <ctime>
 #include <random>
@@ -5,7 +6,7 @@
 int main(void) {
     std::srand(std::time(NULL));
     int nr = std::rand()%10;
-    Communicator com("host" + std::to_string(nr), "wlan0");
+    Communicator com("host" + std::to_string(nr), EXAMPLE_COMMUNICATOR_INTERFACE);
     // com.debug();
     com.start();
     com.join("mygroup");

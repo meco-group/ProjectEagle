@@ -5,6 +5,7 @@ See3Camera::See3Camera(int device) :
     V4L2Camera(device)
 {
     format(1280, 720, V4L2_PIX_FMT_Y16);
+    setBrightness(7);
 }
 
 int See3Camera::process_buffer(cv::Mat &img)

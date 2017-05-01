@@ -1,10 +1,10 @@
-#include "see3_camera.h"
+#include "libcam.h"
+#include "examples_config.h"
 #include <opencv2/opencv.hpp>
 
 int main(void) {
-    See3Camera cam(1);
-    cam.setBrightness(7);
-    cam.calibrate("../config/see3cam.yml");
+    EXAMPLE_CAMERA_T cam(EXAMPLE_CAMERA_INDEX);
+    cam.calibrate(EXAMPLE_CAMERA_CALIBRATION);
     cam.start();
 
     // capture and save background
@@ -18,7 +18,7 @@ int main(void) {
     background /= 50;
     background.convertTo(background, CV_8UC3);
     cv::imwrite("background.png", background);
-    imshow("image", background);
+    imshow("Background", background);
     cv::waitKey(2000);
 
     cam.stop();
