@@ -288,7 +288,7 @@ typedef uint32_t communicator_size_t;
 zmsg_t* Communicator::pack(const std::vector<const void*>& frames, const std::vector<size_t>& sizes) {
     size_t buffer_size = 0;
     for (int i=0; i<sizes.size(); i++) {
-        buffer_size += sizeof(size_t);
+        buffer_size += sizeof(communicator_size_t);
         buffer_size += sizes[i];
     }
     void* buffer = malloc(buffer_size);
@@ -296,8 +296,8 @@ zmsg_t* Communicator::pack(const std::vector<const void*>& frames, const std::ve
     communicator_size_t size_caster;
     for (int i=0; i<frames.size(); i++) {
         size_caster = sizes[i];
-        memcpy(buffer+offset, &size_caster, sizeof(size_caster));
-        offset += sizeof(sizes[i]);
+        memcpy(buffer+offset, &size_caster, sizeof(communicator_size_t));
+        offset += sizeof(communicator_size_t);
         memcpy(buffer+offset, frames[i], sizes[i]);
         offset += sizes[i];
     }
