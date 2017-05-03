@@ -221,20 +221,14 @@ bool Communicator::receive(std::string& header, void* data,
 
 bool Communicator::receive(void* header, void* data,
     size_t& hsize, size_t& dsize, std::string& peer) {
-    std::vector<void*> dat;
+    std::vector<void*> dat = {header, data};
     std::vector<size_t> sizes;
-
     if (!receive(dat, sizes, peer)) {
         return false;
     }
-    if (dat.size() == 2) {
-        memcpy(header, dat[0], sizes[0]);
-        memcpy(data, dat[1], sizes[1]);
-        hsize = sizes[0];
-        dsize = sizes[1];
-        return true;
-    }
-    return false;
+    hsize = sizes[0];
+    dsize = sizes[1];
+    return true;
 }
 
 bool Communicator::listen(zmsg_t** msg, std::string& peer, double timeout) {
@@ -312,25 +306,21 @@ bool Communicator::unpack(zmsg_t* msg, std::vector<void*>& frames, std::vector<s
         return false;
     }
     zframe_t* frame = zmsg_first(msg);
-    std::vector<void*> frames_(0);
-    std::vector<size_t> sizes_(0);
+    sizes.resize(frames.size());
     void* buffer = zframe_data(frame);
     size_t buffer_size = zframe_size(frame);
-	
-    void* pntr;
     communicator_size_t size;
     unsigned int offset = 0;
-    while(offset < buffer_size) {
+    for (unsigned int k=0; k < frames.size(); k++) {
+        if (offset >= buffer_size) {
+            break;
+        }
         memcpy(&size, buffer+offset, sizeof(communicator_size_t));
-        pntr = malloc(size);
+        sizes[k] = size;
         offset += sizeof(communicator_size_t);
-        memcpy(pntr, buffer+offset, size);
-        offset += size;
-        frames_.push_back(pntr);
-        sizes_.push_back(size);
+        memcpy(frames[k], buffer+offset, sizes[k]);
+        offset += sizes[k];
     }
-    frames = frames_;
-    sizes = sizes_;
     return true;
 }
 
