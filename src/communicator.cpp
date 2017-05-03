@@ -303,6 +303,7 @@ zmsg_t* Communicator::pack(const std::vector<const void*>& frames, const std::ve
     }
     zmsg_t* msg = zmsg_new();
     zmsg_pushmem(msg, buffer, buffer_size);
+    free(buffer);
     return msg;
 }
 
