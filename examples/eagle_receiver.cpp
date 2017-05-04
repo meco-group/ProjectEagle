@@ -28,7 +28,7 @@ int main(void)
     int k = 0;
 
     while( k < 200 ) {
-        std::vector< size_t > sizes(2);
+        std::vector< size_t > sizes = {sizeof(eagle::header_t), 0};
         std::vector< void* > data(2);
         data[0] = malloc(sizeof(eagle::header_t));
         data[1] = malloc(1024);

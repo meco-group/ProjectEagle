@@ -284,7 +284,10 @@ zmsg_t* Communicator::pack(const std::vector<const void*>& frames, const std::ve
 }
 
 void Communicator::read(int n_frames, std::vector<void*>& frames, std::vector<size_t>& sizes) {
-    sizes.resize(frames.size(), 0);
+    bool check_size = (sizes.size() == frames.size());
+    if (!check_size) {
+        sizes.resize(frames.size(), 0);
+    }
     for (int k=0; k<n_frames; k++) {
         if (k >= frames.size()) {
             break;
@@ -292,7 +295,14 @@ void Communicator::read(int n_frames, std::vector<void*>& frames, std::vector<si
         communicator_size_t size;
         if (available()) {
             memcpy(&size, _rcv_buffer+_rcv_buffer_index, sizeof(communicator_size_t));
-            sizes[k] = size;
+            if (check_size && sizes[k] != 0 && sizes[k] != size) {
+                std::cout << "Given size (" << sizes[k] <<
+                ") does not match received frame size (" <<
+                size << ")!" << std::endl;
+                sizes[k] = (sizes[k] < size) ? sizes[k] : size;
+            } else {
+                sizes[k] = size;
+            }
             _rcv_buffer_index += sizeof(communicator_size_t);
             memcpy(frames[k], _rcv_buffer+_rcv_buffer_index, sizes[k]);
             _rcv_buffer_index += sizes[k];
