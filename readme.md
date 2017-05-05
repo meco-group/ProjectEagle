@@ -2,6 +2,27 @@
 
 Project Eagle collects modular building blocks for obstacle and robot pose detection using a camera.
 
+## Building the project
+
+### Dependencies
+Install the following packages:
+* OpenCV 3.2
+    - Download source from [here](https://github.com/opencv/opencv/releases).
+    - `mkdir build` and `cd build`
+    - `cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local ..`
+    - `make` and `sudo make install`
+* `zyre`, `zmq`, `czmq` and `libsodium`, see [this](https://github.com/zeromq/zyre) for installation instructions.
+
+### Building the project
+Starting from the root of the repository:
+```
+mkdir build
+cd build
+cmake ..
+make
+```
+Built examples are in `build/bin/`
+
 ## Detector
 
 The detector detects obstacles and robots in the environment using a captured camera frame. Obstacles and robots are distinguished from the environment by comparing the captured frame by a capture of the background. Robots are identified by using a proper marker. The figure underneath gives an overview of a marker with its major dimensions.
