@@ -1,4 +1,6 @@
 # Useful examples
+The default settings for the examples are found under include/examples_config.h . These allow the user to easily change the camera type, camera port, network interface, ... in order to configure the examples in a consistent way. Make sure these settings correspond to your system. Otherwise, segfaults will occur.
+By default, examples are required to be run from the build directory in order to have the right relative paths. So, running Background is done from build, as: ./bin/Background
 
 ## 1. Snapshot
 Take a snapshot and save the image.
@@ -11,6 +13,12 @@ Estimate the framerate for the camera.
 * Estimate the ratio of compression time and capturing time.
 ## 5. ImageTransmitter - ImageReceiver
 Transmit images for as long as a receiver is listening. The ImageTransmitter-ImageReceiver pair should be run together as a video transmission demo.
+## 6. Background
+Takes a few snapshots and averages these to get a nice background, necessary for the detection of the robots.
+## 7. Detector
+Detect robots in the viewing area. Unless your camera is really distorted, this demo will just work fine, no calibration needed. Codes being detected in the demo are 0,1 and 9. A Background should be available (cfr. Background).
+## 8. EagleTransmitter - EagleReceiver
+Transmit images, robot and obstacle data. This should be run together with the receiver as a full demo.
 
 # ToDo-list
 

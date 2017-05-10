@@ -1,4 +1,5 @@
-#include "latitude_camera.h"
+#include "libcam.h"
+#include "examples_config.h"
 #include "detector.h"
 #include "communicator.h"
 #include <opencv2/core/core.hpp>
@@ -7,30 +8,36 @@
 int main(void)
 {
     // setup the camera
-	LatitudeCamera cam(0);
-	cam.start();
+    EXAMPLE_CAMERA_T cam(EXAMPLE_CAMERA_INDEX);
+    cam.start();
 
     // setup the communication
-    Communicator com("eagle", "wlan0");
+    Communicator com("eagle", EXAMPLE_COMMUNICATOR_INTERFACE);
     com.start();
     com.join("EAGLE");
+
+	// setup video compression 
+	std::vector<int> compression_params;
+    compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+    compression_params.push_back(30);
+    std::vector<uchar> buffer(10000,0);
+	
+    eagle::header_t imheader;
+    imheader.id = eagle::IMAGE;
 
     // create detector
     Detector detector("../config/detector.yml", "background.png");
 
     // start detecting
     cv::Mat im;
-    cv::namedWindow("image", cv::WINDOW_AUTOSIZE);
 
     // Make a robot which the camera should find
     Robot BB1(0, 0.55, 0.4, cv::Scalar(17, 110, 138));
     std::vector< Robot* > robots = std::vector< Robot* >{&BB1};
     std::vector< Obstacle* > obstacles;
 
-     int j = 0;
     // main execution loop
-    while (j < 300) {
-        j++;
+    while (true) {
         // Detect the robots/obstacles
         cam.read(im);
         detector.search(im, robots, obstacles);
@@ -78,12 +85,15 @@ int main(void)
         }
 
         // send everything
-        com.shout(data, sizes, "EAGLE");
+        //com.shout(data, sizes, "EAGLE");
 
         // Draw everything to give some feedback
         detector.draw(im, robots, obstacles);
-        imshow("image", im);
-        cv::waitKey(10);
+		imheader.time = k;
+		cv::imencode(".jpg",im,buffer,compression_params);
+        com.shout(&imheader, buffer.data(), sizeof(imheader), buffer.size(), "EAGLE");
+		std::cout << "detected?" << robots[0]->detected() << std::endl;
+		std::cout << "image sent" << std::endl;
     }
 
     // stop the program
