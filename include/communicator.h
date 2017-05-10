@@ -16,9 +16,11 @@ private:
     zyre_event_t* _event;
     std::string _name;
     std::map<std::string, std::vector<std::string> > _groups;
+    void* _rcv_buffer;
+    size_t _rcv_buffer_size;
+    unsigned int _rcv_buffer_index;
 
     zmsg_t* pack(const std::vector<const void*>& frames, const std::vector<size_t>& sizes);
-    bool unpack(zmsg_t* msg, std::vector<void*>& frames, std::vector<size_t>& sizes);
 
 public:
     Communicator(const std::string& name, const std::string& iface, int port);
@@ -62,19 +64,19 @@ public:
         const std::vector<size_t>& sizes, const std::vector<std::string>& peers);
 
     // non-blocking
-    bool receive(zmsg_t** msg, std::string& peer);
-    bool receive(std::vector<void*>& data, std::vector<size_t>& sizes, std::string& peer);
-    bool receive(std::string& header, void* data, size_t& size, std::string& peer);
+    bool receive(std::string& peer);
     bool receive(void* header, void* data, size_t& hsize, size_t& dsize, std::string& peer);
+    bool receive(std::string& header, void* data, size_t& size, std::string& peer);
 
     // blocking
-    bool listen(zmsg_t** msg, std::string& peer, double timeout=-1);
-    bool listen(std::vector<void*>& data,
-        std::vector<size_t>& sizes, std::string& peer, double timeout=-1);
-    bool listen(std::string& header, void* data,
-        size_t& size, std::string& peer, double timeout=-1);
+    bool listen(std::string& peer, double timeout=-1);
     bool listen(void* header, void* data,
         size_t& hsize, size_t& dsize, std::string& peer, double timeout=-1);
+    bool listen(std::string& header, void* data,
+        size_t& size, std::string& peer, double timeout=-1);
+
+    void read(int n_frames, std::vector<void*>& frames, std::vector<size_t>& sizes);
+    bool available();
 };
 
 #endif //COMMUNICATOR_H

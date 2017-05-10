@@ -179,7 +179,7 @@ bool Communicator::whisper(const std::vector<const void*>& data,
     return true;
 }
 
-bool Communicator::receive(zmsg_t** msg, std::string& peer) {
+bool Communicator::receive(std::string& peer) {
     void* which = zpoller_wait(_poller, 0);
     if (which != zyre_socket(_node)) {
         return false;
@@ -187,24 +187,29 @@ bool Communicator::receive(zmsg_t** msg, std::string& peer) {
     _event = zyre_event_new(_node);
     const char* cmd = zyre_event_type(_event);
     if (streq(cmd, "SHOUT") || streq(cmd, "WHISPER")) {
-        *msg = zyre_event_msg(_event);
-        peer = std::string(zyre_event_peer_name(_event));
+        zmsg_t* msg = zyre_event_msg(_event);
+        if (msg != NULL) {
+            zframe_t* frame = zmsg_first(msg);
+            _rcv_buffer = zframe_data(frame);
+            _rcv_buffer_size = zframe_size(frame);
+            _rcv_buffer_index = 0;
+            peer = std::string(zyre_event_peer_name(_event));
+        }
         return true;
     }
     return false;
 }
 
-bool Communicator::receive(std::vector<void*>& data,
-    std::vector<size_t>& sizes, std::string& peer) {
-    zmsg_t* msg;
-    if (!receive(&msg, peer)) {
+bool Communicator::receive(void* header, void* data,
+    size_t& hsize, size_t& dsize, std::string& peer) {
+    if (!receive(peer)) {
         return false;
     }
-    if (!unpack(msg, data, sizes)) {
-        zmsg_destroy(&msg);
-        return false;
-    }
-    zmsg_destroy(&msg);
+    std::vector<void*> dat = {header, data};
+    std::vector<size_t> sizes;
+    read(2, dat, sizes);
+    hsize = sizes[0];
+    dsize = sizes[1];
     return true;
 }
 
@@ -219,50 +224,10 @@ bool Communicator::receive(std::string& header, void* data,
     return true;
 }
 
-bool Communicator::receive(void* header, void* data,
-    size_t& hsize, size_t& dsize, std::string& peer) {
-    std::vector<void*> dat;
-    std::vector<size_t> sizes;
-
-    if (!receive(dat, sizes, peer)) {
-        return false;
-    }
-    if (dat.size() == 2) {
-        memcpy(header, dat[0], sizes[0]);
-        memcpy(data, dat[1], sizes[1]);
-        hsize = sizes[0];
-        dsize = sizes[1];
-        return true;
-    }
-    return false;
-}
-
-bool Communicator::listen(zmsg_t** msg, std::string& peer, double timeout) {
+bool Communicator::listen(std::string& peer, double timeout) {
     clock_t t0 = timeout*CLOCKS_PER_SEC;
     clock_t t = clock();
-    while (!receive(msg, peer) && (t0<0 || (clock()-t) <= t0)) {};
-    if (t0>=0 && (clock()-t) >= t0) {
-        return false;
-    }
-    return (msg != NULL);
-}
-
-bool Communicator::listen(std::vector<void*>& data,
-    std::vector<size_t>& sizes, std::string& peer, double timeout) {
-    clock_t t0 = timeout*CLOCKS_PER_SEC;
-    clock_t t = clock();
-    while (!receive(data, sizes, peer) && (t0<0 || (clock()-t) <= t0)) {};
-    if (t0>=0 && (clock()-t) >= t0) {
-        return false;
-    }
-    return true;
-}
-
-bool Communicator::listen(std::string& header, void* data,
-    size_t& size, std::string& peer, double timeout) {
-    clock_t t0 = timeout*CLOCKS_PER_SEC;
-    clock_t t = clock();
-    while (!receive(header, data, size, peer) && (t0<0 || (clock()-t) <= t0)) {};
+    while (!receive(peer) && (t0<0 || (clock()-t) <= t0)) {};
     if (t0>=0 && (clock()-t) >= t0) {
         return false;
     }
@@ -274,6 +239,17 @@ bool Communicator::listen(void* header, void* data,
     clock_t t0 = timeout*CLOCKS_PER_SEC;
     clock_t t = clock();
     while (!receive(header, data, hsize, dsize, peer) && (t0<0 || (clock()-t) <= t0)) {};
+    if (t0>=0 && (clock()-t) >= t0) {
+        return false;
+    }
+    return true;
+}
+
+bool Communicator::listen(std::string& header, void* data,
+    size_t& size, std::string& peer, double timeout) {
+    clock_t t0 = timeout*CLOCKS_PER_SEC;
+    clock_t t = clock();
+    while (!receive(header, data, size, peer) && (t0<0 || (clock()-t) <= t0)) {};
     if (t0>=0 && (clock()-t) >= t0) {
         return false;
     }
@@ -303,61 +279,39 @@ zmsg_t* Communicator::pack(const std::vector<const void*>& frames, const std::ve
     }
     zmsg_t* msg = zmsg_new();
     zmsg_pushmem(msg, buffer, buffer_size);
+    free(buffer);
     return msg;
 }
 
-bool Communicator::unpack(zmsg_t* msg, std::vector<void*>& frames, std::vector<size_t>& sizes) {
-    if (msg == NULL) {
-        return false;
+void Communicator::read(int n_frames, std::vector<void*>& frames, std::vector<size_t>& sizes) {
+    bool check_size = (sizes.size() == frames.size());
+    if (!check_size) {
+        sizes.resize(frames.size(), 0);
     }
-    zframe_t* frame = zmsg_first(msg);
-    std::vector<void*> frames_(0);
-    std::vector<size_t> sizes_(0);
-    void* buffer = zframe_data(frame);
-    size_t buffer_size = zframe_size(frame);
-	
-    void* pntr;
-    communicator_size_t size;
-    unsigned int offset = 0;
-    while(offset < buffer_size) {
-        memcpy(&size, buffer+offset, sizeof(communicator_size_t));
-        pntr = malloc(size);
-        offset += sizeof(communicator_size_t);
-        memcpy(pntr, buffer+offset, size);
-        offset += size;
-        frames_.push_back(pntr);
-        sizes_.push_back(size);
+    for (int k=0; k<n_frames; k++) {
+        if (k >= frames.size()) {
+            break;
+        }
+        communicator_size_t size;
+        if (available()) {
+            memcpy(&size, _rcv_buffer+_rcv_buffer_index, sizeof(communicator_size_t));
+            if (check_size && sizes[k] != 0 && sizes[k] != size) {
+                std::cout << "Given size (" << sizes[k] <<
+                ") does not match received frame size (" <<
+                size << ")!" << std::endl;
+                sizes[k] = (sizes[k] < size) ? sizes[k] : size;
+            } else {
+                sizes[k] = size;
+            }
+            _rcv_buffer_index += sizeof(communicator_size_t);
+            memcpy(frames[k], _rcv_buffer+_rcv_buffer_index, sizes[k]);
+            _rcv_buffer_index += sizes[k];
+        } else {
+            sizes[k] = 0;
+        }
     }
-    frames = frames_;
-    sizes = sizes_;
-    return true;
 }
 
-// zmsg_t* Communicator::pack(const std::vector<const void*>& frames,
-//     const std::vector<size_t>& sizes) {
-//     zmsg_t* msg = zmsg_new();
-//     for (int i=frames.size()-1; i>=0; i--) {
-//         zmsg_pushmem(msg, frames[i], sizes[i]);
-//     }
-//     return msg;
-// }
-
-// bool Communicator::unpack(zmsg_t* msg, std::vector<void*>& frames, std::vector<size_t>& sizes) {
-//     if (msg == NULL) {
-//         return false;
-//     }
-//     zframe_t* frame = zmsg_first(msg);
-//     std::vector<void*> frames_(0);
-//     std::vector<size_t> sizes_(0);
-//     void* pntr;
-//     while (frame != NULL) {
-//         pntr = malloc(zframe_size(frame));
-//         memcpy(pntr, zframe_data(frame), zframe_size(frame));
-//         frames_.push_back(pntr);
-//         sizes_.push_back(zframe_size(frame));
-//         frame = zmsg_next(msg);
-//     }
-//     frames = frames_;
-//     sizes = sizes_;
-//     return true;
-// }
+bool Communicator::available() {
+    return (_rcv_buffer_index < _rcv_buffer_size);
+}
