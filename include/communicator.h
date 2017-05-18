@@ -76,6 +76,8 @@ public:
         size_t& size, std::string& peer, double timeout=-1);
 
     void read(int n_frames, std::vector<void*>& frames, std::vector<size_t>& sizes);
+	void read(void* frame);
+	size_t framesize();
     bool available();
 };
 

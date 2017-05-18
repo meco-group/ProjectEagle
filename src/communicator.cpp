@@ -312,6 +312,19 @@ void Communicator::read(int n_frames, std::vector<void*>& frames, std::vector<si
     }
 }
 
+void Communicator::read(void* frame) {
+	int n_frames = 1;
+	std::vector<void*> frames = {frame};
+	std::vector<size_t> sizes = {0};
+	read(n_frames, frames, sizes);
+}
+
+size_t Communicator::framesize() {
+	communicator_size_t size;
+	memcpy(&size, _rcv_buffer+_rcv_buffer_index, sizeof(communicator_size_t));
+	return size;
+}
+
 bool Communicator::available() {
     return (_rcv_buffer_index < _rcv_buffer_size);
 }
