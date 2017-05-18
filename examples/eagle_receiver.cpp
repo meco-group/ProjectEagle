@@ -25,39 +25,38 @@ int main(void)
 
     // main loop
     int k = 0;
-
-
 	std::cout << "Opening window"<< std::endl;
     cv::namedWindow("Stream");
+	eagle::header_t header;
 
-    while( k < 200 ) {
-        std::vector< size_t > sizes = {sizeof(eagle::header_t), 0};
-        std::vector< void* > data(2);
-        data[0] = malloc(sizeof(eagle::header_t));
-        data[1] = malloc(1024);
+    while( !kbhit() ) {
         int n_obs = 0;
 
         if (com.listen(peers[0], 1)) {
             while (com.available()) {
-                com.read(2, data, sizes);
-                eagle::header_t header = *((eagle::header_t*)(data[0]));
+				// 1. read the header
+				com.read(&header);
+				// 2. read data based on the header
                 switch (header.id) {
                     case eagle::MARKER:
                         eagle::marker_t marker;
-                        marker = *((eagle::marker_t*)(data[1]));
+						com.read(&marker);
                         std::cout << "Robot " << marker.id << " detected at (" << marker.x << "," << marker.y << "," << marker.t << ")" << std::endl;
+
                         break;
                     case eagle::OBSTACLE:
                         n_obs++;
                         break;
 
 					case eagle::IMAGE:
-						cv::Mat rawData = cv::Mat( 1, sizes[k+1], CV_8UC1, data[k+1]);
+						size_t size = com.framesize();
+						uchar buffer[size];
+						com.read(buffer);
+						cv::Mat rawData = cv::Mat( 1, size, CV_8UC1, buffer);
             			cv::Mat im = cv::imdecode(rawData, 1);
 						imshow("Stream",im);
             			cv::waitKey(1);
 						break;
-                    }
                 }
                 std::cout << "Number of obstacles: " << n_obs << std::endl;
             }

@@ -35,19 +35,32 @@ int main(void) {
 	double total_duration_micros = 0;
 	std::chrono::system_clock::time_point begin;
 	std::chrono::system_clock::time_point end;
-	std::cout << "Opening window"<< std::endl;
+	std::cout << "Opening window (press enter to stop the program)" << std::endl;
     cv::namedWindow("Stream");
 
 	// Start acquiring video stream
-    while( k < nof ) {
+    while( !kbhit() ) {
 		begin = std::chrono::system_clock::now();
-        if( com.listen(&header, data, hsize, dsize, peers[0],1) ) {
-            cv::Mat rawData  =  cv::Mat( 1, dsize, CV_8UC1, data);
-            cv::Mat im = cv::imdecode(rawData, 1);
-			end = std::chrono::system_clock::now();
-			total_duration_micros += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
-            imshow("Stream",im);
-            cv::waitKey(1);
+        if (com.listen(peers[0], 1)) {
+            while (com.available()) {
+				// 1. read the header
+				com.read(&header);
+				// 2. read data based on the header
+                if (header.id == eagle::IMAGE) {
+					size_t size = com.framesize();
+					uchar buffer[size];
+					com.read(buffer);
+					cv::Mat rawData = cv::Mat( 1, size, CV_8UC1, buffer);
+        			cv::Mat im = cv::imdecode(rawData, 1);
+					imshow("Stream",im);
+        			cv::waitKey(1);
+
+					//timing diagnostics
+					end = std::chrono::system_clock::now();
+					total_duration_micros += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+					break;
+                }
+			}
         }
         k++;
     }
