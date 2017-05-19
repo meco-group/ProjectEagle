@@ -12,17 +12,11 @@ Estimate the framerate for the camera.
 * Estimate the framerate with compression.
 * Estimate the ratio of compression time and capturing time.
 ## 5. ImageTransmitter - ImageReceiver
-Transmit images for as long as a receiver is listening. The ImageTransmitter-ImageReceiver pair should be run together as a video transmission demo.
+Transmit images for as long as a receiver is listening. The ImageTransmitter-ImageReceiver pair should be run together as a video transmission demo. When the execution stops, a report is shown about the amount of video data which has been transmitted over the network.
 ## 6. Background
 Takes a few snapshots and averages these to get a nice background, necessary for the detection of the robots.
 ## 7. Detector
-Detect robots in the viewing area. Unless your camera is really distorted, this demo will just work fine, no calibration needed. Codes being detected in the demo are 0,1 and 9. A Background should be available (cfr. Background).
+Detect robots in the viewing area. Unless your camera is really distorted, this demo will just work fine, no calibration needed. Codes being detected in the demo are 0, 1 and 9. A Background should be available (cfr. Background).
 ## 8. EagleTransmitter - EagleReceiver
-Transmit images, robot and obstacle data. This should be run together with the receiver as a full demo.
+Transmit images, robot and obstacle data. This should be run together with the receiver as a full demo. This program can be used as a starting point to everyone who wants to do detection of his own robots.
 
-# ToDo-list
-
-## AnalyzeConnection
-Checks the amount of data which can be transmitted over the network.
-## AnalyzeVideoStream
-Checks the amount of video which can be streamed over the network.
