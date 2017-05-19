@@ -10,12 +10,14 @@ int main(void)
 
     cv::Mat im;
     cv::namedWindow("Viewer",cv::WINDOW_AUTOSIZE);
+    std::cout << "Hit enter to stop the program." << std::endl;
 
-    while(true){
+    while( !kbhit() ){
         cam.read(im);
         imshow("Viewer",im);
         cv::waitKey(1);
     }
     
     cam.stop();
+    return 0;
 }

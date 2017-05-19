@@ -37,9 +37,10 @@ int main(void)
     std::vector< Obstacle* > obstacles;
 
     // main execution loop
-    while (true) {
+    int nof = 0;
+    while ( !kbhit() ) {
         // Detect the robots/obstacles
-        cam.read(im);
+        cam.read(im); nof++;
         detector.search(im, robots, obstacles);
 
         // Send information to interested listeners
@@ -92,8 +93,10 @@ int main(void)
 		imheader.time = k;
 		cv::imencode(".jpg",im,buffer,compression_params);
         com.shout(&imheader, buffer.data(), sizeof(imheader), buffer.size(), "EAGLE");
-		std::cout << "detected?" << robots[0]->detected() << std::endl;
-		std::cout << "image sent" << std::endl;
+        if (robots[0]->detected()){
+			std::cout << "Robot detected!" << std::endl;
+        }
+		std::cout << "image " << nof << " sent" << std::endl;
     }
 
     // stop the program

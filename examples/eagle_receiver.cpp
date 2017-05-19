@@ -38,17 +38,20 @@ int main(void)
 				com.read(&header);
 				// 2. read data based on the header
                 switch (header.id) {
-                    case eagle::MARKER:
+                    case eagle::MARKER:{
                         eagle::marker_t marker;
 						com.read(&marker);
                         std::cout << "Robot " << marker.id << " detected at (" << marker.x << "," << marker.y << "," << marker.t << ")" << std::endl;
 
                         break;
-                    case eagle::OBSTACLE:
+                	}
+                        
+                    case eagle::OBSTACLE:{
                         n_obs++;
                         break;
+                    }
 
-					case eagle::IMAGE:
+					case eagle::IMAGE:{
 						size_t size = com.framesize();
 						uchar buffer[size];
 						com.read(buffer);
@@ -57,6 +60,7 @@ int main(void)
 						imshow("Stream",im);
             			cv::waitKey(1);
 						break;
+					}
                 }
                 std::cout << "Number of obstacles: " << n_obs << std::endl;
             }

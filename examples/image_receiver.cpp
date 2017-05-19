@@ -31,7 +31,7 @@ int main(void) {
     }
 
 	// Video stream setup
-    int k = 0; int nof = 200;
+    int nof = 0;
 	double total_duration_micros = 0;
 	std::chrono::system_clock::time_point begin;
 	std::chrono::system_clock::time_point end;
@@ -62,7 +62,7 @@ int main(void) {
                 }
 			}
         }
-        k++;
+        nof++;
     }
 
     // Diagnose the statistics
