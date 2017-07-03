@@ -33,6 +33,8 @@ add_executable( AnalyzeCompression examples/tests/analyze_compression.cpp )
 add_executable( Communicator examples/tests/communicator_test.cpp )
 add_executable( SimpleTransmitter examples/tests/simple_transmitter.cpp )
 
+add_executable( Experiments examples/experiments.cpp )
+
 target_link_libraries( Viewer ${LIBRARIES} )
 target_link_libraries( Snapshot ${LIBRARIES} )
 target_link_libraries( ImageTransmitter ${LIBRARIES})
@@ -46,3 +48,5 @@ target_link_libraries( AnalyzeFPS ${LIBRARIES} )
 target_link_libraries( AnalyzeCompression ${LIBRARIES} )
 target_link_libraries( Communicator ${LIBRARIES})
 target_link_libraries( SimpleTransmitter ${LIBRARIES})
+
+target_link_libraries( Experiments ${LIBRARIES})
