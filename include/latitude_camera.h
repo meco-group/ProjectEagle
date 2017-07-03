@@ -4,6 +4,7 @@
 #include "v4l2_camera.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <iostream>
 
 class LatitudeCamera : public V4L2Camera
 {
@@ -13,6 +14,7 @@ private:
 
 public:
     LatitudeCamera(int device = 0);
+	bool setBrightness(int brightness);
 
 };
 

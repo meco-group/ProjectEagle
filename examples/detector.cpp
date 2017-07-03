@@ -13,7 +13,7 @@ int main(void) {
     // create detector
     Detector detector("../config/detector.yml", "background.png");
 
-    // start detecting
+    // startte detecting
     cv::Mat im;
     cv::namedWindow("image", cv::WINDOW_AUTOSIZE);
 

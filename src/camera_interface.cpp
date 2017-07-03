@@ -1,3 +1,4 @@
+#include <iostream>
 #include "camera_interface.h"
 
 CameraInterface::CameraInterface(int device) {
