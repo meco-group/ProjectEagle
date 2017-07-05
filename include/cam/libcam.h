@@ -3,6 +3,7 @@
 
 #include "see3_camera.h"
 #include "opi_camera.h"
+#include "pi_camera.h"
 #include "latitude_camera.h"
 
 #endif //LIBCAM_H

@@ -13,7 +13,7 @@ private:
 	bool readYUYV(cv::Mat &img);
 
 public:
-    LatitudeCamera(int device = 0);
+    PiCamera(int device = 0);
 	bool setBrightness(int brightness);
 
 };
