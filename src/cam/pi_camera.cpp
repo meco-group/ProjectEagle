@@ -2,9 +2,9 @@
 
 PiCamera::PiCamera(int device) :
     V4L2Camera(device) {
-    format(640, 480, V4L2_PIX_FMT_YUYV);
+    format(1280, 720, V4L2_PIX_FMT_YUYV);
 	buffers(4);
-	setBrightness(50);
+	setBrightness(45);
 }
 
 int PiCamera::process_buffer(cv::Mat &img) {
