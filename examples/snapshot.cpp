@@ -9,9 +9,10 @@ int main(void) {
 
 	// take a snapshot
     cam.read(im);
-    cv::imwrite("snapshot.png",im);
-    imshow("snapshot",im);
-    cv::waitKey(2000);
+
+    // cv::imwrite("snapshot.png",im);
+    // imshow("snapshot",im);
+    // cv::waitKey(2000);
 
     cam.stop();
 }

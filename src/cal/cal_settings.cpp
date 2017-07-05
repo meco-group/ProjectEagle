@@ -48,13 +48,12 @@ void CalSettings::read(const FileNode &node) {
 
 Mat CalSettings::nextImage() {
     Mat result;
-    if( inputCapture.isOpened() )
-    {
+    if( inputCapture.isOpened()) {
         Mat view0;
         inputCapture >> view0;
         view0.copyTo(result);
     }
-    else if( atImageList < (int)imageList.size() )
+    else if( atImageList < (int)imageList.size())
         result = imread(imageList[atImageList++], CV_LOAD_IMAGE_COLOR);
 
     return result;

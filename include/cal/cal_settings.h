@@ -81,4 +81,11 @@ class CalSettings {
         static bool readStringList( const string& filename, vector<string>& l );
 };
 
+static void read(const FileNode& node, CalSettings& x, const CalSettings& default_value = CalSettings()) {
+    if(node.empty())
+        x = default_value;
+    else
+        x.read(node);
+}
+
 #endif //PROJECTEAGLE_CAL_SETTINGS_H
