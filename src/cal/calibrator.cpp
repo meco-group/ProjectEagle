@@ -2,7 +2,6 @@
 // Created by peter on 04/07/17.
 //
 
-#include <opencv/cv.hpp>
 #include "cal/calibrator.h"
 
 void Calibrator::calibrate(string settingsFile, Mat &cameraMatrix, Mat &distCoeffs) {

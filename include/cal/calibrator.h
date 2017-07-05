@@ -5,7 +5,8 @@
 #ifndef PROJECTEAGLE_CALIBRATOR_H
 #define PROJECTEAGLE_CALIBRATOR_H
 
-
+#include <stdexcept>
+#include <opencv/cv.hpp>
 #include "cal_settings.h"
 
 class Calibrator {
