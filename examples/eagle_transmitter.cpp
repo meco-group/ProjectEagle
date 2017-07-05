@@ -1,7 +1,7 @@
-#include "libcam.h"
+#include "cam/libcam.h"
 #include "examples_config.h"
 #include "detector.h"
-#include "communicator.h"
+#include "comm/communicator.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
@@ -32,7 +32,8 @@ int main(void)
     cv::Mat im;
 
     // Make a robot which the camera should find
-    Robot BB1(0, 0.55, 0.4, cv::Scalar(17, 110, 138));
+    // Robot BB1(0, 0.55, 0.4, cv::Scalar(17, 110, 138));
+    Robot BB1(1, 0.55, 0.4, cv::Scalar(17, 110, 138));
     std::vector< Robot* > robots = std::vector< Robot* >{&BB1};
     std::vector< Obstacle* > obstacles;
 
@@ -86,7 +87,7 @@ int main(void)
         }
 
         // send everything
-        //com.shout(data, sizes, "EAGLE");
+        com.shout(data, sizes, "EAGLE");
 
         // Draw everything to give some feedback
         detector.draw(im, robots, obstacles);

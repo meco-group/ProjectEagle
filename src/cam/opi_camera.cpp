@@ -1,4 +1,4 @@
-#include "opi_camera.h"
+#include "cam/opi_camera.h"
 
 OPICamera::OPICamera(int device) :
     V4L2Camera(device)

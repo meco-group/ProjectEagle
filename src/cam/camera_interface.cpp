@@ -1,5 +1,5 @@
 #include <iostream>
-#include "camera_interface.h"
+#include "cam/camera_interface.h"
 
 CameraInterface::CameraInterface(int device) {
     _camera_matrix = cv::Mat::eye(3, 3, CV_32F);

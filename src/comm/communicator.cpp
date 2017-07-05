@@ -1,4 +1,4 @@
-#include "communicator.h"
+#include "comm/communicator.h"
 
 Communicator::Communicator(const std::string& name, const std::string& iface, int port) :
     _name(name) {
@@ -193,6 +193,7 @@ bool Communicator::receive(std::string& peer) {
             _rcv_buffer = zframe_data(frame);
             _rcv_buffer_size = zframe_size(frame);
             _rcv_buffer_index = 0;
+            std::cout << zyre_event_peer_name(_event);
             peer = std::string(zyre_event_peer_name(_event));
         }
         return true;

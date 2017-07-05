@@ -1,4 +1,4 @@
-#include "see3_camera.h"
+#include "cam/see3_camera.h"
 #include <bitset>
 
 See3Camera::See3Camera(int device) :

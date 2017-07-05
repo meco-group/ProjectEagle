@@ -14,7 +14,7 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <iostream>
-#include "v4l2_camera.h"
+#include "cam/v4l2_camera.h"
 
 V4L2Camera::V4L2Camera(int device):
     CameraInterface(0),

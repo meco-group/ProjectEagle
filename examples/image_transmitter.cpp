@@ -1,7 +1,7 @@
-#include "libcam.h"
+#include "cam/libcam.h"
 #include "examples_config.h"
-#include "communicator.h"
-#include "protocol.h"
+#include "comm/communicator.h"
+#include "comm/protocol.h"
 #include <unistd.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>

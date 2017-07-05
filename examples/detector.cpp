@@ -1,4 +1,4 @@
-#include "libcam.h"
+#include "cam/libcam.h"
 #include "examples_config.h"
 #include "detector.h"
 #include <opencv2/core/core.hpp>

@@ -1,4 +1,4 @@
-#include "libcam.h"
+#include "cam/libcam.h"
 #include "examples_config.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>

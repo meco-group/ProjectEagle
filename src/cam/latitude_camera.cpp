@@ -1,4 +1,4 @@
-#include "latitude_camera.h"
+#include "cam/latitude_camera.h"
 
 LatitudeCamera::LatitudeCamera(int device) :
     V4L2Camera(device)

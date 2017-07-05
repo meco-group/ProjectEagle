@@ -1,4 +1,4 @@
-#include "communicator.h"
+#include "comm/communicator.h"
 #include <ctime>
 #include <random>
 

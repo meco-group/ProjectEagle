@@ -19,21 +19,24 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_subdirectory(src)
+
 add_executable( Viewer examples/viewer.cpp )
 add_executable( Snapshot examples/snapshot.cpp )
 add_executable( ImageTransmitter examples/image_transmitter.cpp )
 add_executable( ImageReceiver examples/image_receiver.cpp )
-add_executable( Background examples/background.cpp )
+add_executable( Background examples/background.cpp examples/calibration.cpp)
 add_executable( Detector examples/detector.cpp )
 add_executable( EagleTransmitter examples/eagle_transmitter.cpp )
 add_executable( EagleReceiver examples/eagle_receiver.cpp )
 
 add_executable( AnalyzeFPS examples/tests/analyze_fps.cpp )
-add_executable( AnalyzeCompression examples/tests/analyze_compression.cpp )
+add_executable( AnalyzeCompression examples/tests/analyze_compression.cpp src/cal/cal_settings.cpp include/cal/cal_settings.h)
 add_executable( Communicator examples/tests/communicator_test.cpp )
 add_executable( SimpleTransmitter examples/tests/simple_transmitter.cpp )
 
-add_executable( Experiments examples/experiments.cpp )
+add_executable( Experiments spike/experiments.cpp)
+
+add_executable( Calibrate examples/calibration.cpp )
 
 target_link_libraries( Viewer ${LIBRARIES} )
 target_link_libraries( Snapshot ${LIBRARIES} )
@@ -50,3 +53,5 @@ target_link_libraries( Communicator ${LIBRARIES})
 target_link_libraries( SimpleTransmitter ${LIBRARIES})
 
 target_link_libraries( Experiments ${LIBRARIES})
+
+target_link_libraries( Calibrate ${LIBRARIES})
