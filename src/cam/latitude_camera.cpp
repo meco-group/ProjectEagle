@@ -5,7 +5,7 @@ LatitudeCamera::LatitudeCamera(int device) :
 {
     format(640, 480, V4L2_PIX_FMT_YUYV);
 	buffers(4);
-	setBrightness(7);
+	setBrightness(50);
 }
 
 int LatitudeCamera::process_buffer(cv::Mat &img)
@@ -23,7 +23,7 @@ bool LatitudeCamera::readYUYV(cv::Mat &img)
 
 bool LatitudeCamera::setBrightness(int brightness)
 {
-	if (brightness < 0 || brightness > 40){
+	if (brightness < 0 || brightness > 100){
 		std::cout << "Brighness should lie between 0 and 40!" << std::endl;
 		return false;
 	}
