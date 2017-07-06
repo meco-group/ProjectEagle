@@ -20,6 +20,9 @@ public:
     enum SourceType {NONE, STORED, VIDEO, CAMERA};
     SourceType sourceType;
 
+    // Amount of frames to take
+    int imageCount;
+
     // Data for case of STORED
     vector<string> imageList;
 
@@ -28,6 +31,15 @@ public:
 
     // Input settings
     bool flipVertical;
+
+    // The Calibration Flag
+    int flag;
+
+    // The output file name
+    string outputFileName;
+
+    // The aspect ratio
+    float aspectRatio;
 };
 
 

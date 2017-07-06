@@ -18,14 +18,36 @@ class Calibrator {
 private:
     CalSettings _settings;
     int _imageIndex = 0;
+    Size imageSize;
+
+    vector<vector<Point2f>> imagePoints;
+    vector<vector<Point3f>> objectPoints;
+
+    vector<Mat> rvecs;
+    vector<Mat> tvecs;
+    Mat cameraMatrix;
+    Mat distCoeffs;
+
+    double totalAvgErr;
+    vector<float> reprojErrs;
 
 public:
     Calibrator(CalSettings s);
 
+    bool execute();
+    void saveCameraParams();
+
 private:
+    bool executed;
+
     Mat getNextImage();
+
     bool processImage(Mat view, vector<Point2f> &pointBuf);
     bool processPattern(vector<Point3f> &pointBuf);
+
+    bool getCalibration();
+
+    double computeReprojectionErrors();
 };
 
 
