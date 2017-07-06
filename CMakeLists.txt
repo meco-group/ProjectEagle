@@ -30,7 +30,7 @@ add_executable( EagleTransmitter examples/eagle_transmitter.cpp )
 add_executable( EagleReceiver examples/eagle_receiver.cpp )
 
 add_executable( AnalyzeFPS examples/tests/analyze_fps.cpp )
-add_executable( AnalyzeCompression examples/tests/analyze_compression.cpp src/cal/cal_settings.cpp include/cal/cal_settings.h)
+add_executable( AnalyzeCompression examples/tests/analyze_compression.cpp)
 add_executable( Communicator examples/tests/communicator_test.cpp )
 add_executable( SimpleTransmitter examples/tests/simple_transmitter.cpp )
 

@@ -18,7 +18,7 @@ class CalSettings {
 
         Size boardSize;                 // The size of the board -> Number of items by width and height
         Pattern calibrationPattern;     // One of the Chessboard, circles, or asymmetric circle pattern
-         float squareSize;               // The size of a square in your defined unit (point, millimeter,etc).
+        float squareSize;               // The size of a square in your defined unit (point, millimeter,etc).
         int nrFrames;                   // The number of frames to use from the input for calibration
         float aspectRatio;              // The aspect ratio
         int delay;                      // In case of a video input
