@@ -28,11 +28,12 @@ int main(void)
 	std::cout << "Opening window"<< std::endl;
     cv::namedWindow("Stream");
 	eagle::header_t header;
+    std::string pr;
 
     while( !kbhit() ) {
         int n_obs = 0;
 
-        if (com.listen(peers[0], 1)) {
+        if (com.listen(pr, 1)) {
             while (com.available()) {
 				// 1. read the header
 				com.read(&header);

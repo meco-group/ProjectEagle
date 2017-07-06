@@ -87,7 +87,7 @@ int main(void)
         }
 
         // send everything
-        com.shout(data, sizes, "EAGLE");
+        // com.shout(data, sizes, "EAGLE");
 
         // Draw everything to give some feedback
         detector.draw(im, robots, obstacles);

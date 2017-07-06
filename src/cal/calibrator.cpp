@@ -1,92 +1,93 @@
 //
-// Created by peter on 04/07/17.
+// Created by peter on 06/07/17.
 //
 
 #include "cal/calibrator.h"
 
-void Calibrator::calibrate(string settingsFile, Mat &cameraMatrix, Mat &distCoeffs) {
-    // Load the settings file
-    CalSettings s = loadSettings(settingsFile);
 
-    // Get the mode that the calibration is currently operating in
-    //  false:   We load frames until empty
-    //  true:    We load frames until we have as many frames as the settings specify are required
-    int count_frames = s.inputType == CalSettings::IMAGE_LIST;
+Calibrator::Calibrator(CalSettings s) : executed(false) {
+    _settings = s;
+};
 
-    vector<vector<Point2f> > imagePoints;   // The image points we are gathering
-    Size imageSize;                         // The size of the image
-    clock_t prevTimestamp = 0;              // Timing information
+bool Calibrator::execute() {
 
-    // Loop through all images and gather imagePoints
-    for (int i = 0;;++i) {
-        // Load the next image from the CalSettings
-        Mat view = s.nextImage();
+    // Gather images
+    for (int i=0; i<_settings.imageCount; i++) {
+        Mat view = getNextImage();
+        // TODO what do we do for camera intake, when this takes a while? => does getNextImage freeze the execution?
 
-        // If we are using a video we only take one frame per s.delay
-        if (!s.inputCapture.isOpened() || clock() - prevTimestamp > s.delay*1e-3*CLOCKS_PER_SEC)
-            prevTimestamp = clock();    // Reset the timer
-        else
-            continue;                   // Skip this loop iteration
+        if (view.empty())
+            // TODO do something
+            continue;
 
-        // Check if we finished calibrating based on the number of frames we have already
-        if (count_frames && imagePoints.size() >= (unsigned)s.nrFrames) {
-            count_frames = runCalibrationAndSave(s, imageSize,  cameraMatrix, distCoeffs, imagePoints);
-            if (count_frames)
-                break;
-        }
-
-        // There are no more frames coming in, so we have to finish
-        else if (view.empty()) {
-            if (imagePoints.size() > 0)
-                count_frames = runCalibrationAndSave(s, imageSize, cameraMatrix, distCoeffs, imagePoints);
-            break;
-        }
+        imageSize = view.size();
 
         // Process the image
-        imageSize = view.size();
-        processImage(s, view, imagePoints);
+        vector<Point2f> imageBuf;
+        bool success = processImage(view, imageBuf);
+        if (success)
+            imagePoints.push_back(imageBuf);
+        else
+            continue;
+
+        // Gather the object points
+        // TODO this can be more efficient, but is the way it is now for flexibility
+        vector<Point3f> objectBuf;
+        success = processPattern(objectBuf);
+        if (success)
+            objectPoints.push_back(objectBuf);
+        else
+            // TODO we should ditch imagePoints, but this should never happen right now
+            continue;
     }
 
-    if (!count_frames)
-        throw invalid_argument("the provided images were not sufficient to calibrate the camera");
+    // TODO check for success
+
+    // Get the intrinsic camera parameters
+    getCalibration();
+
+    // Calculate the reprojection errors
+    computeReprojectionErrors();
+
+    executed = true;
+    return true;
 }
 
-CalSettings Calibrator::loadSettings(string settingsFile) {
-    CalSettings s;
-    FileStorage fs(settingsFile, FileStorage::READ);
-    if (!fs.isOpened()) {
-        throw invalid_argument("settingsFile at "+settingsFile+" could not be opened");
+Mat Calibrator::getNextImage() {
+    Mat result;
+    // Check the source of the images
+    switch(_settings.sourceType) {
+        case CalSettings::SourceType::STORED:
+            // We can get an image from the provided file
+            if (_imageIndex < (int) _settings.imageList.size()) {
+                string temp = _settings.imageList[_imageIndex++];
+                result = imread(temp, CV_LOAD_IMAGE_COLOR);
+            }
+            break;
+        default:
+            break;
     }
 
-    fs["Settings"] >> s;
-    fs.release();
+    return result;
+};
 
-    if (!s.goodInput) {
-        throw invalid_argument("invalid settingsfile "+settingsFile);
-    }
-
-    return s;
-}
-
-void Calibrator::processImage(CalSettings s, Mat view, vector<vector<Point2f>> &imagePoints) {
+bool Calibrator::processImage(Mat view, vector<Point2f> &pointBuf) {
     // Flip the image if requested
-    if( s.flipVertical )
+    if( _settings.flipVertical )
         flip( view, view, 0 );
-
-    vector<Point2f> pointBuf;
 
     // Process image based on format
     bool found;
-    switch( s.calibrationPattern ) {
-        case CalSettings::CHESSBOARD:
-            found = findChessboardCorners( view, s.boardSize, pointBuf,
+    switch( _settings.boardSettings.calibrationPattern ) {
+        case BoardSettings::CHESSBOARD:
+            found = findChessboardCorners( view, _settings.boardSettings.boardSize, pointBuf,
                                            CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
             break;
-        case CalSettings::CIRCLES_GRID:
-            found = findCirclesGrid( view, s.boardSize, pointBuf );
+        case BoardSettings::CIRCLES_GRID:
+            found = findCirclesGrid( view, _settings.boardSettings.boardSize, pointBuf );
             break;
-        case CalSettings::ASYMMETRIC_CIRCLES_GRID:
-            found = findCirclesGrid( view, s.boardSize, pointBuf, CALIB_CB_ASYMMETRIC_GRID );
+        case BoardSettings::ASYMMETRIC_CIRCLES_GRID:
+            found = findCirclesGrid( view, _settings.boardSettings.boardSize, pointBuf, CALIB_CB_ASYMMETRIC_GRID );
             break;
         default:
             found = false;
@@ -95,89 +96,67 @@ void Calibrator::processImage(CalSettings s, Mat view, vector<vector<Point2f>> &
 
     if (found) {
         // improve the found corners' coordinate accuracy for chessboard
-        if( s.calibrationPattern == CalSettings::CHESSBOARD) {
+        if( _settings.boardSettings.calibrationPattern == BoardSettings::CHESSBOARD) {
             Mat viewGray;
             cvtColor(view, viewGray, COLOR_BGR2GRAY);
             cornerSubPix( viewGray, pointBuf, Size(11,11),
                           Size(-1,-1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
         }
-
-        // add the calculated points
-        imagePoints.push_back(pointBuf);
     }
-}
 
-int Calibrator::runCalibrationAndSave(CalSettings s, Size imageSize, Mat &cameraMatrix, Mat &distCoeffs,
-                                      vector<vector<Point2f>> imagePoints) {
+    return found;
+};
+
+bool Calibrator::processPattern(vector<Point3f> &pointBuf) {
+    // Reset the corners
+    pointBuf.clear();
+
+    // Calculate grid points based on pattern
+    switch(_settings.boardSettings.calibrationPattern) {
+        case BoardSettings::CHESSBOARD:
+        case BoardSettings::CIRCLES_GRID:
+            for( int i = 0; i < _settings.boardSettings.boardSize.height; ++i )
+                for( int j = 0; j < _settings.boardSettings.boardSize.width; ++j )
+                    pointBuf.push_back(Point3f(float( j*_settings.boardSettings.squareSize ), float( i*_settings.boardSettings.squareSize ), 0));
+            break;
+
+        case BoardSettings::ASYMMETRIC_CIRCLES_GRID:
+            for( int i = 0; i < _settings.boardSettings.boardSize.height; i++ )
+                for( int j = 0; j < _settings.boardSettings.boardSize.width; j++ )
+                    pointBuf.push_back(Point3f(float((2*j + i % 2)*_settings.boardSettings.squareSize), float(i*_settings.boardSettings.squareSize), 0));
+            break;
+        default:
+            break;
+    }
+
+    return true;
+};
+
+bool Calibrator::getCalibration() {
 
     // Initialise CameraMatrix
     cameraMatrix = Mat::eye(3, 3, CV_64F);
-    if( s.flag & CV_CALIB_FIX_ASPECT_RATIO )
+    if( _settings.flag & CV_CALIB_FIX_ASPECT_RATIO )
         cameraMatrix.at<double>(0,0) = 1.0;
 
     // Initialise Distortion Coefficients
     distCoeffs = Mat::zeros(8, 1, CV_64F);
 
-    // Calculate the object points
-    vector<vector<Point3f>> objectPoints(1);
-    calcBoardCornerPositions(s.boardSize, s.squareSize, objectPoints[0], s.calibrationPattern);
-    objectPoints.resize(imagePoints.size(),objectPoints[0]);
-
     //Find intrinsic and extrinsic camera parameters
-    vector<Mat> rvecs, tvecs;
-    vector<float> reprojErrs;
-    double totalAvgErr = 0;
-    double rms = calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix,
-                                 distCoeffs, rvecs, tvecs, s.flag|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
+    calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix,
+                                 distCoeffs, rvecs, tvecs, _settings.flag|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
 
     // Check the result
     bool success = checkRange(cameraMatrix) && checkRange(distCoeffs);
-
-    // Calculate the error
-    totalAvgErr = computeReprojectionErrors(objectPoints, imagePoints,
-                                            rvecs, tvecs, cameraMatrix, distCoeffs, reprojErrs);
-
-    // Store the result
-    if (success) {
-        saveCameraParams( s, imageSize, cameraMatrix, distCoeffs, rvecs ,tvecs, reprojErrs,
-                          imagePoints, totalAvgErr);
-    }
-
     return success;
-}
+};
 
-void Calibrator::calcBoardCornerPositions(Size boardSize, float squareSize, vector<Point3f> &corners,
-                                          CalSettings::Pattern patternType) {
-    // Reset the corners
-    corners.clear();
+double Calibrator::computeReprojectionErrors() {
 
-    // Calculate grid points based on pattern
-    switch(patternType)
-    {
-        case CalSettings::CHESSBOARD:
-        case CalSettings::CIRCLES_GRID:
-            for( int i = 0; i < boardSize.height; ++i )
-                for( int j = 0; j < boardSize.width; ++j )
-                    corners.push_back(Point3f(float( j*squareSize ), float( i*squareSize ), 0));
-            break;
-
-        case CalSettings::ASYMMETRIC_CIRCLES_GRID:
-            for( int i = 0; i < boardSize.height; i++ )
-                for( int j = 0; j < boardSize.width; j++ )
-                    corners.push_back(Point3f(float((2*j + i % 2)*squareSize), float(i*squareSize), 0));
-            break;
-        default:
-            break;
-    }
-}
-
-double Calibrator::computeReprojectionErrors(vector<vector<Point3f>> objectPoints, vector<vector<Point2f>> imagePoints,
-                                             vector<Mat> rvecs, vector<Mat> tvecs, Mat &cameraMatrix, Mat &distCoeffs,
-                                             vector<float> perViewErrors) {
     vector<Point2f> imagePoints2;
     int i, totalPoints = 0;
     double totalErr = 0, err;
-    perViewErrors.resize(objectPoints.size());
+    reprojErrs.resize(objectPoints.size());
 
     for( i = 0; i < (int)objectPoints.size(); ++i ) {
         projectPoints( Mat(objectPoints[i]), rvecs[i], tvecs[i], cameraMatrix,
@@ -185,18 +164,22 @@ double Calibrator::computeReprojectionErrors(vector<vector<Point3f>> objectPoint
         err = norm(Mat(imagePoints[i]), Mat(imagePoints2), CV_L2);
 
         int n = (int)objectPoints[i].size();
-        perViewErrors[i] = (float) std::sqrt(err*err/n);
+        reprojErrs[i] = (float) std::sqrt(err*err/n);
         totalErr        += err*err;
         totalPoints     += n;
     }
 
     return std::sqrt(totalErr/totalPoints);
-}
+};
 
-void Calibrator::saveCameraParams( CalSettings& s, Size& imageSize, Mat& cameraMatrix, Mat& distCoeffs,
-                                   const vector<Mat>& rvecs, const vector<Mat>& tvecs,
-                                   const vector<float>& reprojErrs, const vector<vector<Point2f> >& imagePoints,
-                                   double totalAvgErr ) {
+void Calibrator::saveCameraParams() {
+
+    if (!executed) {
+        cerr << "can\'t store calibration that has not been executed yet";
+        return;
+    }
+
+    CalSettings s = _settings;
 
     FileStorage fs( s.outputFileName, FileStorage::WRITE );
 
@@ -212,9 +195,9 @@ void Calibrator::saveCameraParams( CalSettings& s, Size& imageSize, Mat& cameraM
         fs << "nrOfFrames" << (int)std::max(rvecs.size(), reprojErrs.size());
     fs << "image_Width" << imageSize.width;
     fs << "image_Height" << imageSize.height;
-    fs << "board_Width" << s.boardSize.width;
-    fs << "board_Height" << s.boardSize.height;
-    fs << "square_Size" << s.squareSize;
+    fs << "board_Width" << s.boardSettings.boardSize.width;
+    fs << "board_Height" << s.boardSettings.boardSize.height;
+    fs << "square_Size" << s.boardSettings.squareSize;
 
     if( s.flag & CV_CALIB_FIX_ASPECT_RATIO )
         fs << "FixAspectRatio" << s.aspectRatio;
@@ -264,4 +247,6 @@ void Calibrator::saveCameraParams( CalSettings& s, Size& imageSize, Mat& cameraM
         }
         fs << "Image_points" << imagePtMat;
     }
-}
+
+    fs.release();
+};

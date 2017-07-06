@@ -1,7 +1,7 @@
 #ifndef EXAMPLES_CONFIG_H
 #define EXAMPLES_CONFIG_H
 
-#define EXAMPLE_CAMERA_T PiCamera
+#define EXAMPLE_CAMERA_T LatitudeCamera
 #define EXAMPLE_CAMERA_INDEX 0
 #define EXAMPLE_CAMERA_CALIBRATION "../config/see3cam.yml"
 //#define EXAMPLE_COMMUNICATOR_INTERFACE "enp0s25"
@@ -14,8 +14,7 @@
 #include <unistd.h>
 #include <sys/select.h>
 
-int kbhit()
-{
+int kbhit() {
     struct timeval tv;
     fd_set fds;
     tv.tv_sec = 0;
