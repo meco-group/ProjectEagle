@@ -28,16 +28,16 @@ void cal_test() {
 
     calSettings.imageCount = 10;
     calSettings.imageList = {
-            "../config/images/0.jpg",
-            "../config/images/1.jpg",
-            "../config/images/2.jpg",
-            "../config/images/3.jpg",
-            "../config/images/4.jpg",
-            "../config/images/5.jpg",
-            "../config/images/6.jpg",
-            "../config/images/7.jpg",
-            "../config/images/8.jpg",
-            "../config/images/9.jpg"
+            "../config/images_ceil1/0.jpg",
+            "../config/images_ceil1/1.jpg",
+            "../config/images_ceil1/2.jpg",
+            "../config/images_ceil1/3.jpg",
+            "../config/images_ceil1/4.jpg",
+            "../config/images_ceil1/5.jpg",
+            "../config/images_ceil1/6.jpg",
+            "../config/images_ceil1/7.jpg",
+            "../config/images_ceil1/8.jpg",
+            "../config/images_ceil1/9.jpg"
     };
     calSettings.boardSettings = boardSettings;
     calSettings.flipVertical = false;

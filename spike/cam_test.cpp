@@ -23,7 +23,7 @@ void cam_test() {
 void detect_pattern() {
 
     // Parse arguments
-    const string cameraSettingsFile = "../config/ceil2_cam.xml";
+    const string cameraSettingsFile = "../config/ceil1_cam.xml";
 
     // Open settings file
     FileStorage fs(cameraSettingsFile, FileStorage::READ);
@@ -32,7 +32,7 @@ void detect_pattern() {
     fs.release();
 
     // EXAMPLE_CAMERA_T cam(EXAMPLE_CAMERA_INDEX);
-    V4L2Camera* cam = (V4L2Camera*)getCamera(cameraSettings.camIndex, cameraSettings.camType);
+    V4L2Camera* cam = getCamera(cameraSettings.camIndex, cameraSettings.camType);
     // cam->setBrightness(5);
     // cam->setExposure(100000);
 
@@ -45,7 +45,7 @@ void detect_pattern() {
     std::cout << "Hit g to take a snapshot" << std::endl;
 
     for (int i= 0; i<10; i++) {
-        const string outputFile = "../config/images/"+std::to_string(i)+".jpg";
+        const string outputFile = "../config/images_ceil1/"+std::to_string(i)+".jpg";
 
         while (true) {
             cam->read(im);

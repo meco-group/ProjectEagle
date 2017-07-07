@@ -40,7 +40,7 @@ int main(void) {
     eagle::header_t header;
     header.id = eagle::IMAGE;
 	
-	// Loop over all peers to send images
+	// Loop over all peers to send images_ceil1
 	auto begin = std::chrono::system_clock::now();
     while(com.peers().size() > 0 ) {
         header.time = img_id;

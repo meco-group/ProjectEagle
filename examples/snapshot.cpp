@@ -6,7 +6,7 @@
 int main(int argc, char* argv[]) {
     // Parse arguments
     const string cameraSettingsFile = argc > 1 ? argv[1] : "../config/ceil1_cam.xml";
-    const string outputFile = argc > 2 ? argv[2] : "../config/images/snapshot.png";
+    const string outputFile = argc > 2 ? argv[2] : "../config/images_ceil1/snapshot.png";
 
     // Open settings file
     FileStorage fs("../config/ceil2_cam.xml", FileStorage::READ);

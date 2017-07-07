@@ -16,7 +16,7 @@ using namespace std;
 
 class CalSettings {
 public:
-    // The source of the images
+    // The source of the images_ceil1
     enum SourceType {NONE, STORED, VIDEO, CAMERA};
     SourceType sourceType;
 

@@ -11,7 +11,7 @@ Calibrator::Calibrator(CalSettings s) : executed(false) {
 
 bool Calibrator::execute() {
 
-    // Gather images
+    // Gather images_ceil1
     for (int i=0; i<_settings.imageCount; i++) {
         Mat view = getNextImage();
         // TODO what do we do for camera intake, when this takes a while? => does getNextImage freeze the execution?
@@ -55,7 +55,7 @@ bool Calibrator::execute() {
 
 Mat Calibrator::getNextImage() {
     Mat result;
-    // Check the source of the images
+    // Check the source of the images_ceil1
     switch(_settings.sourceType) {
         case CalSettings::SourceType::STORED:
             // We can get an image from the provided file
