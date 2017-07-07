@@ -1,6 +1,4 @@
-#include "cam/libcam.h"
-#include "examples_config.h"
-#include "detector.h"
+#include "experiments.h"
 
 void detect_test() {
     // Setup the camera

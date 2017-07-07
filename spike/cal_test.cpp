@@ -1,9 +1,4 @@
-#include "cal/board_settings.h"
-#include "cal/calibration_settings.h"
-#include "cal/calibrator.h"
-#include <opencv2/calib3d/calib3d.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <iostream>
+#include "experiments.h"
 
 using namespace cv;
 using namespace std;
@@ -23,7 +18,7 @@ void gen_settings() {
 
 void cal_test() {
     // Open settings file
-    FileStorage fs("board_settings.xml", FileStorage::READ);
+    FileStorage fs("../config/ceil1_cam.xml", FileStorage::READ);
     BoardSettings boardSettings;
     fs["BoardSettings"] >> boardSettings;
     fs.release();
@@ -33,16 +28,16 @@ void cal_test() {
 
     calSettings.imageCount = 10;
     calSettings.imageList = {
-            "images/0.jpg",
-            "images/1.jpg",
-            "images/2.jpg",
-            "images/3.jpg",
-            "images/4.jpg",
-            "images/5.jpg",
-            "images/6.jpg",
-            "images/7.jpg",
-            "images/8.jpg",
-            "images/9.jpg"
+            "../config/images/0.jpg",
+            "../config/images/1.jpg",
+            "../config/images/2.jpg",
+            "../config/images/3.jpg",
+            "../config/images/4.jpg",
+            "../config/images/5.jpg",
+            "../config/images/6.jpg",
+            "../config/images/7.jpg",
+            "../config/images/8.jpg",
+            "../config/images/9.jpg"
     };
     calSettings.boardSettings = boardSettings;
     calSettings.flipVertical = false;
@@ -57,7 +52,7 @@ void cal_test() {
     if(aspectRatio)            flag |= CV_CALIB_FIX_ASPECT_RATIO;
     calSettings.flag = flag;
 
-    calSettings.outputFileName = "test_cal.xml";
+    calSettings.outputFileName = "../config/ceil1_cam_cal.xml";
 
     calSettings.aspectRatio = 1.0;
 

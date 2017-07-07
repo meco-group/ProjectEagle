@@ -1,19 +1,30 @@
 #include "cam/libcam.h"
 #include "examples_config.h"
 #include <opencv2/opencv.hpp>
+#include "cam/camera_settings.h"
 
-int main(void) {
-    EXAMPLE_CAMERA_T cam(EXAMPLE_CAMERA_INDEX);
-    cam.start();
-    cv::Mat im;
+int main(int argc, char* argv[]) {
+    // Parse arguments
+    const string cameraSettingsFile = argc > 1 ? argv[1] : "../config/ceil1_cam.xml";
+    const string outputFile = argc > 2 ? argv[2] : "../config/images/snapshot.png";
 
-	// take a snapshot
-    cam.read(im);
+    // Open settings file
+    FileStorage fs("../config/ceil1_cam.xml", FileStorage::READ);
+    CameraSettings cameraSettings;
+    fs["CameraSettings"] >> cameraSettings;
+    fs.release();
 
-    cv::imwrite("snapshot.png",im);
-    // imshow("snapshot",im);
-    // cv::waitKey(2000);
+    // Instantiate camera
+    V4L2Camera *cam = getCamera(cameraSettings.camIndex, cameraSettings.camType);
 
-    cam.stop();
+    // Take snapshot
+    Mat im;
+    cam->start();
+    for (int i=0; i<5; i++) {cam->read(im);}
+    cam->stop();
+    delete cam;
+
+    // Store snapshot
+    cv::imwrite(outputFile, im);
 }
 

@@ -4,8 +4,7 @@
 #include <chrono>
 #include <opencv2/core/core.hpp>
 
-class CameraInterface
-{
+class CameraInterface {
 protected:
     cv::Mat _camera_matrix;
     cv::Mat _distortion_vector;

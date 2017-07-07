@@ -1,6 +1,7 @@
-#include "detect_test.cpp"
-#include "cal_test.cpp"
+
+#include "experiments.h"
 
 int main(void) {
+    // detect_pattern();
     cal_test();
 }

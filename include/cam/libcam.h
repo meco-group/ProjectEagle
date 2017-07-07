@@ -6,4 +6,10 @@
 #include "pi_camera.h"
 #include "latitude_camera.h"
 
+enum CamType {INVALID, PICAM, OPICAM, SEE3CAM, LATCAM};
+
+V4L2Camera *getCamera(int index, CamType type);
+CamType getCamType(std::string camType);
+std::string getCamType(CamType camType);
+
 #endif //LIBCAM_H

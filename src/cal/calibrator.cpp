@@ -80,8 +80,8 @@ bool Calibrator::processImage(Mat view, vector<Point2f> &pointBuf) {
     bool found;
     switch( _settings.boardSettings.calibrationPattern ) {
         case BoardSettings::CHESSBOARD:
-            found = findChessboardCorners( view, _settings.boardSettings.boardSize, pointBuf,
-                                           CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
+            found = findChessboardCorners( view, _settings.boardSettings.boardSize, pointBuf, 0);
+                                            // CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
             break;
         case BoardSettings::CIRCLES_GRID:
             found = findCirclesGrid( view, _settings.boardSettings.boardSize, pointBuf );
@@ -99,10 +99,16 @@ bool Calibrator::processImage(Mat view, vector<Point2f> &pointBuf) {
         if( _settings.boardSettings.calibrationPattern == BoardSettings::CHESSBOARD) {
             Mat viewGray;
             cvtColor(view, viewGray, COLOR_BGR2GRAY);
-            cornerSubPix( viewGray, pointBuf, Size(11,11),
+            cornerSubPix( viewGray, pointBuf, _settings.boardSettings.boardSize,
                           Size(-1,-1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
         }
+
+        // Draw the corners.
+        drawChessboardCorners( view, _settings.boardSettings.boardSize, Mat(pointBuf), found );
     }
+
+    imshow("Image View", view);
+    (char)waitKey(500);
 
     return found;
 };
@@ -214,8 +220,8 @@ void Calibrator::saveCameraParams() {
 
     fs << "flagValue" << s.flag;
 
-    fs << "Camera_Matrix" << cameraMatrix;
-    fs << "Distortion_Coefficients" << distCoeffs;
+    fs << "camera_matrix" << cameraMatrix;
+    fs << "distortion_vector" << distCoeffs;
 
     fs << "Avg_Reprojection_Error" << totalAvgErr;
     if( !reprojErrs.empty() )
