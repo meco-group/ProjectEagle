@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
     const string outputFile = argc > 2 ? argv[2] : "../config/images/snapshot.png";
 
     // Open settings file
-    FileStorage fs("../config/ceil1_cam.xml", FileStorage::READ);
+    FileStorage fs("../config/ceil2_cam.xml", FileStorage::READ);
     CameraSettings cameraSettings;
     fs["CameraSettings"] >> cameraSettings;
     fs.release();
