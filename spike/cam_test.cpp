@@ -23,10 +23,10 @@ void cam_test() {
 void detect_pattern() {
 
     // Parse arguments
-    const string cameraSettingsFile = "../config/ceil1_cam.xml";
+    const string cameraSettingsFile = "../config/ceil2_cam.xml";
 
     // Open settings file
-    FileStorage fs("../config/ceil1_cam.xml", FileStorage::READ);
+    FileStorage fs(cameraSettingsFile, FileStorage::READ);
     CameraSettings cameraSettings;
     fs["CameraSettings"] >> cameraSettings;
     fs.release();
