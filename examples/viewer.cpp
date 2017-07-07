@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
     const string cameraSettingsFile = argc > 1 ? argv[1] : "../config/ceil1_cam.xml";
 
     // Open settings file
-    FileStorage fs("../config/ceil1_cam.xml", FileStorage::READ);
+    FileStorage fs("../config/ceil2_cam.xml", FileStorage::READ);
     CameraSettings cameraSettings;
     fs["CameraSettings"] >> cameraSettings;
     fs.release();
@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
 
     // Start camera
     cam->calibrate(cameraSettings.calPath); //camera can be calibrated
-	cam->start();
+    cam->start();
 
     cv::Mat im;
     cv::namedWindow("Viewer",cv::WINDOW_AUTOSIZE);
