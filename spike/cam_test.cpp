@@ -32,9 +32,9 @@ void detect_pattern() {
     fs.release();
 
     // EXAMPLE_CAMERA_T cam(EXAMPLE_CAMERA_INDEX);
-    See3Camera* cam = (See3Camera*)getCamera(cameraSettings.camIndex, cameraSettings.camType);
-    cam->setBrightness(5);
-    cam->setExposure(100000);
+    V4L2Camera* cam = (V4L2Camera*)getCamera(cameraSettings.camIndex, cameraSettings.camType);
+    // cam->setBrightness(5);
+    // cam->setExposure(100000);
 
     // Start camera
     // cam->calibrate("../config/see3cam.yml"); //camera can be calibrated
