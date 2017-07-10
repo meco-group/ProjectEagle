@@ -92,7 +92,8 @@ void detect_pattern(string config, bool transmit) {
                     break;
 
                 header.time = img_id;
-                cv::imencode(".jpg", im, buffer, compression_params);
+                resize(temp, temp, Size(), .2, .2, cv::INTER_LANCZOS4);
+                cv::imencode(".jpg", temp, buffer, compression_params);
                 com.shout(&header, buffer.data(), sizeof(header), buffer.size(), "EAGLE");
                 img_id++;
 
