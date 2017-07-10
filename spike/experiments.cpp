@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
             stereo_cal(config1, config2);
             break;
         case 2:
-            detect_pattern(config1);
+            detect_pattern(config1, true);
             break;
         default:
             break;

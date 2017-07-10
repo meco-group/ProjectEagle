@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "examples_config.h"
 
 int kbhit() {
@@ -9,4 +10,16 @@ int kbhit() {
     FD_SET(STDIN_FILENO, &fds); //STDIN_FILENO is 0
     select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
     return FD_ISSET(STDIN_FILENO, &fds);
+}
+
+int getch(void) {
+    struct termios oldattr, newattr;
+    int ch;
+    tcgetattr( STDIN_FILENO, &oldattr );
+    newattr = oldattr;
+    newattr.c_lflag &= ~( ICANON | ECHO );
+    tcsetattr( STDIN_FILENO, TCSANOW, &newattr );
+    ch = getchar();
+    tcsetattr( STDIN_FILENO, TCSANOW, &oldattr );
+    return ch;
 }

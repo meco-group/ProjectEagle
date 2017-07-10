@@ -21,7 +21,7 @@ bool Communicator::start() {
     if (zyre_start(_node) != 0) {
         return false;
     }
-    // zclock_sleep(100); causes segmentation errors
+    zclock_sleep(100); // causes segmentation errors
     _poller = zpoller_new(zyre_socket(_node));
     return true;
 }
@@ -193,7 +193,6 @@ bool Communicator::receive(std::string& peer) {
             _rcv_buffer = zframe_data(frame);
             _rcv_buffer_size = zframe_size(frame);
             _rcv_buffer_index = 0;
-            std::cout << zyre_event_peer_name(_event);
             peer = std::string(zyre_event_peer_name(_event));
         }
         return true;
