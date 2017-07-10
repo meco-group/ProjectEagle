@@ -18,5 +18,6 @@ void cal_test();
 void detect_test();
 void gen_settings();
 void detect_pattern();
+void stereo_cal();
 
 #endif //PROJECTEAGLE_TESTS_H

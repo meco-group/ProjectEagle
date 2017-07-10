@@ -15,7 +15,7 @@ using namespace std;
 
 class Calibrator {
 
-private:
+public:
     CalSettings _settings;
     int _imageIndex = 0;
     Size imageSize;

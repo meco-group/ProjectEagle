@@ -3,5 +3,6 @@
 
 int main(void) {
     detect_pattern();
-    cal_test();
+    // cal_test();
+    // stereo_cal();
 }
