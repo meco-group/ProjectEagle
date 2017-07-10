@@ -56,7 +56,6 @@ void detect_pattern(string config, bool transmit) {
     cv::Mat im;
     if (!transmit) {
         cv::namedWindow("Viewer", cv::WINDOW_AUTOSIZE);
-        std::cout << "Hit g to take a snapshot" << std::endl;
     }
 
     for (int i= 0; i<calSettings.imageCount; i++) {
@@ -99,6 +98,7 @@ void detect_pattern(string config, bool transmit) {
 
             } else {
                 imshow("Viewer", temp);
+                cv::waitKey(1);
             }
         }
 
