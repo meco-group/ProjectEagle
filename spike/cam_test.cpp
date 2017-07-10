@@ -1,6 +1,9 @@
 #include "experiments.h"
 
 void detect_pattern(string config) {
+    cout << "Taking Calibration snaps for config: "
+         << config << "\n";
+
     // Open settings file
     FileStorage fs(config, FileStorage::READ);
     CameraSettings cameraSettings;
@@ -8,6 +11,10 @@ void detect_pattern(string config) {
     CalSettings calSettings;
     fs["CalibrationSettings"] >> calSettings;
     fs.release();
+
+    cout << "Opening camera: "
+         << cameraSettings.camIndex << " of type: "
+         << getCamType(cameraSettings.camType) << "\n";
 
     // EXAMPLE_CAMERA_T cam(EXAMPLE_CAMERA_INDEX);
     V4L2Camera* cam = getCamera(cameraSettings.camIndex, cameraSettings.camType);

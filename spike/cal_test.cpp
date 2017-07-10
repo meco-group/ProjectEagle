@@ -35,6 +35,7 @@ void gen_settings() {
 }
 
 void cal_test(string config) {
+    cout << "Running calibration test for config: " << config << "\n";
     // Open settings file
     FileStorage fs(config, FileStorage::READ);
     CalSettings calSettings;
@@ -48,6 +49,10 @@ void cal_test(string config) {
 }
 
 void stereo_cal(string config1, string config2) {
+    cout << "Running stereo calibration test for configs: "
+         << config1 << ", "
+         << config2
+         << "\n";
 
     // Calibrate the first camera
     // Open settings file
