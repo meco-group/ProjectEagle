@@ -1,34 +1,12 @@
 #include "experiments.h"
 
-void cam_test() {
-    CameraSettings sc;
-    sc.calPath = "../config/cei"
-            "l2_cam_cal.xml";
-    sc.camType = PICAM;
-    sc.camIndex = 0;
-
-    // Generate the settings file
-    BoardSettings sb;
-    sb.boardSize = Size(7, 6);
-    sb.squareSize = 108;
-    sb.calibrationPattern = sb.CHESSBOARD;
-
-    // Open and write file
-    FileStorage fs("../config/ceil2_cam.xml", FileStorage::WRITE);
-    sc.write(fs);
-    sb.write(fs);
-    fs.release();
-}
-
-void detect_pattern() {
-
-    // Parse arguments
-    const string cameraSettingsFile = "../config/ceil1_cam.xml";
-
+void detect_pattern(string config) {
     // Open settings file
-    FileStorage fs(cameraSettingsFile, FileStorage::READ);
+    FileStorage fs(config, FileStorage::READ);
     CameraSettings cameraSettings;
     fs["CameraSettings"] >> cameraSettings;
+    CalSettings calSettings;
+    fs["CalibrationSettings"] >> calSettings;
     fs.release();
 
     // EXAMPLE_CAMERA_T cam(EXAMPLE_CAMERA_INDEX);
@@ -44,8 +22,8 @@ void detect_pattern() {
     cv::namedWindow("Viewer",cv::WINDOW_AUTOSIZE);
     std::cout << "Hit g to take a snapshot" << std::endl;
 
-    for (int i= 0; i<10; i++) {
-        const string outputFile = "../config/images_ceil1/"+std::to_string(i)+".jpg";
+    for (int i= 0; i<calSettings.imageCount; i++) {
+        const string outputFile = calSettings.imageList[i];
 
         while (true) {
             cam->read(im);

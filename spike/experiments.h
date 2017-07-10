@@ -13,11 +13,10 @@
 #include "detector.h"
 
 
-void cam_test();
-void cal_test();
+void cal_test(string config);
 void detect_test();
 void gen_settings();
-void detect_pattern();
-void stereo_cal();
+void detect_pattern(string config);
+void stereo_cal(string config1, string config2);
 
 #endif //PROJECTEAGLE_TESTS_H

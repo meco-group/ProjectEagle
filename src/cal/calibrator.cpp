@@ -73,8 +73,8 @@ Mat Calibrator::getNextImage() {
 
 bool Calibrator::processImage(Mat view, vector<Point2f> &pointBuf) {
     // Flip the image if requested
-    if( _settings.flipVertical )
-        flip( view, view, 0 );
+    // if( _settings.flipVertical )
+    //     flip( view, view, 0 );
 
     // Process image based on format
     bool found;
