@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <opencv_storage>
 <CameraSettings>
-  <Camera_Index>1</Camera_Index>
-  <Camera_Type>SEE3CAM</Camera_Type>
+  <Camera_Index>0</Camera_Index>
+  <Camera_Type>LATCAM</Camera_Type>
   <Camera_Calibration>"../config/ceil1_cam_cal.xml"</Camera_Calibration></CameraSettings>
 <BoardSettings>
   <BoardSize_Width>7</BoardSize_Width>

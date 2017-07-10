@@ -18,5 +18,6 @@ void detect_test();
 void gen_settings();
 void detect_pattern(string config, bool transmit=false);
 void stereo_cal(string config1, string config2);
+void userStop(bool *st);
 
 #endif //PROJECTEAGLE_TESTS_H

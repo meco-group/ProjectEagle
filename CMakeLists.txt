@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project( ProjectEagle )
+project(ProjectEagle)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -10,8 +10,9 @@ find_package(OpenCV REQUIRED)
 find_package(ZMQ REQUIRED)
 find_package(CZMQ REQUIRED)
 find_package(ZYRE REQUIRED)
+find_package (Threads)
 
-set (LIBRARIES ${OpenCV_LIBS} ${ZMQ_LIBRARIES} ${CZMQ_LIBRARIES} ${ZYRE_LIBRARIES} LibEagle)
+set (LIBRARIES ${OpenCV_LIBS} ${ZMQ_LIBRARIES} ${CZMQ_LIBRARIES} ${ZYRE_LIBRARIES} LibEagle ${CMAKE_THREAD_LIBS_INIT})
 include_directories( include ${ZMQ_INCLUDE_DIRS} ${ZMQ_INCLUDE_DIRS} ${CZMQ_INCLUDE_DIRS}  ${ZYRE_INCLUDE_DIRS})
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
