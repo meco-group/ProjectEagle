@@ -48,6 +48,7 @@ void detect_pattern(string config, bool transmit) {
     header.id = eagle::IMAGE;
 
     // EXAMPLE_CAMERA_T cam(EXAMPLE_CAMERA_INDEX);
+    // V4L2Camera *cam = getCamera(0, LATCAM);
     V4L2Camera *cam = getCamera(cameraSettings.camIndex, cameraSettings.camType);
     // cam->setBrightness(5);
     // cam->setExposure(100000);

@@ -126,7 +126,7 @@ bool See3Camera::read(cv::Mat &img)
     // crop a little bit
     int width = img.size().width;
     int height = img.size().height;
-    double crop_ratio = .85;
+    double crop_ratio = 1;
     cv::Rect roi(0.5*(width-crop_ratio*width), 0.5*(height-crop_ratio*height), crop_ratio*width, crop_ratio*height);
     img = img(roi);
     return true;

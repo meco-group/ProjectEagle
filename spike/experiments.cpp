@@ -9,7 +9,6 @@ int main(int argc, char* argv[]) {
     const string config2 = argc > 3 ? argv[3] : "../config/ceil2_cam.xml";
     const bool transmit = argc > 3 ? (!str.compare(argv[3])) : false;
 
-    cout << str << " " << transmit << '\n';
     switch (mode) {
         case 0:
             cal_test(config1);
