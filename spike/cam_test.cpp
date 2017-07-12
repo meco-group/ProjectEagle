@@ -58,14 +58,22 @@ void detect_pattern(string config, bool transmit) {
         cv::namedWindow("Viewer", cv::WINDOW_AUTOSIZE);
     }
 
+    cout << "Capturing images: " << calSettings.imageCount << "\n";
+
+    bool stopper = false;
+    thread stopThread(userStop, &stopper);      // start thread looking for user input
+
     for (int i= 0; i<calSettings.imageCount; i++) {
         const string outputFile = calSettings.imageList[i];
 
-        bool stopper = false;
-        thread stopThread(userStop, &stopper);      // start thread looking for user input
-
         while (true) {
-            if(stopper) { stopThread.join(); break; }
+            if(stopper) {
+                stopThread.join();
+
+                stopper = false;
+                stopThread = thread(userStop, &stopper);      // start thread looking for user input
+                break;
+            }
 
             cam->read(im);
 
@@ -94,8 +102,7 @@ void detect_pattern(string config, bool transmit) {
                 resize(temp, temp, Size(), .4, .4, cv::INTER_LANCZOS4);
                 cv::imencode(".jpg", temp, buffer, compression_params);
                 com.shout(&header, buffer.data(), sizeof(header), buffer.size(), "EAGLE");
-                cout << "buffer size: "<<buffer.size()<<"\n";
-		img_id++;
+		        img_id++;
 
             } else {
                 imshow("Viewer", temp);
@@ -107,6 +114,8 @@ void detect_pattern(string config, bool transmit) {
         cv::imwrite(outputFile, im);
         cout << "took snapshot: " << outputFile << "\n";
     }
+
+    stopThread.join();
 
     cam->stop();
     delete cam;

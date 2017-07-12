@@ -21,6 +21,7 @@ int main(int argc, char* argv[]) {
     V4L2Camera *cam = getCamera(cameraSettings.camIndex, cameraSettings.camType);
 
     // Start camera
+    // cam->calibrate("../config/see3cam.yml"); //camera can be calibrated
     cam->calibrate(cameraSettings.calPath); //camera can be calibrated
     cam->start();
 

@@ -4,8 +4,8 @@
 See3Camera::See3Camera(int device) :
     V4L2Camera(device)
 {
-    format(2688, 1520, V4L2_PIX_FMT_Y16);
-    // format(1280*2, 720*2, V4L2_PIX_FMT_Y16);
+    // format(2688, 1520, V4L2_PIX_FMT_Y16);
+    format(1280, 720, V4L2_PIX_FMT_Y16);
     // format(1920, 1080, V4L2_PIX_FMT_Y16);
     setBrightness(7);
 }
@@ -126,7 +126,7 @@ bool See3Camera::read(cv::Mat &img)
     // crop a little bit
     int width = img.size().width;
     int height = img.size().height;
-    double crop_ratio = 1;
+    double crop_ratio = .85;
     cv::Rect roi(0.5*(width-crop_ratio*width), 0.5*(height-crop_ratio*height), crop_ratio*width, crop_ratio*height);
     img = img(roi);
     return true;

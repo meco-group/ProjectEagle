@@ -17,6 +17,7 @@ void CalSettings::write(FileStorage &fs) const {
        << "Calibrate_FixAspectRatio" << aspectRatio
        << "Calibrate_AssumeZeroTangentialDistortion" << calibZeroTangentDist
        << "Calibrate_FixPrincipalPointAtTheCenter" << calibFixPrincipalPoint
+       << "Output_File" << outputFileName
        << "}";
 }
 
@@ -28,6 +29,7 @@ void CalSettings::read(const FileNode &node) {
     node["Calibrate_FixAspectRatio"]  >> aspectRatio;
     node["Calibrate_AssumeZeroTangentialDistortion"]  >> calibZeroTangentDist;
     node["Calibrate_FixPrincipalPointAtTheCenter"]  >> calibFixPrincipalPoint;
+    node["Output_File"]  >> outputFileName;
     parse();
 }
 

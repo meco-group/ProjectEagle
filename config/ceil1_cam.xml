@@ -10,11 +10,12 @@
   <Square_Size>108.</Square_Size>
   <Calibrate_Pattern>CHESSBOARD</Calibrate_Pattern></BoardSettings>
 <CalibrationSettings>
-  <Image_Count>10</Image_Count>
+  <Image_Count>40</Image_Count>
   <Source>"../config/ceil1_images.xml"</Source>
   <Source_Type>STORED</Source_Type>
   <Board_Settings>../config/ceil1_cam.xml</Board_Settings>
   <Calibrate_FixAspectRatio>1.</Calibrate_FixAspectRatio>
   <Calibrate_AssumeZeroTangentialDistortion>0</Calibrate_AssumeZeroTangentialDistortion>
-  <Calibrate_FixPrincipalPointAtTheCenter>0</Calibrate_FixPrincipalPointAtTheCenter></CalibrationSettings>
+  <Calibrate_FixPrincipalPointAtTheCenter>0</Calibrate_FixPrincipalPointAtTheCenter>
+  <Output_File>"../config/ceil1_cam_cal.xml"</Output_File></CalibrationSettings>
 </opencv_storage>

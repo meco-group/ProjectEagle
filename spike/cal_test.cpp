@@ -25,6 +25,7 @@ void gen_settings() {
     scal.calibFixPrincipalPoint = false;
     scal.calibZeroTangentDist = false;
     scal.aspectRatio = 1;
+    scal.outputFileName = "../config/ceil1_cam_cal.xml";
 
     // Open and write file
     FileStorage fs("test.xml", FileStorage::WRITE);

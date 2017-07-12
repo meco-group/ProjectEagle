@@ -96,12 +96,12 @@ bool Calibrator::processImage(Mat view, vector<Point2f> &pointBuf) {
 
     if (found) {
         // improve the found corners' coordinate accuracy for chessboard
-        if( _settings.boardSettings.calibrationPattern == BoardSettings::CHESSBOARD) {
-            Mat viewGray;
-            cvtColor(view, viewGray, COLOR_BGR2GRAY);
-            cornerSubPix( viewGray, pointBuf, _settings.boardSettings.boardSize,
-                          Size(-1,-1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
-        }
+//        if( _settings.boardSettings.calibrationPattern == BoardSettings::CHESSBOARD) {
+//            Mat viewGray;
+//            cvtColor(view, viewGray, COLOR_BGR2GRAY);
+//            cornerSubPix( viewGray, pointBuf, _settings.boardSettings.boardSize,
+//                          Size(-1,-1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
+//        }
 
         // Draw the corners.
         drawChessboardCorners( view, _settings.boardSettings.boardSize, Mat(pointBuf), found );
