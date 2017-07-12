@@ -5,11 +5,23 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include <iostream>
+#include <comm/comm_settings.h>
+
+using namespace cv;
+using namespace std;
+
 int main(void) {
 //	std::cout << "size of size_t: " << sizeof(size_t) << std::endl;
+    string config = "../config/ceil1_cam.xml";
 
-    Communicator com("receiver", EXAMPLE_COMMUNICATOR_INTERFACE);
-    com.start();
+    FileStorage fs(config, FileStorage::READ);
+    CommSettings commSettings;
+    fs["CommunicatorSettings"] >> commSettings;
+    fs.release();
+
+    Communicator com("receiver", commSettings.interface);
+    com.start(commSettings.init_wait_time);
     com.join("EAGLE");
 
     // wait for peer
