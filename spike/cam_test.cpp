@@ -110,9 +110,11 @@ void detect_pattern(string config, bool transmit) {
     cam->stop();
     delete cam;
 
-    // stop the program
-    com.leave("EAGLE");
-    com.stop();
+    if (transmit) {
+        // stop the program
+        com.leave("EAGLE");
+        com.stop();
+    }
 }
 
 void userStop(bool *st) {
