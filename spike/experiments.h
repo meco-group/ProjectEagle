@@ -8,6 +8,7 @@
 #include "cal/board_settings.h"
 #include "cal/calibration_settings.h"
 #include "cal/calibrator.h"
+#include "comm/comm_settings.h"
 #include "cam/camera_settings.h"
 #include "examples_config.h"
 #include "detector.h"

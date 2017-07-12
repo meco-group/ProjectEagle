@@ -21,7 +21,15 @@ bool Communicator::start() {
     if (zyre_start(_node) != 0) {
         return false;
     }
-    zclock_sleep(100); // causes segmentation errors
+    _poller = zpoller_new(zyre_socket(_node));
+    return true;
+}
+
+bool Communicator::start(int sleep_time) {
+    if (zyre_start(_node) != 0) {
+        return false;
+    }
+    zclock_sleep(sleep_time); // causes segmentation errors
     _poller = zpoller_new(zyre_socket(_node));
     return true;
 }

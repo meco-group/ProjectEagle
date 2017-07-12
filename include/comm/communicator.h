@@ -29,6 +29,7 @@ public:
 
     std::string name();
     bool start();
+    bool start(int sleep_time);
     bool stop();
     bool join(const std::string& group);
     bool leave(const std::string& group);

@@ -13,6 +13,8 @@ void detect_pattern(string config, bool transmit) {
     fs["CameraSettings"] >> cameraSettings;
     CalSettings calSettings;
     fs["CalibrationSettings"] >> calSettings;
+    CommSettings commSettings;
+    fs["CommunicatorSettings"] >> commSettings;
     fs.release();
 
     cout << "Opening camera: "
@@ -20,7 +22,7 @@ void detect_pattern(string config, bool transmit) {
          << getCamType(cameraSettings.camType) << "\n";
 
     // Open communicator
-    Communicator com("eagle", EXAMPLE_COMMUNICATOR_INTERFACE);
+    Communicator com("eagle", commSettings.interface);
 
     // setup video compression
     std::vector<int> compression_params;
@@ -29,7 +31,7 @@ void detect_pattern(string config, bool transmit) {
     std::vector<uchar> buffer(1000, 0);
 
     if (transmit) {
-        com.start();
+        com.start(commSettings.init_wait_time);
         com.join("EAGLE");
 
         // wait for peer

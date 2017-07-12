@@ -16,5 +16,9 @@
   <Board_Settings>../config/ceil2_cam.xml</Board_Settings>
   <Calibrate_FixAspectRatio>1.</Calibrate_FixAspectRatio>
   <Calibrate_AssumeZeroTangentialDistortion>0</Calibrate_AssumeZeroTangentialDistortion>
-  <Calibrate_FixPrincipalPointAtTheCenter>0</Calibrate_FixPrincipalPointAtTheCenter></CalibrationSettings>
+  <Calibrate_FixPrincipalPointAtTheCenter>0</Calibrate_FixPrincipalPointAtTheCenter>
+  <Output_File>"../config/ceil2_cam_cal.xml"</Output_File></CalibrationSettings>
+<CommunicatorSettings>
+  <Interface>wlan0</Interface>
+  <Init_Wait_Time>0</Init_Wait_Time></CommunicatorSettings>
 </opencv_storage>

@@ -21,17 +21,23 @@ void gen_settings() {
     scal.sourceType = scal.STORED;
     scal.imageCount = 10;
     scal.sourcePath = "../config/ceil1_images.xml";
-    scal.boardSettingsPath = "test.xml";
+    scal.boardSettingsPath = "../config/ceil1_cam.xml";
     scal.calibFixPrincipalPoint = false;
     scal.calibZeroTangentDist = false;
     scal.aspectRatio = 1;
     scal.outputFileName = "../config/ceil1_cam_cal.xml";
 
+    // Generate the comm settings
+    CommSettings scom;
+    scom.interface = "wlp58s0";
+    scom.init_wait_time = 100;
+
     // Open and write file
-    FileStorage fs("test.xml", FileStorage::WRITE);
+    FileStorage fs("../config/ceil1_cam.xml", FileStorage::WRITE);
     scam.write(fs);
     sboard.write(fs);
     scal.write(fs);
+    scom.write(fs);
     fs.release();
 }
 
