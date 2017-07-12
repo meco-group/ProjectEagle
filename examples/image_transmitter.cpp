@@ -5,14 +5,29 @@
 #include <unistd.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <comm/comm_settings.h>
+#include <cam/camera_settings.h>
 
-int main(void) {
-    EXAMPLE_CAMERA_T cam(EXAMPLE_CAMERA_INDEX);
-    cam.start();
-    cv::Mat img;
+int main(int argc, char* argv[]) {
+    // Parse arguments
+    const string config = argc > 1 ? argv[1] : "../config/ceil1_cam.xml";
 
-    Communicator com("eagle", EXAMPLE_COMMUNICATOR_INTERFACE);
-    com.start();
+    FileStorage fs(config, FileStorage::READ);
+    CameraSettings cameraSettings;
+    fs["CameraSettings"] >> cameraSettings;
+    CommSettings commSettings;
+    fs["CommunicatorSettings"] >> commSettings;
+    fs.release();
+
+    // EXAMPLE_CAMERA_T cam(EXAMPLE_CAMERA_INDEX);
+    V4L2Camera *cam = getCamera(cameraSettings.camIndex, cameraSettings.camType);
+
+    // Start camera
+    // cam->calibrate(cameraSettings.calPath); //camera can be calibrated
+    cam->start();
+
+    Communicator com("eagle", commSettings.interface);
+    com.start(commSettings.init_wait_time);
     com.join("EAGLE");
 
 	std::vector<int> compression_params;
@@ -39,12 +54,14 @@ int main(void) {
 	int img_id = 0;
     eagle::header_t header;
     header.id = eagle::IMAGE;
+
+    Mat img;
 	
 	// Loop over all peers to send images_ceil1
 	auto begin = std::chrono::system_clock::now();
     while(com.peers().size() > 0 ) {
         header.time = img_id;
-        cam.read(img);
+        cam->read(img);
         cv::imencode(".jpg",img,buffer,compression_params);
         if (com.shout(&header, buffer.data(), sizeof(header), buffer.size(), "EAGLE")) {
             std::cout << "Sending image " << img_id << ", size: " << buffer.size() << std::endl;
