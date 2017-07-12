@@ -25,8 +25,8 @@ void detect_pattern(string config, bool transmit) {
     // setup video compression
     std::vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
-    compression_params.push_back(30);
-    std::vector<uchar> buffer(10000, 0);
+    compression_params.push_back(5);
+    std::vector<uchar> buffer(20, 0);
 
     if (transmit) {
         com.start();
@@ -91,10 +91,11 @@ void detect_pattern(string config, bool transmit) {
                     break;
 
                 header.time = img_id;
-                resize(temp, temp, Size(), .2, .2, cv::INTER_LANCZOS4);
+                resize(temp, temp, Size(), .4, .4, cv::INTER_LANCZOS4);
                 cv::imencode(".jpg", temp, buffer, compression_params);
                 com.shout(&header, buffer.data(), sizeof(header), buffer.size(), "EAGLE");
-                img_id++;
+                cout << "buffer size: "<<buffer.size()<<"\n";
+		img_id++;
 
             } else {
                 imshow("Viewer", temp);
