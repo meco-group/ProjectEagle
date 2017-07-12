@@ -22,7 +22,7 @@ void detect_pattern(string config, bool transmit) {
          << getCamType(cameraSettings.camType) << "\n";
 
     // Open communicator
-    Communicator com("eagle", commSettings.interface);
+    Communicator* com;
 
     // setup video compression
     std::vector<int> compression_params;
@@ -31,12 +31,13 @@ void detect_pattern(string config, bool transmit) {
     std::vector<uchar> buffer(1000, 0);
 
     if (transmit) {
-        com.start(commSettings.init_wait_time);
-        com.join("EAGLE");
+        com = new Communicator("eagle", commSettings.interface);
+        com->start(commSettings.init_wait_time);
+        com->join("EAGLE");
 
         // wait for peer
         std::cout << "waiting for peers" << std::endl;
-        while (com.peers().size() <= 0) {
+        while (com->peers().size() <= 0) {
             sleep(1);
         }
     }
@@ -70,7 +71,7 @@ void detect_pattern(string config, bool transmit) {
 
         while (true) {
             if(stopper) {
-                stopThread.join();
+                stopThread.detach();
 
                 stopper = false;
                 stopThread = thread(userStop, &stopper);      // start thread looking for user input
@@ -97,13 +98,13 @@ void detect_pattern(string config, bool transmit) {
 
             // Transmit image
             if (transmit) {
-                if (com.peers().size() <= 0)
+                if (com->peers().size() <= 0)
                     break;
 
                 header.time = img_id;
                 resize(temp, temp, Size(), .4, .4, cv::INTER_LANCZOS4);
                 cv::imencode(".jpg", temp, buffer, compression_params);
-                com.shout(&header, buffer.data(), sizeof(header), buffer.size(), "EAGLE");
+                com->shout(&header, buffer.data(), sizeof(header), buffer.size(), "EAGLE");
 		        img_id++;
 
             } else {
@@ -117,16 +118,16 @@ void detect_pattern(string config, bool transmit) {
         cout << "took snapshot: " << outputFile << "\n";
     }
 
-    stopThread.join();
+    stopThread.detach();
+
+    if (transmit) {
+        com->leave("EAGLE");
+        com->stop();
+        delete com;
+    }
 
     cam->stop();
     delete cam;
-
-    if (transmit) {
-        // stop the program
-        com.leave("EAGLE");
-        com.stop();
-    }
 }
 
 void userStop(bool *st) {
