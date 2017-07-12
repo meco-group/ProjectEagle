@@ -2,7 +2,7 @@
 
 PiCamera::PiCamera(int device) :
     V4L2Camera(device) {
-    format(1280, 720, V4L2_PIX_FMT_YUYV);
+    format(640, 360, V4L2_PIX_FMT_YUYV);
 	buffers(4);
 	setBrightness(45);
 }
