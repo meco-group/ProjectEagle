@@ -26,7 +26,7 @@ void detect_pattern(string config, bool transmit) {
     std::vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
     compression_params.push_back(5);
-    std::vector<uchar> buffer(1, 0);
+    std::vector<uchar> buffer(20, 0);
 
     if (transmit) {
         com.start();
