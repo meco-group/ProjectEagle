@@ -29,7 +29,8 @@ bool Communicator::start(int sleep_time) {
     if (zyre_start(_node) != 0) {
         return false;
     }
-    zclock_sleep(sleep_time); // causes segmentation errors
+    if (sleep_time > 0)
+        zclock_sleep(sleep_time); // causes segmentation errors
     _poller = zpoller_new(zyre_socket(_node));
     return true;
 }
