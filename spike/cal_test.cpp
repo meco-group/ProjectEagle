@@ -70,7 +70,7 @@ void stereo_cal(string config1, string config2) {
 
     Calibrator cal1(cal1Settings);
     cal1.execute();
-    cal1.saveCameraParams();
+    // cal1.saveCameraParams();
 
     // Calibrate the second camera
     // Open settings file
@@ -81,13 +81,13 @@ void stereo_cal(string config1, string config2) {
 
     Calibrator cal2(cal2Settings);
     cal2.execute();
-    cal2.saveCameraParams();
+    // cal2.saveCameraParams();
 
     // Stereo calibration
     Mat R; Mat T; Mat F; Mat E;
-    stereoCalibrate(vector<vector<Point3f>>(&cal1.objectPoints[0],&cal1.objectPoints[4]),
-                    vector<vector<Point2f>>(&cal1.imagePoints[0],&cal1.imagePoints[4]),
-                    vector<vector<Point2f>>(&cal2.imagePoints[0],&cal2.imagePoints[4]),
+    stereoCalibrate(cal1.objectPoints,
+                    cal1.imagePoints,
+                    cal2.imagePoints,
                     cal1.cameraMatrix, cal1.distCoeffs, cal2.cameraMatrix, cal2.distCoeffs, cal1.imageSize,
                     R, T, F, E
     );

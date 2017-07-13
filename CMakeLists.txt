@@ -35,7 +35,7 @@ add_executable( AnalyzeCompression examples/tests/analyze_compression.cpp)
 add_executable( Communicator examples/tests/communicator_test.cpp )
 add_executable( SimpleTransmitter examples/tests/simple_transmitter.cpp )
 
-add_executable( Experiments spike/experiments.cpp spike/cam_test.cpp spike/cal_test.cpp spike/detect_test.cpp)
+add_executable( Experiments spike/experiments.cpp spike/cam_test.cpp spike/cal_test.cpp spike/detect_test.cpp spike/other_tests.cpp)
 
 add_executable( Calibrate examples/calibration.cpp )
 
