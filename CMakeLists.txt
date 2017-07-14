@@ -10,14 +10,34 @@ find_package(OpenCV REQUIRED)
 find_package(ZMQ REQUIRED)
 find_package(CZMQ REQUIRED)
 find_package(ZYRE REQUIRED)
-find_package (Threads)
+find_package(Boost REQUIRED)
+find_package (Threads REQUIRED)
 
-set (LIBRARIES ${OpenCV_LIBS} ${ZMQ_LIBRARIES} ${CZMQ_LIBRARIES} ${ZYRE_LIBRARIES} LibEagle ${CMAKE_THREAD_LIBS_INIT} ${FFMPEG_LIBRARIES})
-include_directories( include ${ZMQ_INCLUDE_DIRS} ${ZMQ_INCLUDE_DIRS} ${CZMQ_INCLUDE_DIRS}  ${ZYRE_INCLUDE_DIRS})
+set(LIBRARIES
+        ${OpenCV_LIBS}
+        ${ZMQ_LIBRARIES}
+        ${CZMQ_LIBRARIES}
+        ${ZYRE_LIBRARIES}
+        ${CMAKE_THREAD_LIBS_INIT}
+        LibEagle
+        )
+
+include_directories(include
+        ${ZMQ_INCLUDE_DIRS}
+        ${ZMQ_INCLUDE_DIRS}
+        ${CZMQ_INCLUDE_DIRS}
+        ${ZYRE_INCLUDE_DIRS}
+        ${Boost_INCLUDE_DIRS}
+        /usr/include/python2.7
+        )
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
 
 add_subdirectory(src)
 

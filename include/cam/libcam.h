@@ -5,8 +5,9 @@
 #include "opi_camera.h"
 #include "pi_camera.h"
 #include "latitude_camera.h"
+#include "odroid_camera.h"
 
-enum CamType {INVALID, PICAM, OPICAM, SEE3CAM, LATCAM};
+enum CamType {INVALID, PICAM, OPICAM, SEE3CAM, LATCAM, OCAM};
 
 V4L2Camera *getCamera(int index, CamType type);
 CamType getCamType(std::string camType);

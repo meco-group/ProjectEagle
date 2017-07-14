@@ -1,0 +1,3 @@
+OPENCV: http://yati-sagade.github.io/2013/05/11/numpy-boost-python/
+CMAKE:  https://www.preney.ca/paul/archives/107
+BOOST:  http://www.boost.org/doc/libs/1_64_0/libs/python/doc/html/tutorial/tutorial/exposing.html
