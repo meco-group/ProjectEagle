@@ -1,7 +1,12 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(ProjectEagle)
 
+# Must use GNUInstallDirs to install libraries into correct
+# locations on all platforms.
+include(GNUInstallDirs)
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_CXX_STANDARD 11)
 
 ADD_DEFINITIONS(-DSWM_ZYRE_CONFIG_DIR="${CMAKE_HOME_DIRECTORY}")
 ADD_DEFINITIONS(-std=c++11)
@@ -10,8 +15,7 @@ find_package(OpenCV REQUIRED)
 find_package(ZMQ REQUIRED)
 find_package(CZMQ REQUIRED)
 find_package(ZYRE REQUIRED)
-find_package(Boost REQUIRED)
-find_package (Threads REQUIRED)
+find_package(Threads REQUIRED)
 
 set(LIBRARIES
         ${OpenCV_LIBS}
@@ -19,60 +23,35 @@ set(LIBRARIES
         ${CZMQ_LIBRARIES}
         ${ZYRE_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
-        LibEagle
         )
 
-include_directories(include
+include_directories(src/include
         ${ZMQ_INCLUDE_DIRS}
         ${ZMQ_INCLUDE_DIRS}
         ${CZMQ_INCLUDE_DIRS}
         ${ZYRE_INCLUDE_DIRS}
-        ${Boost_INCLUDE_DIRS}
         /usr/include/python2.7
         )
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# Include Boost as an imported target
+find_package(Boost REQUIRED)
+add_library(boost INTERFACE IMPORTED)
+set_property(TARGET boost PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
 
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
-add_subdirectory(src)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-add_executable( Viewer spike/examples/viewer.cpp)
-add_executable( Snapshot spike/examples/snapshot.cpp)
-add_executable( ImageTransmitter spike/examples/image_transmitter.cpp)
-add_executable( ImageReceiver spike/examples/image_receiver.cpp)
-add_executable( Background spike/examples/background.cpp)
-add_executable( Detector spike/examples/detector.cpp)
-add_executable( EagleTransmitter spike/examples/eagle_transmitter.cpp)
-add_executable( EagleReceiver spike/examples/eagle_receiver.cpp)
-
-add_executable( AnalyzeFPS spike/examples/tests/analyze_fps.cpp)
-add_executable( AnalyzeCompression spike/examples/tests/analyze_compression.cpp)
-add_executable( Communicator spike/examples/tests/communicator_test.cpp)
-add_executable( SimpleTransmitter spike/examples/tests/simple_transmitter.cpp)
-
-add_executable( Experiments spike/experiments.cpp spike/cam_test.cpp spike/cal_test.cpp spike/detect_test.cpp spike/other_tests.cpp)
-
-add_executable( Calibrate spike/examples/calibration.cpp)
-
-target_link_libraries( Viewer ${LIBRARIES} )
-target_link_libraries( Snapshot ${LIBRARIES} )
-target_link_libraries( ImageTransmitter ${LIBRARIES})
-target_link_libraries( ImageReceiver ${LIBRARIES})
-target_link_libraries( Background ${LIBRARIES})
-target_link_libraries( Detector ${LIBRARIES})
-target_link_libraries( EagleTransmitter ${LIBRARIES})
-target_link_libraries( EagleReceiver ${LIBRARIES})
-
-target_link_libraries( AnalyzeFPS ${LIBRARIES} )
-target_link_libraries( AnalyzeCompression ${LIBRARIES} )
-target_link_libraries( Communicator ${LIBRARIES})
-target_link_libraries( SimpleTransmitter ${LIBRARIES})
-
-target_link_libraries( Experiments ${LIBRARIES})
-
-target_link_libraries( Calibrate ${LIBRARIES})
+# Targets that we develop here
+enable_testing()
+add_subdirectory(src/libcom)
+add_subdirectory(src/libcam)
+add_subdirectory(src/libconfig)
+add_subdirectory(src/libio)
+add_subdirectory(src/viewer)
+add_subdirectory(src/image_transmitter)

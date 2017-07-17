@@ -1,3 +1,6 @@
 OPENCV: http://yati-sagade.github.io/2013/05/11/numpy-boost-python/
 CMAKE:  https://www.preney.ca/paul/archives/107
+        https://rix0r.nl/blog/2015/08/13/cmake-guide/
+        https://www.jetbrains.com/help/clion/quick-cmake-tutorial.html
 BOOST:  http://www.boost.org/doc/libs/1_64_0/libs/python/doc/html/tutorial/tutorial/exposing.html
+C++:    http://www.possibility.com/Cpp/CppCodingStandard.html#methodsnames
