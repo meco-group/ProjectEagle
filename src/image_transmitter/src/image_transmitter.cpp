@@ -61,6 +61,7 @@ int main(int argc, char* argv[]) {
         if (com.shout(&header, buffer.data(), sizeof(header), buffer.size(), "EAGLE")) {
             std::cout << "Sending image " << img_id << ", size: " << buffer.size() << std::endl;
         }
+        std::cout << "\n";
         img_id++;
     }
 
