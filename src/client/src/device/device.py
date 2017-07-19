@@ -1,6 +1,7 @@
 import paramiko
+import time
 
-from src.widgets.device_tree import DeviceItem
+from src.widgets.core.device_tree import DeviceItem
 
 
 class Device:
@@ -13,6 +14,7 @@ class Device:
         self.password = password
         self.treeItem = DeviceItem(device=self, parent=self.manager.deviceTree)
         self.connected = False
+        self.image_stream_stdin = None
 
         # initialise ssh
         self.__ssh = paramiko.SSHClient()
@@ -44,15 +46,32 @@ class Device:
         self.connected = True
         self.treeItem.set_connected(self.connected)
 
+    def disconnect(self):
+        self.connected = False
+        self.treeItem.set_connected(self.connected)
+        self.__ssh.close()
+
     def start_image_stream(self):
         assert(self.is_connected())
 
         print "Starting image transmitter"
 
         stdin, stdout, stderr = self.__ssh.exec_command(
-            "/home/pi/ProjectEagle/build/bin/ImageTransmitter /home/pi/ProjectEagle/config/ceil2_cam.xml &")
+            "/home/pi/ProjectEagle/build/bin/ImageTransmitter /home/pi/ProjectEagle/config/ceil2_cam.xml")
 
-        print "Executed"
+        data = stdout.read(200).splitlines()
+        for line in data:
+            print "    [ImageTransmitter] "+line
+        print "    [ImageTransmitter] " + "..."
+
+    def stop_image_stream(self):
+        self.__ssh.exec_command("pkill ImageTransmitter")
+
+    def take_snapshot(self):
+        self.__ssh.exec_command("pkill ImageTransmitter")
+
+
+
 
 
 # dev = Device("ceil2", "192.168.11.133", "pi", "raspberry")

@@ -12,21 +12,19 @@ class CalibrateWizard(QtGui.QDialog):
         self.resize(640, 480)
         self.setWindowTitle('Calibrate Device')
 
-        self.grid = QtGui.QWidget(self)
-        grid_layout = QtGui.QGridLayout(self)
+        self.content = QtGui.QVBoxLayout(self)
 
         self.image_stream = ImageStream(self, device)
-        grid_layout.addWidget(self.image_stream, 0, 0)
+        self.content.addWidget(self.image_stream)
 
-        self.grid.setLayout(grid_layout)
-
-        box = QtGui.QVBoxLayout()
-        box.addWidget(self.grid)
-
-        self.setLayout(box)
+        self.setLayout(self.content)
 
         self.setModal(True)
         self.show()
 
         # Start image stream
         QtCore.QTimer.singleShot(0, self.image_stream.start)
+
+    def closeEvent(self, QCloseEvent):
+        self.image_stream.stop()
+        super(CalibrateWizard, self).closeEvent(QCloseEvent)

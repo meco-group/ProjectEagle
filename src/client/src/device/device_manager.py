@@ -25,8 +25,12 @@ class DeviceManager:
         indexes = self.deviceTree.selectionModel().selectedRows()
         for index in sorted(indexes):
             name = self.deviceTree.listOfDevices[index.row()].name
-            print "connecting: "+name
-            self.devices[name].connect()
+            if self.devices[name].is_connected():
+                # print "disconnecting: "+name
+                self.devices[name].disconnect()
+            else:
+                # print "connecting: "+name
+                self.devices[name].connect()
 
     def edit_selected(self):
         indexes = self.deviceTree.selectionModel().selectedRows()
@@ -68,5 +72,9 @@ class DeviceManager:
         for device in config['Devices'].values():
             device_parsed = json.loads(device)
             self.add_device(device_parsed['name'], device_parsed['ip'], device_parsed['username'], device_parsed['password'])
+
+    def close_all_connections(self):
+        for device in self.devices.values():
+            device.disconnect()
 
 

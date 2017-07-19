@@ -1,15 +1,14 @@
 import time
 
-from PyQt4.QtGui import QImage, QApplication, QPixmap, QLabel
-from pyre import Pyre
-from pyre import zhelper
-import zmq
-import uuid
-import logging
-import sys
-import json
-import numpy as np
+import struct
+from PyQt4 import QtGui
+
 import cv2
+
+import numpy as np
+from pyre import Pyre
+import zmq
+from enum import Enum
 
 class Communicator(Pyre):
     def __init__(self, group):
@@ -22,32 +21,52 @@ class Communicator(Pyre):
             time.sleep(1)
 
     def read(self):
-        return self.recv()
+        # Obtain information from camera.
+        msg = self.recv()
+        while msg[0] != 'SHOUT':
+            msg = self.recv()
 
-# com = Communicator("EAGLE")
-# com.join("EAGLE")
-# com.start()
-# print "Waiting for peers ..."
-# com.wait_for_peers()
-# print "Found peers"
-# com.read()
-# com.read()
-# while True:
-#     buffer = com.read()
-#     #image res 640, 480
-#
-#     nparr = np.fromstring(buffer[-1][24:], np.uint8)
-#     img = cv2.imdecode(nparr, 1)  # cv2.IMREAD_COLOR in OpenCV 3.1
-#     # check types
-#     height, width, channel = img.shape
-#     bytesPerLine = 3 * width
-#     qImg = QImage(img.data, width, height, bytesPerLine, QImage.Format_RGB888)
-#
-#     print type(qImg)
-#     break
-#
-# app = QApplication(sys.argv)
-# label = QLabel()
-# label.setPixmap(QPixmap.fromImage(qImg))
-# label.show()
-# sys.exit(app.exec_())
+        # Initiate elements
+        data = msg[4]
+        offset = 0
+
+        # Parse data
+        while offset < len(data):
+            # Get the size of the header
+            header_size = struct.unpack('@I', data[offset:offset+4])[0]
+            offset += 4
+
+            # Parse the header
+            h_id, h_time = struct.unpack('IL', data[offset:(offset + header_size)])
+            header = Header(h_id, h_time)
+            offset += header_size
+
+            # Get the size of the data
+            data_size = struct.unpack('@I', data[offset:offset+4])[0]
+            offset += 4
+
+            # Get the data
+            buffer = data[offset:offset+data_size]
+            offset += data_size
+
+            # Parse the data
+            if header.type == header.HeaderType.IMAGE:
+                # Decode openCv
+                nparr = np.fromstring(buffer, np.uint8)
+                img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+                return header, img
+            else:
+                # TODO parser for other cases
+                return header, None
+
+
+class Header:
+    class HeaderType(Enum):
+        MARKER = 0
+        OBSTACLE = 1
+        IMAGE = 2
+
+    def __init__(self, type, time):
+        self.type = self.HeaderType(type)
+        self.time = time
