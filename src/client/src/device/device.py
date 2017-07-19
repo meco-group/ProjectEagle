@@ -50,15 +50,9 @@ class Device:
         print "Starting image transmitter"
 
         stdin, stdout, stderr = self.__ssh.exec_command(
-            "/home/pi/ProjectEagle/build/bin/ImageTransmitter /home/pi/ProjectEagle/config/ceil2_cam.xml")
+            "/home/pi/ProjectEagle/build/bin/ImageTransmitter /home/pi/ProjectEagle/config/ceil2_cam.xml &")
 
         print "Executed"
-
-        data = stdout.read().splitlines()
-        for line in data:
-            print line
-
-        print "Done"
 
 
 # dev = Device("ceil2", "192.168.11.133", "pi", "raspberry")

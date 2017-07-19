@@ -60,8 +60,8 @@ int main(int argc, char* argv[]) {
         cv::imencode(".jpg",img,buffer,compression_params);
         if (com.shout(&header, buffer.data(), sizeof(header), buffer.size(), "EAGLE")) {
             std::cout << "Sending image " << img_id << ", size: " << buffer.size() << std::endl;
+            std::cout << "Header size: "<<sizeof(header)<<"\n";
         }
-        std::cout << "\n";
         img_id++;
     }
 

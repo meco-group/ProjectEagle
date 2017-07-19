@@ -26,7 +26,7 @@ namespace com {
         /* protocol messages */
         typedef struct header_t {
             msg_t id;
-            unsigned long time;
+            uint64_t time;
         } header_t;
 
         typedef struct marker_t {
