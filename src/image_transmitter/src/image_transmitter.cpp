@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 
     Communicator com("eagle", comSettings.interface);
     com.start(comSettings.init_wait_time);
-    com.join("EAGLE");
+    com.join(comSettings.group);
 
     std::vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     // start capturing
     std::cout << "Start capturing video stream." << std::endl;
 
-    int img_id = 0;
+    uint img_id = 0;
     eagle::header_t header;
     header.id = eagle::IMAGE;
 

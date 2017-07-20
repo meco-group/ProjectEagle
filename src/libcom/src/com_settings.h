@@ -19,6 +19,7 @@ namespace com {
     class ComSettings : public Config {
     public:
         string interface;
+        string group;
         int init_wait_time;
 
     public:

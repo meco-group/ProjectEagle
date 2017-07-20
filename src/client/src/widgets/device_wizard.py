@@ -134,20 +134,25 @@ class DeviceWizard(QtGui.QDialog):
             self.grid = QtGui.QWidget(self)
             grid_layout = QtGui.QGridLayout()
 
+            self.group_label = QtGui.QLabel(self)
             self.interface_label = QtGui.QLabel(self)
             self.wait_time_label = QtGui.QLabel(self)
 
+            self.group_label.setText("Group:")
             self.interface_label.setText("Interface:")
             self.wait_time_label.setText("Zyre Wait Time:")
 
+            self.group_field = QtGui.QLineEdit(self)
             self.interface_field = QtGui.QLineEdit(self)
             self.wait_time_field = QtGui.QLineEdit(self)
             self.wait_time_field.setValidator(QtGui.QIntValidator(0, 1e10, self))
 
-            grid_layout.addWidget(self.interface_label, 0, 0)
-            grid_layout.addWidget(self.wait_time_label, 1, 0)
-            grid_layout.addWidget(self.interface_field, 0, 1)
-            grid_layout.addWidget(self.wait_time_field, 1, 1)
+            grid_layout.addWidget(self.group_label, 0, 0)
+            grid_layout.addWidget(self.interface_label, 1, 0)
+            grid_layout.addWidget(self.wait_time_label, 2, 0)
+            grid_layout.addWidget(self.group_field, 0, 1)
+            grid_layout.addWidget(self.interface_field, 1, 1)
+            grid_layout.addWidget(self.wait_time_field, 2, 1)
 
             grid_layout.setColumnStretch(1, 10)
             grid_layout.setMargin(0)
@@ -162,6 +167,8 @@ class DeviceWizard(QtGui.QDialog):
             self.setLayout(box_layout)
 
         def load_defaults(self, tree):
+            for elem in tree.iterfind('CommunicatorSettings/Group'):
+                self.group_field.setText(elem.text)
             for elem in tree.iterfind('CommunicatorSettings/Interface'):
                 self.interface_field.setText(elem.text)
             for elem in tree.iterfind('CommunicatorSettings/Init_Wait_Time'):
@@ -169,6 +176,8 @@ class DeviceWizard(QtGui.QDialog):
 
         def get_xml(self, device):
             root = ET.Element('CommunicatorSettings')
+            group = ET.SubElement(root, 'Group')
+            group.text = str(self.group_field.text())
             interface = ET.SubElement(root, 'Interface')
             interface.text = str(self.interface_field.text())
             type = ET.SubElement(root, 'Init_Wait_Time')

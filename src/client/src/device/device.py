@@ -109,7 +109,8 @@ class Device:
 
         # Send general config
         target = str(Path(self.get_conf_path()).relative_to(os.path.abspath("../../..")))
-        print target
+        print os.path.join("/home/pi/ProjectEagle", target)
+        print self.get_conf_path()
         sftp.put(
             self.get_conf_path(),
             os.path.join("/home/pi/ProjectEagle", target)

@@ -111,7 +111,7 @@ class CalibrateWizard(QtGui.QDialog):
         self.snap_count = self.file_list.get_file_count()
 
     def get_next_snap_path(self):
-        return self.device.get_snap_path() + "image_"+str(self.snap_count)+".png"
+        return os.path.join(self.device.get_snap_path(),"image_"+str(self.snap_count)+".png")
 
     def handle_reload(self):
         self.snapshot_button.setEnabled(False)
