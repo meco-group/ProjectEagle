@@ -1,7 +1,10 @@
+import os
 from PyQt4 import QtGui, QtCore
 
 from PyQt4.QtCore import QThread
 from src.comm.communicator import Communicator
+
+from xml.etree import ElementTree as ET
 
 
 class ImageStream(QtGui.QLabel):
@@ -11,7 +14,15 @@ class ImageStream(QtGui.QLabel):
         self.signal_snap = QtCore.SIGNAL("snapshot_taken")
         self.signal_reload = QtCore.SIGNAL("reload")
         self.device = device
-        self.image_receiver = ImageReceiver()
+
+        group = "EAGLE"
+        if os.path.isfile(device.get_conf_path()):
+            tree = ET.ElementTree(file=device.get_conf_path())
+            for elem in tree.iterfind('CommunicatorSettings/Group'):
+                group = elem.text
+
+
+        self.image_receiver = ImageReceiver(group)
         # self.setScaledContents(True) # to resize image to label dimensions
 
     def start(self):
@@ -60,9 +71,10 @@ class ImageStream(QtGui.QLabel):
 
 
 class ImageReceiver(QThread):
-    def __init__(self):
+    def __init__(self, group="EAGLE"):
         QThread.__init__(self)
         self.img = None
+        self.group = group
         self.signal = QtCore.SIGNAL("image_update")
         self.running = False
         self.com = None
@@ -76,9 +88,11 @@ class ImageReceiver(QThread):
         print "======================="
         self.running = True
 
+        print "Group: "+self.group
+
         # Setup communicator
-        self.com = Communicator("EAGLE")
-        self.com.join("EAGLE")
+        self.com = Communicator(self.group)
+        self.com.join(self.group)
         self.com.start()
 
         # Wait for peers to connect
@@ -99,7 +113,7 @@ class ImageReceiver(QThread):
             else:
                 print "Invalid image received"
 
-        self.com.leave("EAGLE")
+        self.com.leave(self.group)
         self.com.stop()
 
     def stop(self):

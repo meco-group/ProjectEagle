@@ -7,7 +7,7 @@ using namespace cam;
 
 int main(int argc, char* argv[]) {
     // Parse arguments
-    const string config = argc > 1 ? argv[1] : "../config/ceil1_cam.xml";
+    const string config = argc > 1 ? argv[1] : "/home/peter/Documents/Honours/ProjectEagle/src/client/config/devices/Pi/conf.xml";
 
     CameraSettings cameraSettings;
     cameraSettings.read(config);
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Average framerate: " << fps << std::endl;
 
     // stop the program
-    com.leave("EAGLE");
+    com.leave(comSettings.group);
     com.stop();
 }
 
