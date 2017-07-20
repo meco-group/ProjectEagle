@@ -14,6 +14,8 @@ int main(int argc, char* argv[]) {
     ComSettings comSettings;
     comSettings.read(config);
 
+    cout << "Starting ImageTransmitter - GROUP: "<<comSettings.group<<"\n";
+
     // EXAMPLE_CAMERA_T cam(EXAMPLE_CAMERA_INDEX);
     V4L2Camera *cam = getCamera(cameraSettings.camIndex, cameraSettings.camType);
 
