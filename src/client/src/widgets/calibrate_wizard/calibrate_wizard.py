@@ -196,6 +196,8 @@ class CalibrateWizard(QtGui.QDialog):
         from subprocess import call
         print "Executing: "+"../../../build/bin/Calibrate "+self.device.get_cal_conf_path()
         call(["../../../build/bin/Calibrate", self.device.get_cal_conf_path()])
+        print "Sending over calibration file"
+        self.device.send_cal_settings()
 
     def handle_cancel(self):
         self.image_stream.stop()

@@ -79,8 +79,10 @@ class Device:
 
         print "Taking snapshot "+target_path
 
+        target = str(Path(self.get_conf_path()).relative_to(os.path.abspath("../../..")))
+        target = os.path.join("/home/pi/ProjectEagle", target)
         stdin, stdout, stderr = self.__ssh.exec_command(
-            "/home/pi/ProjectEagle/build/bin/Snapshot /home/pi/ProjectEagle/config/ceil2_cam.xml /home/pi/ProjectEagle/snapshot.png &")
+            "/home/pi/ProjectEagle/build/bin/Snapshot "+target+" /home/pi/ProjectEagle/snapshot.png &")
 
         data = stdout.read().splitlines()
         for line in data:
@@ -99,15 +101,36 @@ class Device:
 
         # make sure the directory exists
         target = str(Path(self.get_root()).relative_to(os.path.abspath("../../..")))
-        print target
-        sftp.mkdir(target)
-
+        print os.path.join("/home/pi/ProjectEagle", target)
+        try:
+            sftp.mkdir(os.path.join("/home/pi/ProjectEagle", target))
+        except IOError:
+            pass
 
         # Send general config
         target = str(Path(self.get_conf_path()).relative_to(os.path.abspath("../../..")))
         print target
         sftp.put(
             self.get_conf_path(),
+            os.path.join("/home/pi/ProjectEagle", target)
+        )
+
+    def send_cal_settings(self):
+        sftp = self.__ssh.open_sftp()
+
+        # make sure the directory exists
+        target = str(Path(self.get_root()).relative_to(os.path.abspath("../../..")))
+        print os.path.join("/home/pi/ProjectEagle", target)
+        try:
+            sftp.mkdir(os.path.join("/home/pi/ProjectEagle", target))
+        except IOError:
+            pass
+
+        # Send general config
+        target = str(Path(self.get_cal_path()).relative_to(os.path.abspath("../../..")))
+        print target
+        sftp.put(
+            self.get_cal_path(),
             os.path.join("/home/pi/ProjectEagle", target)
         )
 
