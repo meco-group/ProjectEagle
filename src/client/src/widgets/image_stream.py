@@ -1,16 +1,15 @@
 from PyQt4 import QtGui, QtCore
 
-import cv2
-import numpy as np
-
-import struct
 from PyQt4.QtCore import QThread
 from src.comm.communicator import Communicator
 
 
 class ImageStream(QtGui.QLabel):
-    def __init__(self, parent, device):
-        super(ImageStream, self).__init__(parent)
+    def __init__(self, cal_wizard, device):
+        super(ImageStream, self).__init__()
+        self.cal_wizard = cal_wizard
+        self.signal_snap = QtCore.SIGNAL("snapshot_taken")
+        self.signal_reload = QtCore.SIGNAL("reload")
         self.device = device
         self.image_receiver = ImageReceiver()
         # self.setScaledContents(True) # to resize image to label dimensions
@@ -27,6 +26,37 @@ class ImageStream(QtGui.QLabel):
     def stop(self):
         self.image_receiver.stop()
         self.device.stop_image_stream()
+
+    def snap(self):
+        def execute():
+            # Stop ImageTransmitter/Receiver
+            self.image_receiver.stop()
+            self.device.stop_image_stream()
+
+            # Take the snapshot
+            self.device.take_snapshot(self.cal_wizard.get_next_snap_path())
+
+            # Start ImageTransmitter again
+            QtCore.QTimer.singleShot(0, self.device.start_image_stream)
+            self.image_receiver.start()
+
+            self.emit(self.signal_snap, "snapshot taken")
+
+        QtCore.QTimer.singleShot(0, execute)
+
+    def reload(self):
+        def execute():
+            # Stop ImageTransmitter/Receiver
+            self.image_receiver.stop()
+            self.device.stop_image_stream()
+
+            # Start ImageTransmitter again
+            QtCore.QTimer.singleShot(0, self.device.start_image_stream)
+            self.image_receiver.start()
+
+            self.emit(self.signal_reload, "reload")
+
+        QtCore.QTimer.singleShot(0, execute)
 
 
 class ImageReceiver(QThread):

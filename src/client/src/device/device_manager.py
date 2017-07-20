@@ -41,9 +41,12 @@ class DeviceManager:
         device = self.devices[name]
         DeviceWizard(self.deviceTree, self, device)
 
-    def save_devices(self):
-        name = QtGui.QFileDialog.getSaveFileName(self.deviceTree.parent(), 'Save File', selectedFilter='*.conf')
-        print str(name)
+    def save_devices(self, path=None):
+        # TODO we should be able to clear all devices that are not saved in main.conf
+        if path is None:
+            path = str(QtGui.QFileDialog.getSaveFileName(self.deviceTree.parent(), 'Save File', selectedFilter='*.conf'))
+
+        print "Saving: "+path
 
         config = configparser.ConfigParser()
         config['Devices'] = {}
@@ -56,13 +59,14 @@ class DeviceManager:
                 'password': device.password
             })
 
-        with open(name, 'w') as configfile:
+        with open(path, 'w') as configfile:
             config.write(configfile)
 
     def load_devices(self, path=None):
         if path is None:
-            path = QtGui.QFileDialog.getOpenFileName(self.deviceTree.parent(), 'Open File', selectedFilter='*.conf')
-            print str(path)
+            path = str(QtGui.QFileDialog.getOpenFileName(self.deviceTree.parent(), 'Open File', selectedFilter='*.conf'))
+
+        print "Loading: "+path
 
         config = configparser.ConfigParser()
         config.read(str(path))

@@ -15,10 +15,15 @@ class MenuBar(QtGui.QMenuBar):
         self.save.setShortcut('Ctrl+S')
         self.save.setStatusTip('Save devices')
 
+        self.save_as = QtGui.QAction(QtGui.QIcon('icons/save.png'), 'Save As', self.parent())
+        self.save_as.setShortcut('Ctrl+Alt+S')
+        self.save_as.setStatusTip('Save devices in a custom location')
+
         self.load = QtGui.QAction(QtGui.QIcon('icons/open.png'), 'Open', self.parent())
         self.load.setShortcut('Ctrl+O')
         self.load.setStatusTip('Open devices')
 
         self.file.addAction(self.exit)
+        self.file.addAction(self.save_as)
         self.file.addAction(self.save)
         self.file.addAction(self.load)

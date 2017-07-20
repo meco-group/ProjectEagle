@@ -32,7 +32,6 @@ class DeviceTree(QtGui.QTreeWidget):
     def add_device(self, device):
         self.listOfDevices.append(device.treeItem)
 
-
 class DeviceItem(QtGui.QTreeWidgetItem):
     def __init__(self, device, parent):
         super(DeviceItem, self).__init__(parent)

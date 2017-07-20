@@ -4,7 +4,7 @@ import sys
 from PyQt4 import QtGui, QtCore
 
 from src.device.device_manager import DeviceManager
-from src.widgets.calibrate_wizard import CalibrateWizard
+from src.widgets.calibrate_wizard.calibrate_wizard import CalibrateWizard
 from src.widgets.core.device_tree import DeviceTree
 from src.widgets.core.main_window import MainWindow
 from src.widgets.core.menu_bar import MenuBar
@@ -13,6 +13,7 @@ from src.widgets.device_wizard import DeviceWizard
 
 
 class Application(QtGui.QApplication):
+    SAVE_PATH = "../config/main.conf"
 
     def __init__(self):
         super(Application, self).__init__(sys.argv)
@@ -28,6 +29,7 @@ class Application(QtGui.QApplication):
         self.deviceTree = DeviceTree(self.window)
         self.deviceManager = DeviceManager(self.deviceTree)
         self.setup_device_tree()
+        self.deviceManager.load_devices(self.SAVE_PATH)
 
         # setup the menu bar
         self.menu_bar = MenuBar(self.window)
@@ -58,7 +60,8 @@ class Application(QtGui.QApplication):
 
     def setup_menu(self):
         self.window.connect(self.menu_bar.exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
-        self.connect(self.menu_bar.save, QtCore.SIGNAL('triggered()'), self.deviceManager.save_devices)
+        self.connect(self.menu_bar.save, QtCore.SIGNAL('triggered()'), lambda: self.deviceManager.save_devices(self.SAVE_PATH))
+        self.connect(self.menu_bar.save_as, QtCore.SIGNAL('triggered()'), self.deviceManager.save_devices)
         self.connect(self.menu_bar.load, QtCore.SIGNAL('triggered()'), self.deviceManager.load_devices)
 
     def setup_device_tree(self):
@@ -66,6 +69,8 @@ class Application(QtGui.QApplication):
         self.deviceTree.connect(self.deviceTree.selectionModel(),
                      QtCore.SIGNAL("selectionChanged(QItemSelection, QItemSelection)"),
                      self.handle_selection_update)
+
+        self.deviceTree.doubleClicked.connect(self.handle_double_click)
 
     def setup_shelf(self):
         self.shelf.add_button.clicked.connect(self.handle_add)
@@ -121,6 +126,19 @@ class Application(QtGui.QApplication):
             self.shelf.calibrate_button.setEnabled(False)
 
         self.shelf.st_calibrate_button.setEnabled(count == 2)
+
+    def handle_double_click(self, index):
+        dev = self.deviceTree.itemFromIndex(index).device
+        def handle_connect_delayed():
+            if dev.is_connected():
+                self.deviceTree.itemFromIndex(index).device.disconnect()
+            else:
+                self.deviceTree.itemFromIndex(index).device.connect()
+            self.handle_selection_update()
+
+        # Start connecting
+        QtCore.QTimer.singleShot(0, handle_connect_delayed)
+
 
 app = Application()
 app.start()
