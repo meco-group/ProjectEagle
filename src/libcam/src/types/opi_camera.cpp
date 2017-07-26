@@ -21,3 +21,8 @@ bool OPICamera::readUYVY(cv::Mat &img)
 	cv::Mat uyvy(getHeight(),getWidth(),CV_8UC2, (char*)getBuffer());
 	cv::cvtColor(uyvy,img,cv::COLOR_YUV2BGR_UYVY);
 }
+
+bool OPICamera::setResolution(const std::vector<int>& resolution){
+	format(resolution[0], resolution[1], V4L2_PIX_FMT_Y16);
+	return true;
+}

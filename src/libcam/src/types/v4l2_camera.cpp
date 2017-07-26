@@ -302,6 +302,12 @@ void V4L2Camera::format(int width, int height, int pixelformat)
     _pixelformat = pixelformat;
 }
 
+void V4L2Camera::setResolution(int width, int height)
+{
+	_width = width;
+	_height = height;
+}
+
 void V4L2Camera::buffers(int buffercount)
 {
 	assert(buffercount > 0);

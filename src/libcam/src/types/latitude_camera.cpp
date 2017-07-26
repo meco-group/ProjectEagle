@@ -29,3 +29,8 @@ bool LatitudeCamera::setBrightness(int brightness) {
 
 	return v4l2_set_brightness(brightness) == 0;
 }
+
+bool LatitudeCamera::setResolution(const std::vector<int>& resolution){
+	format(resolution[0], resolution[1], V4L2_PIX_FMT_Y16);
+	return true;
+}

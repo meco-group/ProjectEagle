@@ -1,9 +1,12 @@
 # Look for all source files in src and add them to the library
-file(GLOB_RECURSE SOURCE_FILES *.cpp)
+file(GLOB_RECURSE SOURCE_FILES src/helpers/*.cpp)
 
 # Define an executable
-add_executable(Calibrate ${SOURCE_FILES})
+add_executable(Calibrate src/calibrate.cpp ${SOURCE_FILES})
+add_executable(StereoCalibrate src/stereo_calibrate.cpp ${SOURCE_FILES})
 
 # Define the libraries this project depends upon
 target_link_libraries(Calibrate
+        LibConfig)
+target_link_libraries(StereoCalibrate
         LibConfig)

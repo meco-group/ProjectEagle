@@ -1,8 +1,9 @@
+import os
 from PyQt4 import QtGui, QtCore
 
 
 class DeviceTree(QtGui.QTreeWidget):
-    LABELS = ["name", "ip", "calibrated", "enabled", "connected"]
+    LABELS = ["name", "ip", "calibrated", "integrated"]
 
     def __init__(self, parent):
         super(DeviceTree, self).__init__(parent)
@@ -23,14 +24,13 @@ class DeviceTree(QtGui.QTreeWidget):
         self.setColumnWidth(0, 200)
         self.setColumnWidth(1, 200)
         self.setColumnWidth(2, 80)
-        self.setColumnWidth(3, 80)
-        self.setColumnWidth(4, 80)
         self.setBaseSize(680, 480)
 
         self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
 
     def add_device(self, device):
         self.listOfDevices.append(device.treeItem)
+
 
 class DeviceItem(QtGui.QTreeWidgetItem):
     def __init__(self, device, parent):
@@ -40,9 +40,12 @@ class DeviceItem(QtGui.QTreeWidgetItem):
 
         self.set_name(device.name)
         self.set_ip(device.ip)
-        self.set_calibrated(False)
-        self.set_enabled(False)
-        self.set_connected(False)
+
+        self.update()
+
+    def update(self):
+        self.set_calibrated(os.path.isfile(self.device.get_calibration_path())) # TODO anyone can mislead this
+        self.set_integrated(os.path.isfile(self.device.get_extrinsic_path()))   # TODO anyone can mislead this
 
     def set_name(self, value):
         self.name = value
@@ -56,12 +59,8 @@ class DeviceItem(QtGui.QTreeWidgetItem):
         self.calibrated = value
         self.setText(2, str(value))
 
-    def set_enabled(self, value):
-        self.enabled = value
+    def set_integrated(self, value):
+        self.integrated = value
         self.setText(3, str(value))
-
-    def set_connected(self, value):
-        self.connected = value
-        self.setText(4, str(value))
 
 

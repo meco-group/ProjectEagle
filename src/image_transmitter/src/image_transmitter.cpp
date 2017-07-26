@@ -20,10 +20,11 @@ int main(int argc, char* argv[]) {
     V4L2Camera *cam = getCamera(cameraSettings.camIndex, cameraSettings.camType);
 
     // Start camera
+    cam->setResolution(cameraSettings.res_width, cameraSettings.res_height);
     // cam->calibrate(cameraSettings.calPath); //camera can be calibrated
     cam->start();
 
-    Communicator com("eagle", comSettings.interface);
+    Communicator com("transmitter", comSettings.interface);
     com.start(comSettings.init_wait_time);
     com.join(comSettings.group);
 
@@ -74,9 +75,7 @@ int main(int argc, char* argv[]) {
                          Size(-1, -1), TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
             drawChessboardCorners(temp, Size(7, 6), Mat(pointBuf), found);
         }
-	// Mat comprIm;
-        // cv::pyrDown(temp, comprIm, Size(temp.cols/2, temp.rows/2));
-        cv::imencode(".jpg",temp, buffer, compression_params);
+	cv::imencode(".jpg",temp, buffer, compression_params);
         if (com.shout(&header, buffer.data(), sizeof(header), buffer.size(), comSettings.group)) {
             std::cout << "Sending image " << img_id << ", size: " << buffer.size() << std::endl;
             std::cout << "Header size: "<<sizeof(header)<<"\n";

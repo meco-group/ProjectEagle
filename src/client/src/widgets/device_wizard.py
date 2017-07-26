@@ -5,7 +5,9 @@ from xml.etree import ElementTree as ET
 from xml.dom import minidom
 
 from io import BytesIO
+from xml.sax.saxutils import unescape
 
+from src.device.device import Device
 
 def prettify(rough_string):
     """
@@ -66,6 +68,9 @@ class DeviceWizard(QtGui.QDialog):
             self.pass_field.setText(device.password)
 
     class CameraTab(QtGui.QWidget):
+        RESOLUTIONS = ["640 x 480", "1280 x 720", "1920 x 1080"]
+        CAM_TYPES= ["PICAM", "OPICAM", "SEE3CAM", "LATCAM", "OCAM"]
+
         def __init__(self, parent=None):
             super(DeviceWizard.CameraTab, self).__init__(parent)
 
@@ -76,24 +81,37 @@ class DeviceWizard(QtGui.QDialog):
 
             self.index_label = QtGui.QLabel(self)
             self.type_label = QtGui.QLabel(self)
+            self.snap_res_label = QtGui.QLabel(self)
+            self.stream_res_label = QtGui.QLabel(self)
 
             self.index_label.setText("Index:")
             self.type_label.setText("Type:")
+            self.snap_res_label.setText("Snapshot Resolution")
+            self.stream_res_label.setText("Stream Resolution")
 
             self.index_field = QtGui.QLineEdit(self)
             self.index_field.setValidator(QtGui.QIntValidator(0, 1e10, self))
 
             self.type_field = QtGui.QComboBox(self)
-            self.type_field.addItem("PICAM")
-            self.type_field.addItem("OPICAM")
-            self.type_field.addItem("SEE3CAM")
-            self.type_field.addItem("LATCAM")
-            self.type_field.addItem("OCAM")
+            for el in self.CAM_TYPES:
+                self.type_field.addItem(el)
+
+            self.snap_res_field = QtGui.QComboBox(self)
+            for el in self.RESOLUTIONS:
+                self.snap_res_field.addItem(el)
+
+            self.stream_res_field = QtGui.QComboBox(self)
+            for el in self.RESOLUTIONS:
+                self.stream_res_field.addItem(el)
 
             grid_layout.addWidget(self.index_label, 0, 0)
             grid_layout.addWidget(self.type_label, 1, 0)
+            grid_layout.addWidget(self.snap_res_label, 2, 0)
+            grid_layout.addWidget(self.stream_res_label, 3, 0)
             grid_layout.addWidget(self.index_field, 0, 1)
             grid_layout.addWidget(self.type_field, 1, 1)
+            grid_layout.addWidget(self.snap_res_field, 2, 1)
+            grid_layout.addWidget(self.stream_res_field, 3, 1)
 
             grid_layout.setColumnStretch(1, 10)
             grid_layout.setMargin(0)
@@ -108,11 +126,18 @@ class DeviceWizard(QtGui.QDialog):
             self.setLayout(box_layout)
 
         def load_defaults(self, tree):
+            import re
             for elem in tree.iterfind('CameraSettings/Camera_Index'):
                 self.index_field.setText(elem.text)
             for elem in tree.iterfind('CameraSettings/Camera_Type'):
                 index = self.type_field.findText(elem.text)
                 self.type_field.setCurrentIndex(index)
+            for elem in tree.iterfind('CameraSettings/Camera_Resolution'):
+                index = self.snap_res_field.findText(re.sub('["]', '', elem.text))
+                self.snap_res_field.setCurrentIndex(index)
+            for elem in tree.iterfind('CameraSettings/Stream_Resolution'):
+                index = self.stream_res_field.findText(re.sub('["]', '', elem.text))
+                self.stream_res_field.setCurrentIndex(index)
 
         def get_xml(self, device):
             root = ET.Element('CameraSettings')
@@ -120,8 +145,12 @@ class DeviceWizard(QtGui.QDialog):
             cam_index.text = str(self.index_field.text())
             cam_type = ET.SubElement(root, 'Camera_Type')
             cam_type.text = str(self.type_field.currentText())
+            cam_type = ET.SubElement(root, 'Camera_Resolution')
+            cam_type.text = '"' + str(self.snap_res_field.currentText()) + '"'
+            cam_type = ET.SubElement(root, 'Stream_Resolution')
+            cam_type.text = '"' + str(self.stream_res_field.currentText()) + '"'
             cam_cal = ET.SubElement(root, 'Camera_Calibration')
-            cam_cal.text = device.get_cal_path()
+            cam_cal.text = device.get_calibration_path()
 
             return root
 
@@ -266,11 +295,15 @@ class DeviceWizard(QtGui.QDialog):
         self.general_tab = self.GeneralTab()
         if device is not None:
             self.general_tab.load_defaults(device)
+        if len(self.deviceManager.devices) == 0:
+            self.general_tab.name_field.setText(Device.ORIGIN)
+            self.general_tab.name_field.setEnabled(False)
+
         self.tabs.addTab(self.general_tab, "General")
 
         tree = None
         if device is not None:
-            tree = ET.ElementTree(file=device.get_conf_path())
+            tree = ET.ElementTree(file=device.get_config_path())
 
         # Define Camera Tab
         self.camera_tab = self.CameraTab()
@@ -332,10 +365,12 @@ class DeviceWizard(QtGui.QDialog):
             self.device.password = str(self.general_tab.pass_field.text())
 
         result = self.get_xml()
-        path = self.device.get_conf_path()
+        path = self.device.get_config_path()
         with open(path, "w") as text_file:
             text_file.write(result)
 
+        self.deviceManager.save_devices(Device.SAVE_PATH)
+        self.device.sync_config()
         self.accept()
 
     def get_xml(self):
@@ -353,7 +388,9 @@ class DeviceWizard(QtGui.QDialog):
         tree.write(f, encoding='utf-8', xml_declaration=True)
 
         result = minidom.parseString(f.getvalue())
-        return result.toprettyxml(indent="\t")
+        result =  unescape(result.toprettyxml(indent="\t"), {"&quot;": '"'})
+        print result
+        return result
 
     def cancel(self):
         self.reject()

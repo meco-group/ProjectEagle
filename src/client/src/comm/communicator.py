@@ -11,8 +11,8 @@ import zmq
 from enum import Enum
 
 class Communicator(Pyre):
-    def __init__(self, group):
-        super(Communicator, self).__init__(group)
+    def __init__(self, name):
+        super(Communicator, self).__init__(name)
         self.poller = zmq.Poller()
         self.poller.register(self.socket(), zmq.POLLIN)
 

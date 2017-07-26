@@ -1,4 +1,5 @@
 from PyQt4 import QtGui
+import os
 from os import listdir
 from os.path import isfile, join, abspath
 
@@ -8,7 +9,7 @@ import re
 class FileListView(QtGui.QListView):
     def __init__(self, path, parent=None):
         super(FileListView, self).__init__(parent)
-        self.path = path
+        self.path = os.path.realpath(path)
         self.setMinimumWidth(150)
 
         self.file_count = 0
@@ -22,10 +23,13 @@ class FileListView(QtGui.QListView):
 
         self.read_files()
 
+    def get_file_list(self):
+        return [f for f in listdir(self.path) if isfile(join(self.path, f))]
+
     def read_files(self):
         self.model.clear()
 
-        files = [f for f in listdir(self.path) if isfile(join(self.path, f))]
+        files = self.get_file_list()
 
         def cmp_file(x, y):
             # look for all groups of integers in x
@@ -57,10 +61,21 @@ class FileListView(QtGui.QListView):
     def get_file_count(self):
         return self.file_count
 
-    def get_selected(self):
-        return [
-            abspath(join(
-                self.path,
-                str(self.model.itemFromIndex(f).text())
-            )) for f in self.selectionModel().selectedIndexes()
-        ]
+    def get_selected(self, root=None):
+        if root is None:
+            root = self.path
+
+        if len(self.selectionModel().selectedIndexes()) > 0:
+            return [
+                abspath(join(
+                    root,
+                    str(self.model.itemFromIndex(f).text())
+                )) for f in self.selectionModel().selectedIndexes()
+            ]
+        else:
+            return [
+                abspath(join(
+                    root,
+                    str(self.model.item(index).text())
+                )) for index in range(self.model.rowCount())
+            ]
