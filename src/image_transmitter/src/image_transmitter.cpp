@@ -20,6 +20,7 @@ int main(int argc, char* argv[]) {
     V4L2Camera *cam = getCamera(cameraSettings.camIndex, cameraSettings.camType);
 
     // Start camera
+    cam->setResolution(cameraSettings.res_width, cameraSettings.res_height);
     // cam->calibrate(cameraSettings.calPath); //camera can be calibrated
     cam->start();
 
