@@ -75,7 +75,8 @@ int main(int argc, char* argv[]) {
                          Size(-1, -1), TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
             drawChessboardCorners(temp, Size(7, 6), Mat(pointBuf), found);
         }
-	cv::imencode(".jpg",temp, buffer, compression_params);
+
+    	cv::imencode(".jpg",temp, buffer, compression_params);
         if (com.shout(&header, buffer.data(), sizeof(header), buffer.size(), comSettings.group)) {
             std::cout << "Sending image " << img_id << ", size: " << buffer.size() << std::endl;
             std::cout << "Header size: "<<sizeof(header)<<"\n";
