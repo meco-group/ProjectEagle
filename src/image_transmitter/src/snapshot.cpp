@@ -14,6 +14,7 @@ int main(int argc, char* argv[]) {
 
     // Instantiate camera
     V4L2Camera *cam = getCamera(cameraSettings.camIndex, cameraSettings.camType);
+    cam->setResolution(cameraSettings.res_width, cameraSettings.res_height);
     // cam->calibrate(cameraSettings.calPath);
 
     // Take snapshot
