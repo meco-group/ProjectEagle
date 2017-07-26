@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
     // cam->calibrate(cameraSettings.calPath); //camera can be calibrated
     cam->start();
 
-    Communicator com("eagle", comSettings.interface);
+    Communicator com("transmitter", comSettings.interface);
     com.start(comSettings.init_wait_time);
     com.join(comSettings.group);
 
@@ -75,6 +75,7 @@ int main(int argc, char* argv[]) {
             drawChessboardCorners(temp, Size(7, 6), Mat(pointBuf), found);
         }
 
+        cv::pyrDown(temp, temp, Size(temp.size().width/2, temp.size().height/2));
         cv::imencode(".jpg",temp, buffer, compression_params);
         if (com.shout(&header, buffer.data(), sizeof(header), buffer.size(), comSettings.group)) {
             std::cout << "Sending image " << img_id << ", size: " << buffer.size() << std::endl;

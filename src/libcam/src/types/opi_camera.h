@@ -14,6 +14,7 @@ namespace cam {
 
     public:
         OPICamera(int device = 0);
+        bool setResolution(const std::vector<int> &resolution);
 
     };
 }

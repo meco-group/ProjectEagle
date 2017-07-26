@@ -67,6 +67,8 @@ namespace cam {
 
         void format(int width, int height, int pixelformat);
 
+        void setResolution(int width, int height);
+
         int getWidth();
 
         int getHeight();

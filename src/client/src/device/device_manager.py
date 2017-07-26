@@ -10,6 +10,7 @@ from src.widgets.device_wizard import DeviceWizard
 
 
 class DeviceManager:
+
     def __init__(self, device_tree):
         self.deviceTree = device_tree
         self.devices = {}
@@ -71,14 +72,15 @@ class DeviceManager:
         config = configparser.ConfigParser()
         config.read(str(path))
 
-        assert('Devices' in config)
+        if not 'Devices' in config:
+            return
 
         for device in config['Devices'].values():
             device_parsed = json.loads(device)
             self.add_device(device_parsed['name'], device_parsed['ip'], device_parsed['username'], device_parsed['password'])
 
-    def close_all_connections(self):
+    def close_devices(self):
         for device in self.devices.values():
-            device.disconnect()
+            device.destroy()
 
 

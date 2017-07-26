@@ -15,6 +15,7 @@ namespace cam {
     public:
         LatitudeCamera(int device = 0);
         bool setBrightness(int brightness);
+        bool setResolution(const std::vector<int> &resolution);
 
     };
 }

@@ -3,8 +3,10 @@
 import sys
 from PyQt4 import QtGui, QtCore
 
+from src.device.device import Device
 from src.device.device_manager import DeviceManager
 from src.widgets.calibrate_wizard.calibrate_wizard import CalibrateWizard
+from src.widgets.calibrate_wizard.stereo_calibrate_wizard import StereoCalibrateWizard
 from src.widgets.core.device_tree import DeviceTree
 from src.widgets.core.main_window import MainWindow
 from src.widgets.core.menu_bar import MenuBar
@@ -13,8 +15,6 @@ from src.widgets.device_wizard import DeviceWizard
 
 
 class Application(QtGui.QApplication):
-    SAVE_PATH = "../config/main.conf"
-
     def __init__(self):
         super(Application, self).__init__(sys.argv)
 
@@ -29,7 +29,7 @@ class Application(QtGui.QApplication):
         self.deviceTree = DeviceTree(self.window)
         self.deviceManager = DeviceManager(self.deviceTree)
         self.setup_device_tree()
-        self.deviceManager.load_devices(self.SAVE_PATH)
+        self.deviceManager.load_devices(Device.SAVE_PATH)
 
         # setup the menu bar
         self.menu_bar = MenuBar(self.window)
@@ -75,8 +75,8 @@ class Application(QtGui.QApplication):
     def setup_shelf(self):
         self.shelf.add_button.clicked.connect(self.handle_add)
         self.shelf.edit_button.clicked.connect(self.handle_edit)
-        self.shelf.connect_button.clicked.connect(self.handle_connect)
         self.shelf.calibrate_button.clicked.connect(self.handle_calibrate)
+        self.shelf.st_calibrate_button.clicked.connect(self.handle_stereo_calibrate)
         self.handle_selection_update()
 
     def start(self):
@@ -87,26 +87,26 @@ class Application(QtGui.QApplication):
         sys.exit(self.exec_())
 
     def stop(self):
-        self.deviceManager.close_all_connections()
+        self.deviceManager.close_devices()
 
     def handle_add(self):
         DeviceWizard(self.window, self.deviceManager)
-
-    def handle_connect(self):
-        def handle_connect_delayed():
-            self.deviceManager.connect_selected()
-            self.handle_selection_update()
-
-        # Start connecting
-        QtCore.QTimer.singleShot(0, handle_connect_delayed)
 
     def handle_edit(self):
         self.deviceManager.edit_selected()
 
     def handle_calibrate(self):
-        device = self.deviceManager.deviceTree.listOfDevices[0].device
+        indexes = self.deviceTree.selectionModel().selectedRows()
+        device = self.deviceTree.itemFromIndex(indexes[0]).device
         print "calibrate " + device.name
         CalibrateWizard(self.window, device)
+
+    def handle_stereo_calibrate(self):
+        indexes = self.deviceTree.selectionModel().selectedRows()
+        left_device = self.deviceTree.itemFromIndex(indexes[0]).device
+        right_device = self.deviceTree.itemFromIndex(indexes[1]).device
+        print "stereo calibrate " + left_device.name + " and " + right_device.name
+        StereoCalibrateWizard(self.window, left_device, right_device)
 
     def handle_selection_update(self):
         # Button enable logic
@@ -115,29 +115,25 @@ class Application(QtGui.QApplication):
 
         if count == 1:
             self.shelf.edit_button.setEnabled(True)
-            self.shelf.connect_button.setEnabled(True)
-
-            deviceItem = self.deviceTree.listOfDevices[0]
-            self.shelf.connect_button.update(deviceItem.device.is_connected())
-            self.shelf.calibrate_button.setEnabled(deviceItem.device.is_connected())
+            self.shelf.calibrate_button.setEnabled(True)
         else:
             self.shelf.edit_button.setEnabled(False)
-            self.shelf.connect_button.setEnabled(False)
             self.shelf.calibrate_button.setEnabled(False)
 
-        self.shelf.st_calibrate_button.setEnabled(count == 2)
+        if count == 2:
+            left_device = self.deviceTree.itemFromIndex(indexes[0])
+            right_device = self.deviceTree.itemFromIndex(indexes[1])
+
+            cond = ((left_device.integrated and not right_device.integrated) or
+                   (not left_device.integrated and right_device.integrated)) and \
+                   (left_device.calibrated and right_device.calibrated)
+            self.shelf.st_calibrate_button.setEnabled(cond)
+        else:
+            self.shelf.st_calibrate_button.setEnabled(False)
 
     def handle_double_click(self, index):
-        dev = self.deviceTree.itemFromIndex(index).device
-        def handle_connect_delayed():
-            if dev.is_connected():
-                self.deviceTree.itemFromIndex(index).device.disconnect()
-            else:
-                self.deviceTree.itemFromIndex(index).device.connect()
-            self.handle_selection_update()
-
-        # Start connecting
-        QtCore.QTimer.singleShot(0, handle_connect_delayed)
+        # TODO what do we use this for
+        pass
 
 
 app = Application()
