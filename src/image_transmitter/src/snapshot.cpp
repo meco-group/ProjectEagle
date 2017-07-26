@@ -20,7 +20,10 @@ int main(int argc, char* argv[]) {
     // Take snapshot
     Mat im;
     cam->start();
-    for (int i=0; i<5; i++) {cam->read(im);}
+    for (int i=0; i<5; i++) {
+        cam->read(im);
+        cv::waitKey(1); // give camera time to reload
+    }
     cam->stop();
     delete cam;
 

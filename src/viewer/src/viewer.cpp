@@ -6,7 +6,7 @@ using namespace cam;
 
 int main(int argc, char* argv[]) {
     // Parse arguments
-    const string cameraSettingsFile = argc > 1 ? argv[1] : "/home/peter/Documents/Honours/ProjectEagle/src/client/config/devices/origin/config.xml";
+    const string cameraSettingsFile = argc > 1 ? argv[1] : "/home/peter/Documents/Honours/ProjectEagle/config/config.xml";
 
     // Open settings file
     CameraSettings cameraSettings;
@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
 
     // Start camera
     cam->setResolution(cameraSettings.res_width, cameraSettings.res_height);
-    cam->calibrate(cameraSettings.calPath); //camera can be calibrated
+    // cam->calibrate(cameraSettings.calPath); //camera can be calibrated
     cam->start();
 
     cv::Mat im;
