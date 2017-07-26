@@ -22,6 +22,7 @@ namespace cam {
         int camIndex;
         CamType camType;
         string calPath;
+        string extPath;
         int res_width;
         int res_height;
         int comp_res_width;

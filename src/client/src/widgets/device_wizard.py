@@ -9,10 +9,6 @@ from xml.sax.saxutils import unescape
 
 from src.device.device import Device
 
-def prettify(rough_string):
-    """
-    Return a pretty-printed XML string for the Element.
-    """
 
 class DeviceWizard(QtGui.QDialog):
     class GeneralTab(QtGui.QWidget):
@@ -151,6 +147,8 @@ class DeviceWizard(QtGui.QDialog):
             cam_type.text = '"' + str(self.stream_res_field.currentText()) + '"'
             cam_cal = ET.SubElement(root, 'Camera_Calibration')
             cam_cal.text = device.get_calibration_path()
+            cam_cal = ET.SubElement(root, 'Extrinsic_Calibration')
+            cam_cal.text = device.get_extrinsic_path()
 
             return root
 
@@ -389,7 +387,6 @@ class DeviceWizard(QtGui.QDialog):
 
         result = minidom.parseString(f.getvalue())
         result =  unescape(result.toprettyxml(indent="\t"), {"&quot;": '"'})
-        print result
         return result
 
     def cancel(self):

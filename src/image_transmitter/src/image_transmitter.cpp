@@ -91,6 +91,8 @@ int main(int argc, char* argv[]) {
     std::cout << "Average framerate: " << fps << std::endl;
 
     // stop the program
+    cam->stop();
+    delete cam;
     com.leave(comSettings.group);
     com.stop();
 }

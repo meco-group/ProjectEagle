@@ -1,0 +1,23 @@
+%YAML:1.0
+blob:
+    minThreshold: 10
+    maxThreshold: 200
+    filterByArea: 1
+    minArea: 80
+    filterByCircularity: 1
+    minCircularity: 0.85
+pixelspermeter: 118
+min_robot_area: 0.06
+min_obstacle_area: 0.02
+markers:
+    triangle_ratio: 0.625
+    qr_posx: 0
+    qr_posy: 0
+    qr_sizex: 0.8
+    qr_sizey: 0.8
+    qr_nbitx: 2
+    qr_nbity: 2
+thresholds:
+    bg_subtraction: 31
+    top_marker: 0.1
+    triangle_ratio: 0.1
