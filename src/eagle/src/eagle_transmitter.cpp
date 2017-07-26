@@ -117,6 +117,7 @@ int main(int argc, char* argv[]) {
         com.shout(&imheader, buffer.data(), sizeof(imheader), buffer.size(), comSettings.group);
         if (robots[0]->detected()){
             std::cout << "Robot detected!" << std::endl;
+            std::cout << robots[0]->serialize().x << ", " << robots[0]->serialize().y << std::endl;
         }
         std::cout << "image " << nof << " sent" << std::endl;
     }

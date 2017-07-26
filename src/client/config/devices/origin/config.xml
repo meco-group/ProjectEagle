@@ -3,7 +3,7 @@
 	<CameraSettings>
 		<Camera_Index>1</Camera_Index>
 		<Camera_Type>OCAM</Camera_Type>
-		<Camera_Resolution>"1280 x 720"</Camera_Resolution>
+		<Camera_Resolution>"640 x 480"</Camera_Resolution>
 		<Stream_Resolution>"640 x 480"</Stream_Resolution>
 		<Camera_Calibration>/home/peter/Documents/Honours/ProjectEagle/src/client/config/devices/origin/calibration.xml</Camera_Calibration>
 		<Extrinsic_Calibration>/home/peter/Documents/Honours/ProjectEagle/src/client/config/devices/origin/extrinsic.xml</Extrinsic_Calibration>
