@@ -16,6 +16,8 @@ void CameraSettings::write(FileStorage &fs) const {
        << "Stream_Resolution" << '"' << comp_res_width << " x " << comp_res_height << '"'
        << "Camera_Calibration" << calPath
        << "Extrinsic_Calibration" << extPath
+       << "Background" << bgPath
+       << "Detector_Config" << detPath
        << "}";
 }
 
@@ -23,6 +25,8 @@ void CameraSettings::read(const FileNode &node) {
     node["Camera_Index" ] >> camIndex;
     node["Camera_Calibration"]  >> calPath;
     node["Extrinsic_Calibration"]  >> extPath;
+    node["Background"]  >> bgPath;
+    node["Detector_Config"]  >> detPath;
 
     string resString;
     node["Camera_Resolution"] >> resString;

@@ -10,6 +10,7 @@ from pyre import Pyre
 import zmq
 from enum import Enum
 
+
 class Communicator(Pyre):
     def __init__(self, name):
         super(Communicator, self).__init__(name)

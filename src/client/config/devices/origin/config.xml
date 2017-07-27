@@ -5,8 +5,10 @@
 		<Camera_Type>OCAM</Camera_Type>
 		<Camera_Resolution>"640 x 480"</Camera_Resolution>
 		<Stream_Resolution>"640 x 480"</Stream_Resolution>
-		<Camera_Calibration>/home/peter/Documents/Honours/ProjectEagle/src/client/config/devices/origin/calibration.xml</Camera_Calibration>
-		<Extrinsic_Calibration>/home/peter/Documents/Honours/ProjectEagle/src/client/config/devices/origin/extrinsic.xml</Extrinsic_Calibration>
+		<Camera_Calibration>/home/pi/ProjectEagle/src/client/config/devices/origin/calibration.xml</Camera_Calibration>
+		<Extrinsic_Calibration>/home/pi/ProjectEagle/src/client/config/devices/origin/extrinsic.xml</Extrinsic_Calibration>
+		<Background>/home/pi/ProjectEagle/src/client/config/devices/origin/background.png</Background>
+		<Detector_Config>/home/pi/ProjectEagle/src/client/config/detector.yml</Detector_Config>
 	</CameraSettings>
 	<CommunicatorSettings>
 		<Group>EAGLE1</Group>

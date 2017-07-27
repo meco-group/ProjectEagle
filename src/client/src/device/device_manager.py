@@ -19,20 +19,6 @@ class DeviceManager:
         self.devices[name] = Device(self, name, ip, username, password)
         self.deviceTree.add_device(self.devices[name])
 
-    def connect_device(self, name):
-        self.devices[name].connect()
-
-    def connect_selected(self):
-        indexes = self.deviceTree.selectionModel().selectedRows()
-        for index in sorted(indexes):
-            name = self.deviceTree.listOfDevices[index.row()].name
-            if self.devices[name].is_connected():
-                # print "disconnecting: "+name
-                self.devices[name].disconnect()
-            else:
-                # print "connecting: "+name
-                self.devices[name].connect()
-
     def edit_selected(self):
         indexes = self.deviceTree.selectionModel().selectedRows()
         if len(indexes) <= 0:
@@ -41,6 +27,12 @@ class DeviceManager:
         name = self.deviceTree.listOfDevices[sorted(indexes)[0].row()].name
         device = self.devices[name]
         DeviceWizard(self.deviceTree, self, device)
+
+    def upload_selected(self):
+        indexes = self.deviceTree.selectionModel().selectedRows()
+        for index in sorted(indexes):
+            name = self.deviceTree.listOfDevices[index.row()].name
+            self.devices[name].upload()
 
     def save_devices(self, path=None):
         # TODO we should be able to clear all devices that are not saved in main.conf

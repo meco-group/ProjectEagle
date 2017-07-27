@@ -9,7 +9,7 @@ using namespace cam;
 
 int main(int argc, char* argv[]) {
     // Parse arguments
-    const string config = argc > 1 ? argv[1] : "/home/peter/Documents/Honours/ProjectEagle/src/client/config/devices/origin/config.xml";
+    const string config = argc > 1 ? argv[1] : "/home/peter/Documents/Honours/ProjectEagle/config/config.xml";
 
     // Open settings file
     CameraSettings cameraSettings;
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
     imheader.id = eagle::IMAGE;
 
     // create detector
-    Detector detector("../config/detector.yml", "background.png");
+    Detector detector(cameraSettings.detPath, cameraSettings.bgPath);
 
     // start detecting
     cv::Mat im;
@@ -115,6 +115,9 @@ int main(int argc, char* argv[]) {
         imheader.time = k;
         cv::imencode(".jpg",im,buffer,compression_params);
         com.shout(&imheader, buffer.data(), sizeof(imheader), buffer.size(), comSettings.group);
+        cv::imshow("Viewer",im);
+        cv::waitKey(1);
+
         if (robots[0]->detected()){
             std::cout << "Robot detected!" << std::endl;
             std::cout << robots[0]->serialize().x << ", " << robots[0]->serialize().y << std::endl;

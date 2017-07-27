@@ -6,7 +6,6 @@ using namespace cam;
 int main(int argc, char* argv[]) {
     // Parse arguments
     const string cameraSettingsFile = argc > 1 ? argv[1] : "/home/peter/Documents/Honours/ProjectEagle/src/client/config/devices/origin/config.xml";
-    const string outputFile = argc > 2 ? argv[2] : "/home/peter/Documents/Honours/ProjectEagle/src/client/config/devices/origin/background.png";
 
     // Open settings file
     CameraSettings cameraSettings;
@@ -30,7 +29,7 @@ int main(int argc, char* argv[]) {
     }
     background /= 50;
     background.convertTo(background, CV_8UC3);
-    cv::imwrite(outputFile, background);
+    cv::imwrite(cameraSettings.bgPath, background);
     imshow("Background", background);
     cv::waitKey(2000);
 

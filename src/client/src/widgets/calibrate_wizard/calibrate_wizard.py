@@ -45,7 +45,7 @@ class CalibrateWizard(QtGui.QDialog):
         snap_list_layout = QtGui.QVBoxLayout()
 
         # Build the snapshot list
-        self.file_list = FileListView(os.path.join(self.device.get_root(), self.IMG_FOLDER))
+        self.file_list = FileListView(device.local_path_finder.get_path("[INTRINSIC_SNAP_FOLDER]"))
         self.snap_count = self.file_list.get_file_count()
         snap_list_layout.addWidget(self.file_list)
 
@@ -82,12 +82,12 @@ class CalibrateWizard(QtGui.QDialog):
         self.connect(self.image_stream, self.image_stream.signal_reload, self.handle_reload_finished)
 
     def setup_folder(self):
-        path = os.path.join(self.device.get_root(), self.IMG_FOLDER)
+        path = self.device.local_path_finder.get_path("[INTRINSIC_SNAP_FOLDER]")
         if not os.path.isdir(path):
             os.mkdir(path)
 
     def get_next_snap_path(self, device):
-        return os.path.join(device.get_root(), self.IMG_FOLDER, "image_"+str(self.snap_count)+".png")
+        return device.local_path_finder.get_path("[INTRINSIC_SNAP_FOLDER]/image_" + str(self.snap_count) + ".png")
 
     def closeEvent(self, QCloseEvent):
         self.image_stream.finish()
@@ -137,10 +137,11 @@ class CalibrateWizard(QtGui.QDialog):
 
     def handle_calibrate(self):
         conf = CalibrationConfig(
-            wizard=self
+            device=self.device,
+            images=self.file_list.get_selected(),
         )
-        conf.write_config(os.path.join(self.device.get_root(), self.CONFIG))
-        conf.write_image_list(os.path.join(self.device.get_root(), self.IMG_CONFIG))
+        conf.write_config(self.device.local_path_finder.get_path("[INTRINSIC_CONFIG]"))
+        conf.write_image_list(self.device.local_path_finder.get_path("[INTRINSIC_SNAP_LIST]"))
 
         self.calibrate()
         self.device.update()
@@ -149,7 +150,7 @@ class CalibrateWizard(QtGui.QDialog):
         self.accept()
 
     def calibrate(self):
-        target = os.path.join(self.device.get_root(), self.CONFIG)
+        target = self.device.local_path_finder.get_path("[INTRINSIC_CONFIG]")
         from subprocess import call
         print "Executing: "+"../../../build/bin/Calibrate "+target
         call(["../../../build/bin/Calibrate", target])

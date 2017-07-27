@@ -146,9 +146,13 @@ class DeviceWizard(QtGui.QDialog):
             cam_type = ET.SubElement(root, 'Stream_Resolution')
             cam_type.text = '"' + str(self.stream_res_field.currentText()) + '"'
             cam_cal = ET.SubElement(root, 'Camera_Calibration')
-            cam_cal.text = device.get_calibration_path()
+            cam_cal.text = device.remote_path_finder.get_path("[INTRINSIC_CALIBRATION]")
             cam_cal = ET.SubElement(root, 'Extrinsic_Calibration')
-            cam_cal.text = device.get_extrinsic_path()
+            cam_cal.text = device.remote_path_finder.get_path("[EXTRINSIC_CALIBRATION]")
+            cam_cal = ET.SubElement(root, 'Background')
+            cam_cal.text = device.remote_path_finder.get_path("[BACKGROUND]")
+            cam_cal = ET.SubElement(root, 'Detector_Config')
+            cam_cal.text = device.remote_path_finder.get_path("[DETECTOR_CONFIG]")
 
             return root
 
@@ -301,7 +305,7 @@ class DeviceWizard(QtGui.QDialog):
 
         tree = None
         if device is not None:
-            tree = ET.ElementTree(file=device.get_config_path())
+            tree = ET.ElementTree(file=device.local_path_finder.get_path("[DEVICE_CONFIG]"))
 
         # Define Camera Tab
         self.camera_tab = self.CameraTab()
@@ -363,7 +367,7 @@ class DeviceWizard(QtGui.QDialog):
             self.device.password = str(self.general_tab.pass_field.text())
 
         result = self.get_xml()
-        path = self.device.get_config_path()
+        path = self.device.local_path_finder.get_path("[DEVICE_CONFIG]")
         with open(path, "w") as text_file:
             text_file.write(result)
 

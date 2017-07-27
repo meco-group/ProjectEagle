@@ -10,8 +10,8 @@
 	</CameraSettings>
 	<CommunicatorSettings>
 		<Group>EAGLE1</Group>
-		<Interface>wlan0</Interface>
-		<Init_Wait_Time>0</Init_Wait_Time>
+		<Interface>wlp58s0</Interface>
+		<Init_Wait_Time>100</Init_Wait_Time>
 	</CommunicatorSettings>
 	<BoardSettings>
 		<BoardSize_Width>6</BoardSize_Width>

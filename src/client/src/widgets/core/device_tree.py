@@ -44,8 +44,12 @@ class DeviceItem(QtGui.QTreeWidgetItem):
         self.update()
 
     def update(self):
-        self.set_calibrated(os.path.isfile(self.device.get_calibration_path())) # TODO anyone can mislead this
-        self.set_integrated(os.path.isfile(self.device.get_extrinsic_path()))   # TODO anyone can mislead this
+        self.set_calibrated(
+            os.path.isfile(self.device.local_path_finder.get_path("[INTRINSIC_CALIBRATION]"))
+        ) # TODO anyone can mislead this
+        self.set_integrated(
+            os.path.isfile(self.device.local_path_finder.get_path("[EXTRINSIC_CALIBRATION]"))
+        )   # TODO anyone can mislead this
 
     def set_name(self, value):
         self.name = value

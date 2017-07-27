@@ -75,6 +75,7 @@ class Application(QtGui.QApplication):
     def setup_shelf(self):
         self.shelf.add_button.clicked.connect(self.handle_add)
         self.shelf.edit_button.clicked.connect(self.handle_edit)
+        self.shelf.upload_button.clicked.connect(self.handle_upload)
         self.shelf.calibrate_button.clicked.connect(self.handle_calibrate)
         self.shelf.st_calibrate_button.clicked.connect(self.handle_stereo_calibrate)
         self.handle_selection_update()
@@ -95,6 +96,9 @@ class Application(QtGui.QApplication):
     def handle_edit(self):
         self.deviceManager.edit_selected()
 
+    def handle_upload(self):
+        self.deviceManager.upload_selected()
+
     def handle_calibrate(self):
         indexes = self.deviceTree.selectionModel().selectedRows()
         device = self.deviceTree.itemFromIndex(indexes[0]).device
@@ -112,6 +116,8 @@ class Application(QtGui.QApplication):
         # Button enable logic
         indexes = self.deviceTree.selectionModel().selectedRows()
         count = len(indexes)
+
+        self.shelf.upload_button.setEnabled(count >= 1)
 
         if count == 1:
             self.shelf.edit_button.setEnabled(True)

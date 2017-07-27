@@ -22,8 +22,8 @@ class ImageStream(QtGui.QLabel):
         # stereo calibration!
         # TODO verify this in code
         self.group = "EAGLE"
-        if os.path.isfile(device.get_config_path()):
-            tree = ET.ElementTree(file=device.get_config_path())
+        if os.path.isfile(device.local_path_finder.get_path("[DEVICE_CONFIG]")):
+            tree = ET.ElementTree(file=device.local_path_finder.get_path("[DEVICE_CONFIG]"))
             for elem in tree.iterfind('CommunicatorSettings/Group'):
                 self.group = elem.text
 
@@ -70,12 +70,9 @@ class ImageStream(QtGui.QLabel):
         target_path = self.cal_wizard.get_next_snap_path(self.device)
         print "Taking snapshot "+target_path
 
-        command = "/home/pi/ProjectEagle/build/bin/Snapshot"
-
-        arg1 = str(Path(self.device.get_config_path()).relative_to(os.path.abspath("../../..")))
-        arg1 = os.path.join("/home/pi/ProjectEagle", arg1)
-
-        arg2 = "/home/pi/ProjectEagle/" + self.device.name + "_snapshot.png"
+        command = self.device.remote_path_finder.get_path("[PROJECT_FOLDER]/build/bin/Snapshot")
+        arg1 = self.device.remote_path_finder.get_path("[DEVICE_CONFIG]")
+        arg2 = self.device.remote_path_finder.get_path("[PROJECT_FOLDER]/" + self.device.name + "_snapshot.png")
 
         self.device.ssh_manager.start_process("snapshot", command, arg1, arg2)
         self.device.ssh_manager.wait_for_process("snapshot")
@@ -123,10 +120,7 @@ class ImageTransmitter(QObject):
             # Start image transmitter
             command = "/home/pi/ProjectEagle/build/bin/ImageTransmitter"
 
-            target = str(Path(self.device.get_config_path()).relative_to(os.path.abspath("../../..")))
-            target = os.path.join("/home/pi/ProjectEagle", target)
-
-            self.device.ssh_manager.start_process("image_transmitter", command, target)
+            self.device.ssh_manager.start_process("image_transmitter", command, self.device.remote_path_finder.get_path("[DEVICE_CONFIG]"))
 
             self._isRunning = True
             self._isDead = False
@@ -138,14 +132,9 @@ class ImageTransmitter(QObject):
                 # self.emit(self.signal, "transmitter lost")
                 self._isDead = True
 
-        while self._isRunning:
-            time.sleep(.01)
-
-        self.device.ssh_manager.end_process("image_transmitter")
-
     def stop(self):
         print "Stopping Image Transmitter"
-        print "======================="
+        print "=========================="
         self._isRunning = False
         self.device.ssh_manager.end_process("image_transmitter")
 
@@ -167,6 +156,7 @@ class ImageReceiver(QObject):
             print "======================="
             print "Starting Image Receiver"
             print "======================="
+            self._isRunning = True
 
             print "Group: "+self.group
 
@@ -179,8 +169,6 @@ class ImageReceiver(QObject):
             print "Waiting for peers ..."
             self.com.wait_for_peers()
             print "Found peers"
-
-            self._isRunning = True
 
         print "Start receiving images ... "
 
@@ -197,8 +185,10 @@ class ImageReceiver(QObject):
             else:
                 print "Invalid image received"
 
+        print "Closing com ..."
         self.com.leave(self.group)
         self.com.stop()
+        print "done"
 
     def stop(self):
         print "Stopping Image Receiver"

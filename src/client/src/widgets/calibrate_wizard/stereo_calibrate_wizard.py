@@ -62,7 +62,7 @@ class StereoCalibrateWizard(QtGui.QDialog):
         snap_list_layout = QtGui.QVBoxLayout()
 
         # Build the snapshot list
-        self.file_list = FileListView(os.path.join(self.left_device.get_root(), self.IMG_FOLDER))
+        self.file_list = FileListView(self.left_device.local_path_finder.get_path("[EXTRINSIC_SNAP_FOLDER]"))
         self.snap_count = self.file_list.get_file_count()
         snap_list_layout.addWidget(self.file_list)
 
@@ -102,16 +102,16 @@ class StereoCalibrateWizard(QtGui.QDialog):
         self.connect(self.right_image_stream, self.right_image_stream.signal_reload, self.handle_reload_finished)
 
     def setup_folder(self):
-        path = os.path.join(self.left_device.get_root(), self.IMG_FOLDER)
+        path = self.left_device.local_path_finder.get_path("[EXTRINSIC_SNAP_FOLDER]")
         if not os.path.isdir(path):
             os.mkdir(path)
 
-        path = os.path.join(self.right_device.get_root(), self.IMG_FOLDER)
+        path = self.right_device.local_path_finder.get_path("[EXTRINSIC_SNAP_FOLDER]")
         if not os.path.isdir(path):
             os.mkdir(path)
 
     def get_next_snap_path(self, device):
-        return os.path.join(device.get_root(), self.IMG_FOLDER, "image_" + str(self.snap_count) + ".png")
+        return device.local_path_finder.get_path("[EXTRINSIC_SNAP_FOLDER]/image_" + str(self.snap_count) + ".png")
 
     def closeEvent(self, QCloseEvent):
         self.left_image_stream.finish()
@@ -171,25 +171,25 @@ class StereoCalibrateWizard(QtGui.QDialog):
         self.cal_button.setEnabled(True)
 
     def handle_calibrate(self):
-        path = os.path.join(self.left_device.get_root(), self.IMG_FOLDER)
+        path = self.left_device.local_path_finder.get_path("[EXTRINSIC_SNAP_FOLDER]")
         conf = CalibrationConfig(
-            self,
             device=self.left_device,
-            output=self.left_device.get_extrinsic_path(),
-            images=self.file_list.get_selected(path)
+            images=self.file_list.get_selected(path),
+            image_list_path="[EXTRINSIC_SNAP_LIST]",
+            output_path="[EXTRINSIC_CALIBRATION]"
         )
-        conf.write_config(os.path.join(self.left_device.get_root(), self.CONFIG))
-        conf.write_image_list(os.path.join(self.left_device.get_root(), self.IMG_CONFIG))
+        conf.write_config(self.left_device.local_path_finder.get_path("[EXTRINSIC_CONFIG]"))
+        conf.write_image_list(self.left_device.local_path_finder.get_path("[EXTRINSIC_SNAP_LIST]"))
 
-        path = os.path.join(self.right_device.get_root(), self.IMG_FOLDER)
+        path = self.right_device.local_path_finder.get_path("[EXTRINSIC_SNAP_FOLDER]")
         conf = CalibrationConfig(
-            self,
             device=self.right_device,
-            output=self.right_device.get_extrinsic_path(),
-            images=self.file_list.get_selected(path)
+            images=self.file_list.get_selected(path),
+            image_list_path="[EXTRINSIC_SNAP_LIST]",
+            output_path="[EXTRINSIC_CALIBRATION]"
         )
-        conf.write_config(os.path.join(self.right_device.get_root(), self.CONFIG))
-        conf.write_image_list(os.path.join(self.right_device.get_root(), self.IMG_CONFIG))
+        conf.write_config(self.right_device.local_path_finder.get_path("[EXTRINSIC_CONFIG]"))
+        conf.write_image_list(self.right_device.local_path_finder.get_path("[EXTRINSIC_SNAP_LIST]"))
 
         self.calibrate()
 
@@ -204,8 +204,8 @@ class StereoCalibrateWizard(QtGui.QDialog):
     def calibrate(self):
         from subprocess import call
         command = "../../../build/bin/StereoCalibrate"
-        config1 = os.path.join(self.left_device.get_root(), self.CONFIG)
-        config2 = os.path.join(self.right_device.get_root(), self.CONFIG)
+        config1 = self.left_device.local_path_finder.get_path("[EXTRINSIC_CONFIG]")
+        config2 = self.right_device.local_path_finder.get_path("[EXTRINSIC_CONFIG]")
 
         # TODO direction of transformation? => swap configs?
 

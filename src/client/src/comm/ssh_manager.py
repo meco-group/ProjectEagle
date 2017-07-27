@@ -13,6 +13,7 @@ class SSHManager:
             self.pid = ""
 
             self.running = False
+            self.started = False
 
             self.__monitor = SSHClient()
             self.__control = SSHClient()
@@ -47,6 +48,7 @@ class SSHManager:
                 print str(i)+"\t["+self.name+"] "+line.replace('\n', ' ').replace('\r', '')
 
             self.running = True
+            self.started = True
 
         def is_active(self):
             if not self.running:
@@ -67,7 +69,14 @@ class SSHManager:
                 time.sleep(.01)
 
         def close(self):
+            if not self.started:
+                print "Process "+self.name+" has not been started. Waiting for start"
+
+            while not self.started:
+                time.sleep(.01)
+
             if not self.running:
+                print "Process "+self.name+" is already closed. Attempted to close again"
                 return
 
             self.running = False
