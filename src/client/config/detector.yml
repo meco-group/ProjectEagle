@@ -6,7 +6,7 @@ blob:
     minArea: 80
     filterByCircularity: 1
     minCircularity: 0.85
-pixelspermeter: 118
+pixelspermeter: 125
 min_robot_area: 0.06
 min_obstacle_area: 0.02
 markers:

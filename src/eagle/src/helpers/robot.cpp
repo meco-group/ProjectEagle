@@ -52,10 +52,6 @@ void Robot::pose2vertices(const cv::Point2f& position, double orientation, std::
 }
 
 void Robot::pose2global(cv::Point2f& position, double& orientation) const {
-    std::cout << _T << "\n" << cv::Point2f(
-            (float)(_T.at<double>(0,0)/1000.0),
-            (float)(_T.at<double>(1,0)/1000.0)
-    ) << "\n";
     position = position + cv::Point2f(
             (float)(_T.at<double>(0,0)/1000.0),
             (float)(_T.at<double>(1,0)/1000.0)

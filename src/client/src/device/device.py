@@ -88,6 +88,17 @@ class Device:
         ssh = self.ssh_manager.get_ssh()
         sftp = ssh.open_sftp()
 
+        print "Sending detector settings file to remote:"
+        print "from "+self.local_path_finder.get_path("[DETECTOR_CONFIG]") \
+              + " to " + self.remote_path_finder.get_path("[DETECTOR_CONFIG]")
+        try:
+            sftp.put(
+                self.local_path_finder.get_path("[DETECTOR_CONFIG]"),
+                self.remote_path_finder.get_path("[DETECTOR_CONFIG]")
+            )
+        except OSError:
+            print "File does not exist"
+
         print "Sending calibration files to remote:"
         print "from "+self.local_path_finder.get_path("[INTRINSIC_CALIBRATION]") \
               + " to " + self.remote_path_finder.get_path("[INTRINSIC_CALIBRATION]")

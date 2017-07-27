@@ -58,6 +58,9 @@ int main(int argc, char* argv[]) {
     std::vector< Robot* > robots = std::vector< Robot* >{&BB1};
     std::vector< Obstacle* > obstacles;
 
+    std::cout << "Starting eagle transmitter\n";
+    std::cout << "T: \n" << T << "\n";
+
     // main execution loop
     int nof = 0;
     while ( !io::kbhit() ) {
@@ -115,14 +118,15 @@ int main(int argc, char* argv[]) {
         imheader.time = k;
         cv::imencode(".jpg",im,buffer,compression_params);
         com.shout(&imheader, buffer.data(), sizeof(imheader), buffer.size(), comSettings.group);
-        cv::imshow("Viewer",im);
-        cv::waitKey(1);
+
+        // cv::imshow("Viewer",im);
+        // cv::waitKey(1);
 
         if (robots[0]->detected()){
             std::cout << "Robot detected!" << std::endl;
             std::cout << robots[0]->serialize().x << ", " << robots[0]->serialize().y << std::endl;
         }
-        std::cout << "image " << nof << " sent" << std::endl;
+        // std::cout << "image " << nof << " sent" << std::endl;
     }
 
     // stop the program
