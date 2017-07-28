@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <opencv_storage>
 	<CalibrationSettings>
-		<Image_Count>9</Image_Count>
+		<Image_Count>14</Image_Count>
 		<Source>/home/peter/Documents/Honours/ProjectEagle/src/client/config/devices/other/extrinsic_snaps.xml</Source>
 		<Source_Type>STORED</Source_Type>
 		<Board_Settings>/home/peter/Documents/Honours/ProjectEagle/src/client/config/devices/other/config.xml</Board_Settings>

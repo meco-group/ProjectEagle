@@ -146,7 +146,7 @@ class CalibrateWizard(QtGui.QDialog):
         self.calibrate()
         self.device.update()
         # TODO send calibration
-        self.image_stream.stop()
+        self.image_stream.finish()
         self.accept()
 
     def calibrate(self):

@@ -46,8 +46,10 @@ void Detector::init_blob(const cv::FileStorage& params) {
 
 void Detector::init_transformations(const cv::Mat& frame) {
     int height = frame.size().height;
-    _cam2world_tf = cv::Matx23f(_pixel2meter, 0, 0, 0, -_pixel2meter, _pixel2meter*height);
-    _world2cam_tf = cv::Matx23f(_meter2pixel, 0, 0, 0, -_meter2pixel, height);
+    // TODO changed the - sign on the second _pixel2meter and on _meter2pixel
+    // this is because the extrinsic transformation uses this axis system
+    _cam2world_tf = cv::Matx23f(_pixel2meter, 0, 0, 0, _pixel2meter, _pixel2meter*height);
+    _world2cam_tf = cv::Matx23f(_meter2pixel, 0, 0, 0, _meter2pixel, height);
 }
 
 void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles) {

@@ -3,8 +3,6 @@ from PyQt4 import QtGui, QtCore
 
 import time
 from PyQt4.QtCore import QThread, QObject
-from pathlib import Path
-
 from src.comm.communicator import Communicator
 
 from xml.etree import ElementTree as ET
@@ -43,8 +41,7 @@ class ImageStream(QtGui.QLabel):
         self.connect(self.image_transmitter, self.image_transmitter.signal, self.reload)
 
     def finish(self):
-        self.image_receiver.stop()
-        self.image_transmitter.stop()
+        self.stop()
         self.receiver_thread.quit()
         self.receiver_thread.wait()
         self.transmitter_thread.quit()
@@ -59,8 +56,11 @@ class ImageStream(QtGui.QLabel):
         return
 
     def stop(self):
-        self.image_transmitter.stop()
+        # note: The image receiver has to be stopped first
+        #       otherwise zyre will keep waiting for a message from the
+        #       transmitter indefinitely
         self.image_receiver.stop()
+        self.image_transmitter.stop()
 
     def snap(self):
         # Stop ImageTransmitter/Receiver
@@ -76,6 +76,7 @@ class ImageStream(QtGui.QLabel):
 
         self.device.ssh_manager.start_process("snapshot", command, arg1, arg2)
         self.device.ssh_manager.wait_for_process("snapshot")
+        self.device.ssh_manager.end_process("snapshot")
 
         print "Downloading snapshot"
 
@@ -123,14 +124,6 @@ class ImageTransmitter(QObject):
             self.device.ssh_manager.start_process("image_transmitter", command, self.device.remote_path_finder.get_path("[DEVICE_CONFIG]"))
 
             self._isRunning = True
-            self._isDead = False
-
-        while self._isRunning and not self._isDead:
-            self.device.ssh_manager.wait_for_process("image_transmitter")
-            if self._isRunning:
-                print "Lost transmitter process"
-                # self.emit(self.signal, "transmitter lost")
-                self._isDead = True
 
     def stop(self):
         print "Stopping Image Transmitter"
@@ -188,9 +181,14 @@ class ImageReceiver(QObject):
         print "Closing com ..."
         self.com.leave(self.group)
         self.com.stop()
-        print "done"
+        print "Closed com"
+
+        self._isDead = True
 
     def stop(self):
         print "Stopping Image Receiver"
         print "======================="
         self._isRunning = False
+        while not self._isDead:
+            time.sleep(.01)
+        print "Stopped image receiver"
