@@ -119,7 +119,7 @@ class ImageTransmitter(QObject):
             print "=========================="
 
             # Start image transmitter
-            command = "/home/pi/ProjectEagle/build/bin/ImageTransmitter"
+            command = self.device.remote_path_finder.get_path("[PROJECT_FOLDER]/build/bin/ImageTransmitter")
 
             self.device.ssh_manager.start_process("image_transmitter", command, self.device.remote_path_finder.get_path("[DEVICE_CONFIG]"))
 
