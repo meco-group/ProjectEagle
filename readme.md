@@ -6,6 +6,9 @@ Project Eagle collects modular building blocks for obstacle and robot pose detec
 
 ### Dependencies
 Install the following packages:
+* cmake version 3.1 or higher
+    - check this in the terminal with the command `cmake --version`
+    - if not installed, get cmake from the website
 * OpenCV 3.2
     - Download source from [here](https://github.com/opencv/opencv/releases).
     - `mkdir build` and `cd build`
