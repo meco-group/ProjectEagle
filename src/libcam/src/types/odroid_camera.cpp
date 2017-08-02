@@ -30,6 +30,6 @@ bool OdroidCamera::setBrightness(int brightness) {
 }
 
 bool OdroidCamera::setResolution(const std::vector<int>& resolution){
-	format(resolution[0], resolution[1], V4L2_PIX_FMT_Y16);
+	format(resolution[0], resolution[1], V4L2_PIX_FMT_YUYV);
 	return true;
 }
