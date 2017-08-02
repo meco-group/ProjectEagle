@@ -4,7 +4,7 @@ using namespace cam;
 
 OdroidCamera::OdroidCamera(int device) :
     V4L2Camera(device) {
-    format(1280, 720, V4L2_PIX_FMT_YUYV);
+    format(640, 480, V4L2_PIX_FMT_YUYV);
 	buffers(4);
 	setBrightness(5);
 }
@@ -21,8 +21,8 @@ bool OdroidCamera::readYUYV(cv::Mat &img) {
 }
 
 bool OdroidCamera::setBrightness(int brightness) {
-	if (brightness < 0 || brightness > 100) {
-		std::cout << "Brighness should lie between 0 and 100!" << std::endl;
+	if (brightness < 0 || brightness > 8) {
+		std::cout << "Brighness should lie between 0 and 8!" << std::endl;
 		return false;
 	}
 
