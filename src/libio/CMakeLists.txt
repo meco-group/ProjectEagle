@@ -22,7 +22,6 @@ target_compile_features(LibIO
 
 # Depend on a library that we defined in the top-level file
 #target_link_libraries(LibIO
-#        boost
 #        ${LIBRARIES})
 
 # 'make install' to the correct locations (provided by GNUInstallDirs).

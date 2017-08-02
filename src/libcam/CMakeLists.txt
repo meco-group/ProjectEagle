@@ -33,7 +33,6 @@ target_compile_features(LibCam
 
 # Depend on a library that we defined in the top-level file
 target_link_libraries(LibCam
-        boost
         ${LIBRARIES}
         LibConfig)
 

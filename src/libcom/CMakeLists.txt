@@ -22,7 +22,6 @@ target_compile_features(LibCom
 
 # Depend on a library that we defined in the top-level file
 target_link_libraries(LibCom
-        boost
         ${LIBRARIES}
         LibConfig)
 

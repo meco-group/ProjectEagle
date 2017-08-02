@@ -33,7 +33,6 @@ target_compile_features(LibConfig
 
 # Depend on a library that we defined in the top-level file
 target_link_libraries(LibConfig
-        boost
         ${LIBRARIES})
 
 # 'make install' to the correct locations (provided by GNUInstallDirs).
