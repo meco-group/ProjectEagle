@@ -29,7 +29,7 @@ V4L2Camera::V4L2Camera(int device):
     char d[3];
     sprintf(d, "%d", device);
     std::string device_name = "/dev/video" + std::string(d);
-    if((_fd = open(device_name.c_str(), O_RDWR | O_NONBLOCK, 0)) < 0){
+    if((_fd = open(device_name.c_str(), O_RDWR, 0)) < 0){
         perror("open");
     }
 }
