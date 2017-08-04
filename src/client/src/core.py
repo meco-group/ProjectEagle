@@ -3,15 +3,15 @@
 import sys
 from PyQt4 import QtGui, QtCore
 
-from src.device.device import Device
-from src.device.device_manager import DeviceManager
-from src.widgets.calibrate_wizard.calibrate_wizard import CalibrateWizard
-from src.widgets.calibrate_wizard.stereo_calibrate_wizard import StereoCalibrateWizard
-from src.widgets.core.device_tree import DeviceTree
-from src.widgets.core.main_window import MainWindow
-from src.widgets.core.menu_bar import MenuBar
-from src.widgets.core.shelf import Shelf
-from src.widgets.device_wizard import DeviceWizard
+from device.device import Device
+from device.device_manager import DeviceManager
+from widgets.calibrate_wizard.calibrate_wizard import CalibrateWizard
+from widgets.calibrate_wizard.stereo_calibrate_wizard import StereoCalibrateWizard
+from widgets.core.device_tree import DeviceTree
+from widgets.core.main_window import MainWindow
+from widgets.core.menu_bar import MenuBar
+from widgets.core.shelf import Shelf
+from widgets.device_wizard import DeviceWizard
 
 
 class Application(QtGui.QApplication):

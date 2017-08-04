@@ -5,8 +5,8 @@ import yaml
 
 import configparser as configparser
 
-from src.device.device import Device
-from src.widgets.device_wizard import DeviceWizard
+from device import Device
+from widgets.device_wizard import DeviceWizard
 
 
 class DeviceManager:
