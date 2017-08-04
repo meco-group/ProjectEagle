@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 
     Communicator com("receiver", comSettings.interface);
     com.start(comSettings.init_wait_time);
-    com.join("EAGLE");
+    com.join(comSettings.group);
 
     // wait for peer
     std::cout << "waiting for peers" << std::endl;
