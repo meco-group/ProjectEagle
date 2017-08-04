@@ -2,10 +2,10 @@ import os
 
 from pathlib import Path
 
-from src.comm.ssh_manager import SSHManager
-from src.config.extrinsic_conf import ExtrinsicConfig
-from src.config.path_finder import PathFinder
-from src.widgets.core.device_tree import DeviceItem
+from comm.ssh_manager import SSHManager
+from config.extrinsic_conf import ExtrinsicConfig
+from config.path_finder import PathFinder
+from widgets.core.device_tree import DeviceItem
 
 
 class Device:

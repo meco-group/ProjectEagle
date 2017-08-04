@@ -7,7 +7,7 @@ from xml.dom import minidom
 from io import BytesIO
 from xml.sax.saxutils import unescape
 
-from src.device.device import Device
+from device.device import Device
 
 
 class DeviceWizard(QtGui.QDialog):

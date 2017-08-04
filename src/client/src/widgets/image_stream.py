@@ -3,7 +3,7 @@ from PyQt4 import QtGui, QtCore
 
 import time
 from PyQt4.QtCore import QThread, QObject
-from src.comm.communicator import Communicator
+from comm.communicator import Communicator
 
 from xml.etree import ElementTree as ET
 

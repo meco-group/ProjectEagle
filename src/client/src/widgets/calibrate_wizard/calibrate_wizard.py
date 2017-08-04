@@ -6,9 +6,9 @@ from xml.dom import minidom
 
 import xml.etree.cElementTree as ET
 
-from src.config.cal_config import CalibrationConfig
-from src.widgets.calibrate_wizard.file_list_view import FileListView
-from src.widgets.image_stream import ImageStream
+from config.cal_config import CalibrationConfig
+from file_list_view import FileListView
+from widgets.image_stream import ImageStream
 
 
 class CalibrateWizard(QtGui.QDialog):
