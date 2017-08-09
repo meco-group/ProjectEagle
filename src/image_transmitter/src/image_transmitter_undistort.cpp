@@ -7,7 +7,7 @@ using namespace cam;
 
 int main(int argc, char* argv[]) {
     // Parse arguments
-    const string config = argc > 1 ? argv[1] : "/home/odroid/ProjectEagle/src/client/config/devices/eagle0/calibration.xml";
+    const string config = argc > 1 ? argv[1] : "/home/odroid/ProjectEagle/src/client/config/devices/eagle0/config.xml";
     const string node_name = argc > 2 ? argv[2] : "eagle0";
 
     CameraSettings cameraSettings;
