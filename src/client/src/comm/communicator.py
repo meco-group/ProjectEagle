@@ -8,7 +8,6 @@ import cv2
 import numpy as np
 from pyre import Pyre
 import zmq
-from enum import Enum
 
 
 class Communicator(Pyre):
@@ -39,7 +38,6 @@ class Communicator(Pyre):
 
             # Parse the header
             h_id, h_time = struct.unpack('IL', data[offset:(offset + header_size)])
-            header = Header(h_id, h_time)
             offset += header_size
 
             # Get the size of the data
@@ -51,23 +49,13 @@ class Communicator(Pyre):
             offset += data_size
 
             # Parse the data
-            if header.type == header.HeaderType.IMAGE:
+            if h_id == 2:
                 # Decode openCv
                 nparr = np.fromstring(buffer, np.uint8)
                 img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-                return header, img
+                return img
             else:
                 # TODO parser for other cases
-                return header, None
+                return None
 
-
-class Header:
-    class HeaderType(Enum):
-        MARKER = 0
-        OBSTACLE = 1
-        IMAGE = 2
-
-    def __init__(self, type, time):
-        self.type = self.HeaderType(type)
-        self.time = time

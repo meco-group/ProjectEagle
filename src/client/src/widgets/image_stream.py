@@ -166,7 +166,7 @@ class ImageReceiver(QObject):
         print "Start receiving images ... "
 
         while self._isRunning:
-            (header, img) = self.com.read()
+            img = self.com.read()
 
             if img is not None:
                 # Transform to QImage
