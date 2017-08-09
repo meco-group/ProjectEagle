@@ -77,10 +77,9 @@ int main(int argc, char* argv[]) {
         //  check time
         auto t = std::chrono::high_resolution_clock::now();
         if (std::chrono::duration_cast<std::chrono::milliseconds>(t-t0).count() < dt) {
-            break;
+            continue;
         }
-        auto t0 = t;
-
+        t0 = t;
         // Detect the robots/obstacles
         cam->read(im); nof++;
         detector.search(im, robots, obstacles);
