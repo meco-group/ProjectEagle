@@ -34,6 +34,13 @@ class DeviceManager:
             name = self.deviceTree.listOfDevices[index.row()].name
             self.devices[name].upload()
 
+    def download_selected(self):
+        indexes = self.deviceTree.selectionModel().selectedRows()
+        for index in sorted(indexes):
+            name = self.deviceTree.listOfDevices[index.row()].name
+            print "Downloading from " + name
+            self.devices[name].download()
+
     def save_devices(self, path=None):
         # TODO we should be able to clear all devices that are not saved in main.conf
         if path is None:
