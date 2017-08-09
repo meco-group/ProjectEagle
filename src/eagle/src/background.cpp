@@ -5,7 +5,7 @@ using namespace cam;
 
 int main(int argc, char* argv[]) {
     // Parse arguments
-    const string cameraSettingsFile = argc > 1 ? argv[1] : "/home/peter/Documents/Honours/ProjectEagle/src/client/config/devices/origin/config.xml";
+    const string cameraSettingsFile = argc > 1 ? argv[1] : "/home/odroid/ProjectEagle/src/client/config/devices/eagle0/config.xml";
 
     // Open settings file
     CameraSettings cameraSettings;
