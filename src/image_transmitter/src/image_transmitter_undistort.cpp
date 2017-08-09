@@ -22,11 +22,10 @@ int main(int argc, char* argv[]) {
 
     // Start camera
     cam->setResolution(cameraSettings.comp_res_width, cameraSettings.comp_res_height);
-    // cam->calibrate(cameraSettings.calPath); //camera can be calibrated
+    cam->calibrate(cameraSettings.calPath); //camera can be calibrated
     cam->start();
 
     Communicator com(node_name, comSettings.interface);
-    com.debug();
     com.start(comSettings.init_wait_time);
     com.join(comSettings.group);
 

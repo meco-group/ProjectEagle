@@ -29,7 +29,7 @@ class ImageStream(QtGui.QLabel):
         self.receiver_thread = QThread()
         self.receiver_thread.start()
 
-        self.image_receiver = ImageReceiver(self.group)
+        self.image_receiver = ImageReceiver(self.device, self.group)
         self.image_receiver.moveToThread(self.receiver_thread)
         self.connect(self.image_receiver, self.image_receiver.signal, self.update_image)
 
@@ -121,7 +121,7 @@ class ImageTransmitter(QObject):
             # Start image transmitter
             command = self.device.remote_path_finder.get_path("[PROJECT_FOLDER]/build/bin/ImageTransmitter")
 
-            self.device.ssh_manager.start_process("image_transmitter", command, self.device.remote_path_finder.get_path("[DEVICE_CONFIG]"))
+            self.device.ssh_manager.start_process("image_transmitter", command, self.device.remote_path_finder.get_path("[DEVICE_CONFIG]"), self.device.name+'_imgtx')
 
             self._isRunning = True
 
@@ -133,8 +133,9 @@ class ImageTransmitter(QObject):
 
 
 class ImageReceiver(QObject):
-    def __init__(self, group="EAGLE"):
+    def __init__(self, device, group="EAGLE"):
         super(ImageReceiver, self).__init__()
+        self.device = device
         self.group = group
         self.img = None
         self.com = None
@@ -166,17 +167,17 @@ class ImageReceiver(QObject):
         print "Start receiving images ... "
 
         while self._isRunning:
-            img = self.com.read()
+            img, pr = self.com.read()
+            if pr == self.device.name+'_imgtx':
+                if img is not None:
+                    # Transform to QImage
+                    height, width, channel = img.shape
+                    bytesPerLine = 3 * width
+                    self.img = QtGui.QImage(img.data, width, height, bytesPerLine, QtGui.QImage.Format_RGB888).rgbSwapped()
 
-            if img is not None:
-                # Transform to QImage
-                height, width, channel = img.shape
-                bytesPerLine = 3 * width
-                self.img = QtGui.QImage(img.data, width, height, bytesPerLine, QtGui.QImage.Format_RGB888).rgbSwapped()
-
-                self.emit(self.signal, "image updated")
-            else:
-                print "Invalid image received"
+                    self.emit(self.signal, "image updated")
+                else:
+                    print "Invalid image received"
 
         print "Closing com ..."
         self.com.leave(self.group)
