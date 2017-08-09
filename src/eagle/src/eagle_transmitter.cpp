@@ -3,6 +3,8 @@
 #include "libcom.hpp"
 #include "helpers/detector.h"
 #include "libio.hpp"
+#include <string>
+#include <chrono>
 
 using namespace com;
 using namespace cam;
@@ -11,7 +13,9 @@ int main(int argc, char* argv[]) {
     // Parse arguments
     string config = argc > 1 ? argv[1] : "/home/odroid/ProjectEagle/src/client/config/devices/eagle0/config.xml";
     string node_name = argc > 2 ? argv[2] : "eagle0";
-    string image_stream_str = argc > 3 ? argv[3] : "1";
+    string frequency_str = argc > 3 ? argv[3] : "10"; // Hz
+    string image_stream_str = argc > 4 ? argv[4] : "1";
+    double frequency = std::stod(frequency_str);
     bool image_stream = (image_stream_str == "1");
 
     // Open settings file
@@ -67,7 +71,16 @@ int main(int argc, char* argv[]) {
 
     // main execution loop
     int nof = 0;
+    int dt = 1000/frequency;
+    auto t0 = std::chrono::high_resolution_clock::now();
     while ( !io::kbhit() ) {
+        //  check time
+        auto t = std::chrono::high_resolution_clock::now();
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(t-t0).count() < dt) {
+            break;
+        }
+        auto t0 = t;
+
         // Detect the robots/obstacles
         cam->read(im); nof++;
         detector.search(im, robots, obstacles);
