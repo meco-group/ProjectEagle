@@ -7,7 +7,7 @@ int main(int argc, char* argv[]) {
     // Parse arguments
     string iface = (argc > 1) ? argv[1] : "wlan0";
     string group = (argc > 2) ? argv[2] : "EAGLE";
-    string peer = (argc > 3) ? argv[3] : "eagle0_imgtx";
+    string peer = (argc > 3) ? argv[3] : "eagle0";
 
     std::cout << "iface: " << iface << std::endl;
     std::cout << "group: " << group << std::endl;
