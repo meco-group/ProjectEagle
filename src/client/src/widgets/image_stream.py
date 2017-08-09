@@ -121,7 +121,7 @@ class ImageTransmitter(QObject):
             # Start image transmitter
             command = self.device.remote_path_finder.get_path("[PROJECT_FOLDER]/build/bin/ImageTransmitter")
 
-            self.device.ssh_manager.start_process("image_transmitter", command, self.device.remote_path_finder.get_path("[DEVICE_CONFIG]"), self.device.name+'_imgtx')
+            self.device.ssh_manager.start_process("image_transmitter", command, self.device.remote_path_finder.get_path("[DEVICE_CONFIG]"), self.device.name)
 
             self._isRunning = True
 
@@ -168,7 +168,7 @@ class ImageReceiver(QObject):
 
         while self._isRunning:
             img, pr = self.com.read()
-            if pr == self.device.name+'_imgtx':
+            if pr == self.device.name:
                 if img is not None:
                     # Transform to QImage
                     height, width, channel = img.shape
