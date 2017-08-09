@@ -11,7 +11,8 @@ int main(int argc, char* argv[]) {
     // Parse arguments
     string config = argc > 1 ? argv[1] : "/home/odroid/ProjectEagle/src/client/config/devices/eagle0/config.xml";
     string node_name = argc > 2 ? argv[2] : "eagle0";
-    bool image_stream = argc > 3 ? argv[3] : false;
+    string image_stream_str = argc > 3 ? argv[3] : "1";
+    bool image_stream = (image_stream_str == "1");
 
     // Open settings file
     CameraSettings cameraSettings;
@@ -28,7 +29,6 @@ int main(int argc, char* argv[]) {
     cam->start();
 
     // setup the communication
-
     Communicator com(node_name, comSettings.interface);
     com.start(comSettings.init_wait_time);
     com.join(comSettings.group);
@@ -55,9 +55,11 @@ int main(int argc, char* argv[]) {
     fs.release();
 
     // Make a robot which the camera should find
-    // Robot BB1(0, 0.55, 0.4, cv::Scalar(17, 110, 138));
-    Robot BB1(1, 0.55, 0.4, cv::Scalar(17, 110, 138), T, R);
-    std::vector< Robot* > robots = std::vector< Robot* >{&BB1};
+    Robot dave(0, 0.55, 0.4, cv::Scalar(17, 110, 138), T, R);
+    Robot krist(1, 0.55, 0.4, cv::Scalar(138, 31, 17), T, R);
+    Robot kurt(9, 0.55, 0.4, cv::Scalar(17, 138, 19), T, R);
+
+    std::vector< Robot* > robots = std::vector< Robot* >{&dave, &krist, &kurt};
     std::vector< Obstacle* > obstacles;
 
     std::cout << "Starting eagle transmitter\n";
@@ -123,9 +125,10 @@ int main(int argc, char* argv[]) {
             com.shout(&imheader, buffer.data(), sizeof(imheader), buffer.size(), comSettings.group);
         }
 
-        if (robots[0]->detected()){
-            std::cout << "Robot detected!" << std::endl;
-            std::cout << robots[0]->serialize().x << ", " << robots[0]->serialize().y << std::endl;
+        for (int k=0; k<robots.size(); k++) {
+            if (robots[k]->detected()) {
+                std::cout << "Robot " << robots[k]->code() << " detected!" << std::endl;
+            }
         }
     }
 
