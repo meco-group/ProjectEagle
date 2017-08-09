@@ -9,7 +9,9 @@ using namespace cam;
 
 int main(int argc, char* argv[]) {
     // Parse arguments
-    const string config = argc > 1 ? argv[1] : "/home/peter/Documents/Honours/ProjectEagle/config/config.xml";
+    string config = argc > 1 ? argv[1] : "/home/odroid/ProjectEagle/src/client/config/devices/eagle0/config.xml";
+    string node_name = argc > 2 ? argv[2] : "eagle0";
+    bool image_stream = argc > 3 ? argv[3] : false;
 
     // Open settings file
     CameraSettings cameraSettings;
@@ -27,7 +29,7 @@ int main(int argc, char* argv[]) {
 
     // setup the communication
 
-    Communicator com("transmitter", comSettings.interface);
+    Communicator com(node_name, comSettings.interface);
     com.start(comSettings.init_wait_time);
     com.join(comSettings.group);
 
@@ -113,20 +115,18 @@ int main(int argc, char* argv[]) {
         // send everything
         com.shout(data, sizes, comSettings.group);
 
-        // Draw everything to give some feedback
-        detector.draw(im, robots, obstacles);
-        imheader.time = k;
-        cv::imencode(".jpg",im,buffer,compression_params);
-        com.shout(&imheader, buffer.data(), sizeof(imheader), buffer.size(), comSettings.group);
-
-        // cv::imshow("Viewer",im);
-        // cv::waitKey(1);
+        if (image_stream) {
+            // draw everything to give some feedback
+            detector.draw(im, robots, obstacles);
+            imheader.time = k;
+            cv::imencode(".jpg", im, buffer, compression_params);
+            com.shout(&imheader, buffer.data(), sizeof(imheader), buffer.size(), comSettings.group);
+        }
 
         if (robots[0]->detected()){
             std::cout << "Robot detected!" << std::endl;
             std::cout << robots[0]->serialize().x << ", " << robots[0]->serialize().y << std::endl;
         }
-        // std::cout << "image " << nof << " sent" << std::endl;
     }
 
     // stop the program
