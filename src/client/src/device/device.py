@@ -122,3 +122,50 @@ class Device:
             print "File does not exist"
 
         ssh.close()
+        print "Uploading files done."
+
+    def download(self):
+        #self.sync_config()
+        print self.local_path_finder.get_path("[DEVICE_FOLDER]")
+        directory = os.path.dirname(self.local_path_finder.get_path("[DEVICE_FOLDER]"))
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        ssh = self.ssh_manager.get_ssh()
+        sftp = ssh.open_sftp()
+
+        print "Pulling detector settings file from remote:"
+        print "from "+ self.remote_path_finder.get_path("[DETECTOR_CONFIG]") \
+              + " to " + self.local_path_finder.get_path("[DETECTOR_CONFIG]")
+        try:
+            sftp.get(
+                self.remote_path_finder.get_path("[DETECTOR_CONFIG]"),
+                self.local_path_finder.get_path("[DETECTOR_CONFIG]")
+            )
+        except IOError:
+            print "File does not exist"
+
+        print "Pulling calibration files from remote:"
+        print "from "+self.remote_path_finder.get_path("[INTRINSIC_CALIBRATION]") \
+              + " to " + self.local_path_finder.get_path("[INTRINSIC_CALIBRATION]")
+        try:
+            sftp.get(
+                self.remote_path_finder.get_path("[INTRINSIC_CALIBRATION]"),
+                self.local_path_finder.get_path("[INTRINSIC_CALIBRATION]")
+            )
+        except IOError:
+            print "File does not exist"
+
+        print "from "+self.remote_path_finder.get_path("[EXTRINSIC_CALIBRATION]") \
+              + " to " + self.local_path_finder.get_path("[EXTRINSIC_CALIBRATION]")
+
+        try:
+            sftp.get(
+                self.remote_path_finder.get_path("[EXTRINSIC_CALIBRATION]"),
+                self.local_path_finder.get_path("[EXTRINSIC_CALIBRATION]")
+            )
+        except IOError:
+            print "File does not exist"
+
+        ssh.close()
+        print "Downloading files done."

@@ -76,6 +76,7 @@ class Application(QtGui.QApplication):
         self.shelf.add_button.clicked.connect(self.handle_add)
         self.shelf.edit_button.clicked.connect(self.handle_edit)
         self.shelf.upload_button.clicked.connect(self.handle_upload)
+        self.shelf.download_button.clicked.connect(self.handle_download)
         self.shelf.calibrate_button.clicked.connect(self.handle_calibrate)
         self.shelf.st_calibrate_button.clicked.connect(self.handle_stereo_calibrate)
         self.handle_selection_update()
@@ -98,6 +99,10 @@ class Application(QtGui.QApplication):
 
     def handle_upload(self):
         self.deviceManager.upload_selected()
+
+    def handle_download(self):
+        print "download clicked"
+        self.deviceManager.download_selected()
 
     def handle_calibrate(self):
         indexes = self.deviceTree.selectionModel().selectedRows()

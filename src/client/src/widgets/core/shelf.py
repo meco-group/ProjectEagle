@@ -21,6 +21,9 @@ class Shelf(QtGui.QWidget):
         self.upload_button = QtGui.QPushButton('Upload', self)
         self.box.addWidget(self.upload_button)
 
+        self.download_button = QtGui.QPushButton('Download', self)
+        self.box.addWidget(self.download_button)
+
         self.vertical_spacer = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.box.addItem(self.vertical_spacer)
 
