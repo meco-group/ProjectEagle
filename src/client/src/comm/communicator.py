@@ -23,11 +23,13 @@ class Communicator(Pyre):
     def read(self):
         # Obtain information from camera.
         msg = self.recv()
+
         while msg[0] != 'SHOUT':
             msg = self.recv()
 
         # Initiate elements
         data = msg[4]
+        peer = msg[2]
         offset = 0
 
         # Parse data
@@ -54,8 +56,8 @@ class Communicator(Pyre):
                 nparr = np.fromstring(buffer, np.uint8)
                 img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-                return img
+                return img, peer
             else:
                 # TODO parser for other cases
-                return None
+                return None, None
 

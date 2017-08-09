@@ -5,14 +5,17 @@ using namespace com;
 
 int main(int argc, char* argv[]) {
     // Parse arguments
-    const string config = argc > 1 ? argv[1] : "../config/ceil1_cam.xml";
+    string iface = (argc > 1) ? argv[1] : "wlan0";
+    string group = (argc > 2) ? argv[2] : "EAGLE";
+    string peer = (argc > 3) ? argv[3] : "eagle0_imgtx";
 
-    ComSettings comSettings;
-    comSettings.read(config);
+    std::cout << "iface: " << iface << std::endl;
+    std::cout << "group: " << group << std::endl;
 
-    Communicator com("receiver", comSettings.interface);
-    com.start(comSettings.init_wait_time);
-    com.join(comSettings.group);
+
+    Communicator com("receiver", iface);
+    com.start(100.);
+    com.join(group);
 
     // wait for peer
     std::cout << "waiting for peers" << std::endl;
@@ -38,10 +41,12 @@ int main(int argc, char* argv[]) {
                     size_t size = com.framesize();
                     uchar buffer[size];
                     com.read(buffer);
-                    cv::Mat rawData = cv::Mat( 1, size, CV_8UC1, buffer);
-                    cv::Mat im = cv::imdecode(rawData, 1);
-                    imshow("Stream",im);
-                    cv::waitKey(1);
+                    if (pr == peer) {
+                        cv::Mat rawData = cv::Mat( 1, size, CV_8UC1, buffer);
+                        cv::Mat im = cv::imdecode(rawData, 1);
+                        imshow("Stream",im);
+                        cv::waitKey(1);
+                    }
                     break;
                 }
             }

@@ -7,7 +7,8 @@ using namespace cam;
 
 int main(int argc, char* argv[]) {
     // Parse arguments
-    const string config = argc > 1 ? argv[1] : "/home/peter/Documents/Honours/ProjectEagle/src/client/config/devices/Pi/conf.xml";
+    const string config = argc > 1 ? argv[1] : "/home/odroid/ProjectEagle/src/client/src/config/cal_config.xml";
+    const string node_name = argc > 2 ? argv[2] : "eagle0_imgtx";
 
     CameraSettings cameraSettings;
     cameraSettings.read(config);
@@ -24,7 +25,8 @@ int main(int argc, char* argv[]) {
     // cam->calibrate(cameraSettings.calPath); //camera can be calibrated
     cam->start();
 
-    Communicator com("transmitter", comSettings.interface);
+    Communicator com(node_name, comSettings.interface);
+    com.debug();
     com.start(comSettings.init_wait_time);
     com.join(comSettings.group);
 
