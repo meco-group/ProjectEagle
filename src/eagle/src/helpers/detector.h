@@ -43,7 +43,7 @@ class Detector {
         void detect_obstacles(const cv::Mat& frame, const std::vector<std::vector<cv::Point> >& contours, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
         void filter_obstacles(const std::vector<std::vector<cv::Point>>& contours, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
         void sort_obstacles(std::vector<Obstacle*>& obstacles);
-        void init_transformations(const cv::Mat& frame);
+        void init_transformations(const cv::Matx33f& c2w);
 
         std::vector<cv::Point2f> cam2worldframe(const std::vector<cv::Point2f>& points);
         cv::Point2f cam2worldframe(const cv::Point2f& point);
@@ -51,8 +51,8 @@ class Detector {
         cv::Point2f world2camframe(const cv::Point2f& point);
 
     public:
-        Detector(const std::string& param_file, const cv::Mat& background);
-        Detector(const std::string& param_file, const std::string& background_path);
+        Detector(const std::string& param_file, const cv::Mat& background, const cv::Matx33f& cam2world_tf);
+        Detector(const std::string& param_file, const std::string& background_path, const cv::Matx33f& cam2world_tf);
         void search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
         void draw(cv::Mat& frame, const std::vector<Robot*>& robots, const std::vector<Obstacle*>& obstacles);
 };

@@ -1,23 +1,23 @@
 #include "detector.h"
 
-Detector::Detector(const std::string& param_file, const cv::Mat& background) :
-    _background(background) {
+Detector::Detector(const std::string& param_file, const cv::Mat& background, const cv::Matx33f& cam2world_tf) :
+_background(background) {
     read_parameters(param_file);
+    init_transformations(cam2world_tf);
 }
 
-Detector::Detector(const std::string& param_file, const std::string& background_path) {
+Detector::Detector(const std::string& param_file, const std::string& background_path, const cv::Matx33f& cam2world_tf) {
     cv::Mat background = cv::imread(background_path, CV_LOAD_IMAGE_COLOR);
     if (!background.data) {
         std::cout << "Could not open " << background_path << "!" << std::endl;
     }
-    read_parameters(param_file);
-    _background = background;
+    Detector(param_file, background, cam2world_tf);
 }
 
 void Detector::read_parameters(const std::string& param_file) {
     cv::FileStorage params(param_file, cv::FileStorage::READ);
-    _meter2pixel = (double)params["pixelspermeter"];
-    _pixel2meter = 1./_meter2pixel;
+    // _meter2pixel = (double)params["pixelspermeter"];
+    // _pixel2meter = 1./_meter2pixel;
     _min_robot_area = (double)params["min_robot_area"];
     _min_obstacle_area = (double)params["min_obstacle_area"];
     _triangle_ratio = (double)params["markers"]["triangle_ratio"];
@@ -44,16 +44,30 @@ void Detector::init_blob(const cv::FileStorage& params) {
     _blob_detector = cv::SimpleBlobDetector::create(blob_par);
 }
 
-void Detector::init_transformations(const cv::Mat& frame) {
-    int height = frame.size().height;
-    // TODO changed the - sign on the second _pixel2meter and on _meter2pixel
-    // this is because the extrinsic transformation uses this axis system
-    _cam2world_tf = cv::Matx23f(_pixel2meter, 0, 0, 0, _pixel2meter, _pixel2meter*height);
-    _world2cam_tf = cv::Matx23f(_meter2pixel, 0, 0, 0, _meter2pixel, height);
+void Detector::init_transformations(const cv::Matx33f& c2w) {
+    _cam2world_tf = cv::Matx23f(c2w(0,0), c2w(0,1), c2w(0,2), c2w(1,0), c2w(1,1), c2w(1,2));
+    cv::Matx22f rot = cv::Matx22f(c2w(0,0), c2w(0,1), c2w(1,0), c2w(1,1));
+    cv::Matx22f rotinv = rot.inv();
+    cv::Matx22f rottp = cv::Matx22f(c2w(0,0), c2w(1,0), c2w(0,1), c2w(1,1));
+    cv::Matx21f tinv = -rotinv*cv::Matx21f(c2w(0,2), c2w(1,2));
+    _world2cam_tf = cv::Matx23f(rotinv(0,0), rotinv(0,1), tinv(0,0), rotinv(1,0), rotinv(1,1), tinv(1,0));
+    cv::Matx22f rrtp = rot*rottp;
+    if (rrtp(0, 0) == rrtp(1, 1) && rrtp(1, 0) == 0 and rrtp(0, 1) == 0) {
+        _pixel2meter = sqrt(rrtp(0, 0));
+        _meter2pixel = 1./_pixel2meter;
+    }
 }
 
+// void Detector::init_transformations(const cv::Mat& frame) {
+//     int height = frame.size().height;
+//     // TODO changed the - sign on the second _pixel2meter and on _meter2pixel
+//     // this is because the extrinsic transformation uses this axis system
+//     // UPDATE: ruben changed this back. maarten should change this to use cam matrix
+//     _cam2world_tf = cv::Matx23f(_pixel2meter, 0, 0, 0, -_pixel2meter, _pixel2meter*height);
+//     _world2cam_tf = cv::Matx23f(_meter2pixel, 0, 0, 0, -_meter2pixel, height);
+// }
+
 void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles) {
-    init_transformations(frame);
     for (uint k=0; k<robots.size(); k++) {
         robots[k]->reset();
     }
