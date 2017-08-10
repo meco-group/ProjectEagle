@@ -48,6 +48,7 @@ bool Calibrator::execute() {
 
     // Calculate the reprojection errors
     computeReprojectionErrors();
+    rescaleTransformation(false);
 
     executed = true;
     return true;
@@ -120,6 +121,7 @@ bool Calibrator::processPattern(vector<Point3f> &pointBuf) {
     // Calculate grid points based on pattern
     switch(_settings.boardSettings.calibrationPattern) {
         case BoardSettings::CHESSBOARD:
+        	std::cout << _settings.boardSettings.squareSize << std::endl;
         case BoardSettings::CIRCLES_GRID:
             for( int i = 0; i < _settings.boardSettings.boardSize.height; ++i )
                 for( int j = 0; j < _settings.boardSettings.boardSize.width; ++j )
@@ -149,8 +151,22 @@ bool Calibrator::getCalibration() {
     distCoeffs = Mat::zeros(8, 1, CV_64F);
 
     //Find intrinsic and extrinsic camera parameters
-    calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix,
-                                 distCoeffs, rvecs, tvecs, _settings.flag|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
+    
+    calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix,distCoeffs, rvecs, tvecs, _settings.flag|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
+
+    //Process the extrinsic camera parameters:
+    //For now only translation is taken into account. Rotated images are not yet.
+    //We still have to write a routine to compute the rotation between the image plane and the world plane.
+    double Z = 0.0;
+    for(int k=0; k<tvecs.size();k++){
+        Z += tvecs[k].at<double>(2,0);
+    }
+    Z = Z/tvecs.size();
+
+
+    groundPlane = Mat::zeros(1,4,CV_64F);
+    groundPlane.at<double>(0,2) = 1.0;
+    groundPlane.at<double>(0,3) = -Z;
 
     // Check the result
     bool success = checkRange(cameraMatrix) && checkRange(distCoeffs);
@@ -176,6 +192,50 @@ double Calibrator::computeReprojectionErrors() {
     }
 
     return std::sqrt(totalErr/totalPoints);
+};
+
+double Calibrator::rescaleTransformation(bool apply = false) {
+	
+    double tsum = 0.0;
+    int tcount = 0;
+
+    for(int k = 0;k<imagePoints.size();k++){
+    	Mat undistorted;
+    	Mat world;
+        undistortPoints(Mat(imagePoints[k]),undistorted,Mat::eye(3,3,CV_64F),distCoeffs);
+
+    	std::vector<double> norms;
+
+    	double sum = 0.0;
+    	int count = 0;
+    	for(int j = 1;j<imagePoints[k].size();j++){
+            Point3d i1(imagePoints[k][j].x,imagePoints[k][j].y,1);
+            Point3d P1;
+            Point3d i0(imagePoints[k][j-1].x,imagePoints[k][j-1].y,1);
+            Point3d P0;
+            Calibrator::projectToGround(i1,P1,cameraMatrix,groundPlane);
+            Calibrator::projectToGround(i0,P0,cameraMatrix,groundPlane);
+            
+//            std::cout << P0 << "," << P1 << std::endl;
+
+    		double temp = cv::norm(Mat(P1),Mat(P0));
+    		if(count==0 || (temp <= 1.2*(sum/count))){
+    			sum += temp;
+    			count++;
+    		}
+    	}
+
+	    double average = sum/count;
+	    std::cout << "Average square distance " << k << ": " << average << std::endl;
+
+        tsum += sum;
+        tcount += count;
+    }
+    double scale = tsum/tcount;
+    std::cout << "Global average square distance: " << scale << std::endl;
+    std::cout << "Relative error: " << (_settings.boardSettings.squareSize-scale)/_settings.boardSettings.squareSize << std::endl;
+	
+	return 0;
 };
 
 void Calibrator::saveCameraParams() {
@@ -222,6 +282,7 @@ void Calibrator::saveCameraParams() {
 
     fs << "camera_matrix" << cameraMatrix;
     fs << "distortion_vector" << distCoeffs;
+    fs << "ground_plane" << groundPlane;
 
     fs << "Avg_Reprojection_Error" << totalAvgErr;
     if( !reprojErrs.empty() )
@@ -256,3 +317,25 @@ void Calibrator::saveCameraParams() {
 
     fs.release();
 };
+
+void Calibrator::projectToGround(const Point3d &i, Point3d &w, Mat K, Mat ground)
+{
+    // Project image coordinates to a plane ground
+    // i is of the form [x;y;1], w is of the form [X,Y,Z], K is the camera matrix
+    // ground holds the coefficients of the ground plane [a,b,c,d] where the 
+    // ground plane is represented by ax+by+cz+d=0
+    
+    Mat M1;
+    hconcat(-Mat::eye(3,3,CV_64F),K.inv()*Mat(i),M1);
+    Mat M2;
+    hconcat(ground(Rect(0,0,3,1)),Mat::zeros(1,1,CV_64F),M2);
+    Mat A;
+    vconcat(M1,M2,A);
+
+    Mat b = Mat::zeros(4,1,CV_64F);
+    b.at<double>(3,0) = -ground.at<double>(0,3);
+
+    Mat W = A.inv()*b;
+    w = Point3d(W(Rect(0,0,1,3)));
+}
+

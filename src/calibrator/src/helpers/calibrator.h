@@ -26,6 +26,7 @@ public:
     vector<Mat> rvecs;
     vector<Mat> tvecs;
     Mat cameraMatrix;
+    Mat groundPlane;
     Mat distCoeffs;
 
     double totalAvgErr;
@@ -36,6 +37,7 @@ public:
 
     bool execute();
     void saveCameraParams();
+    static void projectToGround(const Point3d &i, Point3d &w, Mat K, Mat ground);
 
 private:
     bool executed;
@@ -46,8 +48,8 @@ private:
     bool processPattern(vector<Point3f> &pointBuf);
 
     bool getCalibration();
-
     double computeReprojectionErrors();
+    double rescaleTransformation(bool apply);
 };
 
 
