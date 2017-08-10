@@ -121,7 +121,6 @@ bool Calibrator::processPattern(vector<Point3f> &pointBuf) {
     // Calculate grid points based on pattern
     switch(_settings.boardSettings.calibrationPattern) {
         case BoardSettings::CHESSBOARD:
-        	std::cout << _settings.boardSettings.squareSize << std::endl;
         case BoardSettings::CIRCLES_GRID:
             for( int i = 0; i < _settings.boardSettings.boardSize.height; ++i )
                 for( int j = 0; j < _settings.boardSettings.boardSize.width; ++j )
@@ -339,3 +338,9 @@ void Calibrator::projectToGround(const Point3d &i, Point3d &w, Mat K, Mat ground
     w = Point3d(W(Rect(0,0,1,3)));
 }
 
+static void projectToImage(Point3d &i, const Point3d &w, Mat K)
+{
+    Mat p = K*Mat(w);
+    p = p*(1.0/p.at<double>(2,0));
+    i = Point3d(p.at<double>(0,0),p.at<double>(1,0),p.at<double>(2,0));
+}

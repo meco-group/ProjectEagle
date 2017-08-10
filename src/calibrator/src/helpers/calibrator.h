@@ -38,6 +38,7 @@ public:
     bool execute();
     void saveCameraParams();
     static void projectToGround(const Point3d &i, Point3d &w, Mat K, Mat ground);
+    static void projectToImage(Point3d &i, const Point3d &w, Mat K);
 
 private:
     bool executed;
