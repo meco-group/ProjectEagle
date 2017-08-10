@@ -45,20 +45,26 @@ int main(int argc, char* argv[]) {
     eagle::header_t imheader;
     imheader.id = eagle::IMAGE;
 
-    // create detector
-    Detector detector(cameraSettings.detPath, cameraSettings.bgPath);
 
     Mat im;
-    Mat R; Mat T;
+    cv::Mat R;
+    cv::Mat T;
     cv::FileStorage fs(cameraSettings.extPath, cv::FileStorage::READ);
     fs["rotation_matrix"] >> R;
     fs["translation_matrix"] >> T;
     fs.release();
 
+    // create detector
+    // temp tf matrix
+    float p2m = 1./125;
+    cv::Matx33f cam2world_tf = cv::Matx33f(p2m, 0, 0, 0, -p2m, p2m*cameraSettings.res_height);
+    cv::Matx33f ext_f = cv::Matx33f(R.data[0], R.data[1], T.data[0], R.data[3], R.data[4], T.data[1], 0, 0, 1);
+    Detector detector(cameraSettings.detPath, cameraSettings.bgPath, ext_f*cam2world_tf);
+
     // make robots which the camera should find
-    Robot dave(0, 0.55, 0.4, cv::Scalar(17, 110, 138), T, R);
-    Robot krist(1, 0.55, 0.4, cv::Scalar(138, 31, 17), T, R);
-    Robot kurt(9, 0.55, 0.4, cv::Scalar(17, 138, 19), T, R);
+    Robot dave(0, 0.55, 0.4, cv::Scalar(17, 110, 138));
+    Robot krist(1, 0.55, 0.4, cv::Scalar(138, 31, 17));
+    Robot kurt(9, 0.55, 0.4, cv::Scalar(17, 138, 19));
 
     std::vector< Robot* > robots = std::vector< Robot* >{&dave, &krist, &kurt};
     std::vector< Obstacle* > obstacles;

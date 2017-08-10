@@ -1,29 +1,18 @@
 #include "robot.h"
 
-Robot::Robot(uint code, double width, double height, const cv::Scalar& color, cv::Mat T, cv::Mat R) :
-        _code(code), _width(width), _height(height), _color(color), _detected(false), _T(T), _R(R) {}
-
-Robot::Robot(uint code, double width, double height, cv::Mat T, cv::Mat R) {
-    Robot(code, width, height, cv::Scalar(17, 110, 138), R, T);
-}
-
 Robot::Robot(uint code, double width, double height) {
     Robot(code, width, height, cv::Scalar(17, 110, 138));
 }
 
-Robot::Robot(uint code, double width, double height, const cv::Scalar& color) {
-    cv::Mat R = cv::Mat::eye(3, 3, CV_64F);
-    cv::Mat T = cv::Mat::zeros(1, 3, CV_64F);
-    Robot(code, width, height, color, R, T);
-}
-
+Robot::Robot(uint code, double width, double height, const cv::Scalar& color) :
+        _code(code), _width(width), _height(height), _color(color), _detected(false) {}
 
 void Robot::update(const std::vector<cv::Point2f>& markers) {
     _markers = markers;
     _detected = true;
     markers2pose(markers, _position, _orientation);
     pose2vertices(_position, _orientation, _vertices);
-    pose2global(_position, _orientation);
+    // pose2global(_position, _orientation);
 }
 
 bool Robot::detected() const {
@@ -51,20 +40,20 @@ void Robot::pose2vertices(const cv::Point2f& position, double orientation, std::
     vertices = std::vector<cv::Point2f>(vert, vert+4);
 }
 
-void Robot::pose2global(cv::Point2f& position, double& orientation) const {
-    // TODO verify result
-    Mat_<float> M(3,3);
-    M <<    1, 0, (float)(_T.at<double>(0,0)/1000.0),
-            0, 1, (float)(_T.at<double>(1,0)/1000.0),
-            0, 0, 1;
-    Mat_<float> pm(3,1);
-    pm << position.x, position.y, 1.0;
-    Mat_<float> pr =  M * pm;
-    Point2f pt(pr(0), -pr(1));
-    position = pt;
+// void Robot::pose2global(cv::Point2f& position, double& orientation) const {
+//     // TODO verify result
+//     Mat_<float> M(3,3);
+//     M <<    1, 0, (float)(_T.at<double>(0,0)/1000.0),
+//             0, 1, (float)(_T.at<double>(1,0)/1000.0),
+//             0, 0, 1;
+//     Mat_<float> pm(3,1);
+//     pm << position.x, position.y, 1.0;
+//     Mat_<float> pr =  M * pm;
+//     Point2f pt(pr(0), -pr(1));
+//     position = pt;
 
-    // TODO correct orientation
-}
+//     // TODO correct orientation
+// }
 
 std::vector<cv::Point2f> Robot::vertices() const {
     return _vertices;
