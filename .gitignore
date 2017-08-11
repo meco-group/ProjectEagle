@@ -1,6 +1,4 @@
 build/
-old/
-copy.sh
-.idea
 *~
 *.pyc
+todo
