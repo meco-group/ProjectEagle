@@ -43,7 +43,7 @@ public:
 private:
     bool executed;
 
-    Mat getNextImage();
+    Mat getNextImage(string &name);
 
     bool processImage(Mat view, vector<Point2f> &pointBuf);
     bool processPattern(vector<Point3f> &pointBuf);

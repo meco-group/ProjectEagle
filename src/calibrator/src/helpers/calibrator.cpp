@@ -12,8 +12,9 @@ Calibrator::Calibrator(string settings_path) : executed(false) {
 bool Calibrator::execute() {
 
     // Gather images_ceil1
+    string filename;
     for (int i=0; i<_settings.imageCount; i++) {
-        Mat view = getNextImage();
+        Mat view = getNextImage(filename);
         // TODO what do we do for camera intake, when this takes a while? => does getNextImage freeze the execution?
 
         if (view.empty())
@@ -25,10 +26,12 @@ bool Calibrator::execute() {
         // Process the image
         vector<Point2f> imageBuf;
         bool success = processImage(view, imageBuf);
-        if (success)
+        if (success){
             imagePoints.push_back(imageBuf);
-        else
-            continue;
+        } else {
+            std::cout << "Ditch image: " << filename << std::endl;
+        }
+            //continue;
 
         // Gather the object points
         // TODO this can be more efficient, but is the way it is now for flexibility
@@ -54,15 +57,15 @@ bool Calibrator::execute() {
     return true;
 }
 
-Mat Calibrator::getNextImage() {
+Mat Calibrator::getNextImage(string &name) {
     Mat result;
     // Check the source of the images_ceil1
     switch(_settings.sourceType) {
         case CalSettings::SourceType::STORED:
             // We can get an image from the provided file
             if (_imageIndex < (int) _settings.imageList.size()) {
-                string temp = _settings.imageList[_imageIndex++];
-                result = imread(temp, CV_LOAD_IMAGE_COLOR);
+                name = _settings.imageList[_imageIndex++];
+                result = imread(name, CV_LOAD_IMAGE_COLOR);
             }
             break;
         default:

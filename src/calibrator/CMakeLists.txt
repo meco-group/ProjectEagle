@@ -7,6 +7,8 @@ add_executable(StereoCalibrate src/stereo_calibrate.cpp ${SOURCE_FILES})
 
 # Define the libraries this project depends upon
 target_link_libraries(Calibrate
+        LibCam
         LibConfig)
 target_link_libraries(StereoCalibrate
+        LibCam
         LibConfig)
