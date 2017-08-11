@@ -5,7 +5,7 @@ using namespace cam;
 OdroidCamera::OdroidCamera(int device) :
     V4L2Camera(device) {
     format(640, 480, V4L2_PIX_FMT_YUYV);
-	buffers(4);
+	buffers(1);
 	setBrightness(5);
 }
 
