@@ -7,17 +7,16 @@ _background(background) {
 }
 
 Detector::Detector(const std::string& param_file, const std::string& background_path, const cv::Matx33f& cam2world_tf) {
-    cv::Mat background = cv::imread(background_path, CV_LOAD_IMAGE_COLOR);
-    if (!background.data) {
+    _background = cv::imread(background_path, CV_LOAD_IMAGE_COLOR);
+    if (!_background.data) {
         std::cout << "Could not open " << background_path << "!" << std::endl;
     }
-    Detector(param_file, background, cam2world_tf);
+    read_parameters(param_file);
+    init_transformations(cam2world_tf);
 }
 
 void Detector::read_parameters(const std::string& param_file) {
     cv::FileStorage params(param_file, cv::FileStorage::READ);
-    // _meter2pixel = (double)params["pixelspermeter"];
-    // _pixel2meter = 1./_meter2pixel;
     _min_robot_area = (double)params["min_robot_area"];
     _min_obstacle_area = (double)params["min_obstacle_area"];
     _triangle_ratio = (double)params["markers"]["triangle_ratio"];
@@ -55,17 +54,10 @@ void Detector::init_transformations(const cv::Matx33f& c2w) {
     if (rrtp(0, 0) == rrtp(1, 1) && rrtp(1, 0) == 0 and rrtp(0, 1) == 0) {
         _pixel2meter = sqrt(rrtp(0, 0));
         _meter2pixel = 1./_pixel2meter;
+    } else {
+        std::cout << "Wrong transformation matrix!" << std::endl;
     }
 }
-
-// void Detector::init_transformations(const cv::Mat& frame) {
-//     int height = frame.size().height;
-//     // TODO changed the - sign on the second _pixel2meter and on _meter2pixel
-//     // this is because the extrinsic transformation uses this axis system
-//     // UPDATE: ruben changed this back. maarten should change this to use cam matrix
-//     _cam2world_tf = cv::Matx23f(_pixel2meter, 0, 0, 0, -_pixel2meter, _pixel2meter*height);
-//     _world2cam_tf = cv::Matx23f(_meter2pixel, 0, 0, 0, -_meter2pixel, height);
-// }
 
 void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles) {
     for (uint k=0; k<robots.size(); k++) {

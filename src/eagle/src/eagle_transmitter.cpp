@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
     string config = argc > 1 ? argv[1] : "/home/odroid/ProjectEagle/src/client/config/devices/eagle0/config.xml";
     string node_name = argc > 2 ? argv[2] : "eagle0";
     string frequency_str = argc > 3 ? argv[3] : "10"; // Hz
-    string image_stream_str = argc > 4 ? argv[4] : "1";
+    string image_stream_str = argc > 4 ? argv[4] : "0";
     double frequency = std::stod(frequency_str);
     bool image_stream = (image_stream_str == "1");
 
@@ -35,7 +35,6 @@ int main(int argc, char* argv[]) {
     Communicator com(node_name, comSettings.interface);
     com.start(comSettings.init_wait_time);
     com.join(comSettings.group);
-
     // setup video compression
     std::vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
@@ -45,21 +44,38 @@ int main(int argc, char* argv[]) {
     eagle::header_t imheader;
     imheader.id = eagle::IMAGE;
 
-
     Mat im;
-    cv::Mat R;
-    cv::Mat T;
+
+    // compute transformation from image plane to ground plane
+    cv::Mat R, T, K, ground_plane;
     cv::FileStorage fs(cameraSettings.extPath, cv::FileStorage::READ);
     fs["rotation_matrix"] >> R;
     fs["translation_matrix"] >> T;
     fs.release();
+    fs = cv::FileStorage(cameraSettings.calPath, cv::FileStorage::READ);
+    fs["ground_plane"] >> ground_plane;
+    fs["camera_matrix"] >> K;
+    fs.release();
+    R.convertTo(R, CV_32F);
+    T.convertTo(T, CV_32F);
+    K.convertTo(K, CV_32F);
+    ground_plane.convertTo(ground_plane, CV_32F);
+    cv::Mat t1, t2, int_tf, ext_tf, sel_tf;
+    float h = -ground_plane.at<float>(0,3)/ground_plane.at<float>(0,2);
+    cv::hconcat(cv::Mat::zeros(1, 2, CV_32F), cv::Mat::ones(1, 1, CV_32F), t2);
+    cv::vconcat(h*K.inv(), t2, int_tf);
 
-    // create detector
-    // temp tf matrix
-    float p2m = 1./125;
-    cv::Matx33f cam2world_tf = cv::Matx33f(p2m, 0, 0, 0, -p2m, p2m*cameraSettings.res_height);
-    cv::Matx33f ext_f = cv::Matx33f(R.data[0], R.data[1], T.data[0], R.data[3], R.data[4], T.data[1], 0, 0, 1);
-    Detector detector(cameraSettings.detPath, cameraSettings.bgPath, ext_f*cam2world_tf);
+    cv::hconcat(R, T, t1);
+    cv::hconcat(cv::Mat::zeros(1, 3, CV_32F), cv::Mat::ones(1, 1, CV_32F), t2);
+    cv::vconcat(t1, t2, ext_tf);
+
+    cv::hconcat(cv::Mat::eye(2, 2, CV_32F), cv::Mat::zeros(2, 2, CV_32F), t1);
+    cv::hconcat(cv::Mat::zeros(1, 3, CV_32F), cv::Mat::ones(1, 1, CV_32F), t2);
+    cv::vconcat(t1, t2, sel_tf);
+
+    cv::Mat tf = sel_tf*ext_tf*int_tf;
+
+    Detector detector(cameraSettings.detPath, cameraSettings.bgPath, cv::Matx33f((float*)(tf.ptr())));
 
     // make robots which the camera should find
     Robot dave(0, 0.55, 0.4, cv::Scalar(17, 110, 138));
@@ -70,7 +86,7 @@ int main(int argc, char* argv[]) {
     std::vector< Obstacle* > obstacles;
 
     std::cout << "Starting eagle transmitter\n";
-    std::cout << "T: \n" << T << "\n";
+    // cv::namedWindow("Viewer",cv::WINDOW_AUTOSIZE);
 
     // main execution loop
     int dt = 1000/frequency;
@@ -88,7 +104,7 @@ int main(int argc, char* argv[]) {
         cam->read(im);
         capture_time = cam->captureTime();
         capture_time2 = cam->getV4L2CaptureTime();
-        std::cout << "[" << capture_time << " vs " << capture_time2 << "]" << std::endl;
+        // std::cout << "[" << capture_time<< " vs " << capture_time2 << "]" << std::endl;
         // detect the robots/obstacles
         detector.search(im, robots, obstacles);
 
@@ -118,16 +134,16 @@ int main(int argc, char* argv[]) {
 
         int i = 0;
         for (int k = 0; k < n_detected_robots; k++) {
-            sizes[i++] = sizeof(eagle::header_t);
+            sizes[i] = sizeof(eagle::header_t);
             data[i++] = (const void*)(&mheaders[k]);
-            sizes[i++] = sizeof(eagle::marker_t);
+            sizes[i] = sizeof(eagle::marker_t);
             data[i++] = (const void*)(&markers[k]);
         }
 
         for (int k = 0; k < obstacles.size(); k++) {
-            sizes[i++] = sizeof(eagle::header_t);
+            sizes[i] = sizeof(eagle::header_t);
             data[i++] = (const void*)(&oheaders[k]);
-            sizes[i++] = sizeof(eagle::obstacle_t);
+            sizes[i] = sizeof(eagle::obstacle_t);
             data[i++] = (const void*)(&obs[k]);
         }
 
@@ -141,6 +157,10 @@ int main(int argc, char* argv[]) {
             cv::imencode(".jpg", im, buffer, compression_params);
             com.shout(&imheader, buffer.data(), sizeof(imheader), buffer.size(), comSettings.group);
         }
+
+        // detector.draw(im, robots, obstacles);
+        // imshow("Viewer",im);
+        // cv::waitKey(1);
 
         for (int k=0; k<robots.size(); k++) {
             if (robots[k]->detected()) {

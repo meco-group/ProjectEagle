@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <opencv_storage>
-<calibration_Time>"wo 09 aug 2017 11:18:48 CEST"</calibration_Time>
+<calibration_Time>"vr 11 aug 2017 10:10:03 CEST"</calibration_Time>
 <nrOfFrames>39</nrOfFrames>
 <image_Width>640</image_Width>
 <image_Height>480</image_Height>
@@ -25,7 +25,13 @@
     -2.2410764577362879e-01 6.8924178601529357e-02
     -1.3048654638913226e-03 -3.2936580596897979e-04
     -1.2663040687623292e-02</data></distortion_vector>
-<Avg_Reprojection_Error>2.1308522654891913e-317</Avg_Reprojection_Error>
+<ground_plane type_id="opencv-matrix">
+  <rows>1</rows>
+  <cols>4</cols>
+  <dt>d</dt>
+  <data>
+    0. 0. 1. -2.4561764952647471e+00</data></ground_plane>
+<Avg_Reprojection_Error>2.1370102996989566e-317</Avg_Reprojection_Error>
 <Per_View_Reprojection_Errors type_id="opencv-matrix">
   <rows>39</rows>
   <cols>1</cols>
