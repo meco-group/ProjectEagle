@@ -1,7 +1,13 @@
+#ifndef UTILS_H
+#define UTILS_H
+
+#define CONFIG_PATH "/home/ruben/Documents/Work/Repositories/ProjectEagle/eagle/config/config.yml"
+
 #include <cstdio>
 #include <zconf.h>
 
 namespace eagle {
+
     int kbhit() {
         struct timeval tv;
         fd_set fds;
@@ -12,4 +18,8 @@ namespace eagle {
         select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
         return FD_ISSET(STDIN_FILENO, &fds);
     }
-};
+
+}
+
+#endif //UTILS_H
+

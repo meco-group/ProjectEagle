@@ -1,0 +1,54 @@
+%YAML:1.0
+camera:
+    index: 0
+    type: 'LATCAM'
+    resolution:
+        width: 640
+        height: 480
+    camera_matrix: !!opencv-matrix
+        rows: 3
+        cols: 3
+        dt: d
+        data: [4.1466407296187219e+02, 0., 3.2784876526935585e+02, 0., 4.1466407296187219e+02, 2.4200655525167369e+02, 0., 0., 1.]
+    distortion_vector: !!opencv-matrix
+        rows: 5
+        cols: 1
+        dt: d
+        data: [-2.2410764577362879e-01, 6.8924178601529357e-02, -1.3048654638913226e-03, -3.2936580596897979e-04, -1.2663040687623292e-02]
+    ground_plane: !!opencv-matrix
+        rows: 1
+        cols: 4
+        dt: d
+        data: [0., 0., 1., -2.4561764952647471e+00]
+    external_transformation: !!opencv-matrix
+        rows: 4
+        cols: 4
+        dt: d
+        data: [1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.]
+
+detector:
+    blob:
+        minThreshold: 10
+        maxThreshold: 200
+        filterByArea: 1
+        minArea: 80
+        filterByCircularity: 1
+        minCircularity: 0.85
+    # pixelspermeter: 118
+    pixelspermeter: 125
+    min_robot_area: 0.06
+    min_obstacle_area: 0.02
+    markers:
+        triangle_ratio: 0.625
+        qr_posx: 0
+        qr_posy: 0
+        qr_sizex: 0.8
+        qr_sizey: 0.8
+        qr_nbitx: 2
+        qr_nbity: 2
+    thresholds:
+        bg_subtraction: 31
+        top_marker: 0.1
+        triangle_ratio: 0.1
+    background_path: '/home/ruben/Documents/Work/Repositories/ProjectEagle/eagle/config/background.png'
+

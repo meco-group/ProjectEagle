@@ -33,8 +33,8 @@ namespace eagle {
             double _th_top_marker;
             int _th_bg_subtraction;
 
-            void read_parameters(const std::string& param_file);
-            void init_blob(const cv::FileStorage& params);
+            void read_parameters(const cv::FileStorage& fs);
+            void init_blob(const cv::FileStorage& fs);
             bool subtract_background(const cv::Mat& frame, std::vector<std::vector<cv::Point>>& contours);
             void detect_robots(const cv::Mat& frame, const std::vector<std::vector<cv::Point>>& contours, const std::vector<Robot*>& robots);
             void find_robots(cv::Mat& roi, const cv::Point2f& roi_location, const std::vector<Robot*>& robots);
@@ -52,8 +52,7 @@ namespace eagle {
             cv::Point2f world2camframe(const cv::Point2f& point);
 
         public:
-            Detector(const std::string& param_file, const cv::Mat& background, const cv::Matx33f& cam2world_tf);
-            Detector(const std::string& param_file, const std::string& background_path, const cv::Matx33f& cam2world_tf);
+            Detector(const std::string& config_path, const cv::Matx33f& cam2world_tf);
             void search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
             void draw(cv::Mat& frame, const std::vector<Robot*>& robots, const std::vector<Obstacle*>& obstacles);
     };

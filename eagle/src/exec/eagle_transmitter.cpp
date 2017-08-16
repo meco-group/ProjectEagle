@@ -1,9 +1,8 @@
-#include "libcam.hpp"
-#include "libcamsettings.hpp"
 #include "libcom.hpp"
-#include "protocol.h"
+#include "camera.hpp"
 #include "detector.h"
-#include "utils.cpp"
+#include "protocol.h"
+#include "utils.h"
 #include <string>
 #include <chrono>
 
@@ -18,17 +17,13 @@ int main(int argc, char* argv[]) {
     double frequency = std::stod(frequency_str);
     bool image_stream = (image_stream_str == "1");
 
+
     // open settings file
-    CameraSettings cameraSettings;
-    cameraSettings.read(config);
     ComSettings comSettings;
     comSettings.read(config);
 
-    V4L2Camera *cam = getCamera(cameraSettings.camIndex, cameraSettings.camType);
-
     // start camera
-    cam->setResolution(cameraSettings.res_width, cameraSettings.res_height);
-    cam->calibrate(cameraSettings.calPath);
+    Camera* cam = getCamera(CONFIG_PATH);
     cam->start();
 
     // setup the communication
@@ -48,15 +43,11 @@ int main(int argc, char* argv[]) {
 
     // compute transformation from image plane to ground plane
     cv::Mat R, T, K, ground_plane;
-    cv::FileStorage fs(cameraSettings.extPath, cv::FileStorage::READ);
-    fs["rotation_matrix"] >> R;
-    fs["translation_matrix"] >> T;
+    cv::FileStorage fs(CONFIG_PATH, cv::FileStorage::READ);
+    fs["camera"]["external_transformation"] >> T;
+    fs["camera"]["ground_plane"] >> ground_plane;
+    fs["camera"]["camera_matrix"] >> K;
     fs.release();
-    fs = cv::FileStorage(cameraSettings.calPath, cv::FileStorage::READ);
-    fs["ground_plane"] >> ground_plane;
-    fs["camera_matrix"] >> K;
-    fs.release();
-    R.convertTo(R, CV_32F);
     T.convertTo(T, CV_32F);
     K.convertTo(K, CV_32F);
     ground_plane.convertTo(ground_plane, CV_32F);
@@ -65,17 +56,13 @@ int main(int argc, char* argv[]) {
     cv::hconcat(cv::Mat::zeros(1, 2, CV_32F), cv::Mat::ones(1, 1, CV_32F), t2);
     cv::vconcat(h*K.inv(), t2, int_tf);
 
-    cv::hconcat(R, T, t1);
-    cv::hconcat(cv::Mat::zeros(1, 3, CV_32F), cv::Mat::ones(1, 1, CV_32F), t2);
-    cv::vconcat(t1, t2, ext_tf);
-
     cv::hconcat(cv::Mat::eye(2, 2, CV_32F), cv::Mat::zeros(2, 2, CV_32F), t1);
     cv::hconcat(cv::Mat::zeros(1, 3, CV_32F), cv::Mat::ones(1, 1, CV_32F), t2);
     cv::vconcat(t1, t2, sel_tf);
 
-    cv::Mat tf = sel_tf*ext_tf*int_tf;
+    cv::Mat tf = sel_tf*T*int_tf;
 
-    Detector detector(cameraSettings.detPath, cameraSettings.bgPath, cv::Matx33f((float*)(tf.ptr())));
+    Detector detector(CONFIG_PATH, cv::Matx33f((float*)(tf.ptr())));
 
     // make robots which the camera should find
     Robot dave(0, 0.55, 0.4, cv::Scalar(17, 110, 138));
@@ -103,7 +90,7 @@ int main(int argc, char* argv[]) {
         // capturer image
         cam->read(im);
         capture_time = cam->captureTime();
-        capture_time2 = cam->getV4L2CaptureTime();
+        capture_time2 = ((V4L2Camera*)cam)->getV4L2CaptureTime();
         // std::cout << "[" << capture_time<< " vs " << capture_time2 << "]" << std::endl;
         // detect the robots/obstacles
         detector.search(im, robots, obstacles);

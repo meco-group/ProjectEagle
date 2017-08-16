@@ -19,7 +19,7 @@
 using namespace eagle;
 
 V4L2Camera::V4L2Camera(int device):
-    CameraInterface(0),
+    Camera(0),
     _width(640),
     _height(480),
     _pixelformat(V4L2_PIX_FMT_YUYV),

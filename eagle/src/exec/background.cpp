@@ -1,22 +1,10 @@
-#include "libcam.hpp"
-#include "libcamsettings.hpp"
+#include "camera.hpp"
+#include "utils.h"
 
 using namespace eagle;
 
 int main(int argc, char* argv[]) {
-    // Parse arguments
-    const string cameraSettingsFile = argc > 1 ? argv[1] : "/home/odroid/ProjectEagle/src/client/config/devices/eagle0/config.xml";
-
-    // Open settings file
-    CameraSettings cameraSettings;
-    cameraSettings.read(cameraSettingsFile);
-
-    // EXAMPLE_CAMERA_T cam(EXAMPLE_CAMERA_INDEX);
-    V4L2Camera *cam = getCamera(cameraSettings.camIndex, cameraSettings.camType);
-
-    // Start camera
-    cam->setResolution(cameraSettings.res_width, cameraSettings.res_height);
-    cam->calibrate(cameraSettings.calPath); //camera can be calibrated
+    Camera* cam = getCamera(CONFIG_PATH);
     cam->start();
 
     // capture and save background
@@ -29,7 +17,9 @@ int main(int argc, char* argv[]) {
     }
     background /= 50;
     background.convertTo(background, CV_8UC3);
-    cv::imwrite(cameraSettings.bgPath, background);
+    cv::FileStorage fs(CONFIG_PATH, cv::FileStorage::READ);
+    cv::imwrite(fs["detector"]["background_path"], background);
+    fs.release();
     imshow("Background", background);
     cv::waitKey(2000);
 

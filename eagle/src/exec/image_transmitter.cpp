@@ -1,7 +1,7 @@
-#include "libcam.hpp"
+#include "camera.hpp"
 #include "libcom.hpp"
-#include "libcamsettings.hpp"
 #include "protocol.h"
+#include "utils.h"
 
 using namespace eagle;
 
@@ -10,19 +10,13 @@ int main(int argc, char* argv[]) {
     const string config = argc > 1 ? argv[1] : "/home/odroid/ProjectEagle/src/client/config/devices/eagle0/config.xml";
     const string node_name = argc > 2 ? argv[2] : "eagle0";
 
-    CameraSettings cameraSettings;
-    cameraSettings.read(config);
     ComSettings comSettings;
     comSettings.read(config);
 
     cout << "Starting ImageTransmitter - GROUP: "<<comSettings.group<<"\n";
 
-    // EXAMPLE_CAMERA_T cam(EXAMPLE_CAMERA_INDEX);
-    V4L2Camera *cam = getCamera(cameraSettings.camIndex, cameraSettings.camType);
-
-    // Start camera
-    cam->setResolution(cameraSettings.comp_res_width, cameraSettings.comp_res_height);
-    // cam->calibrate(cameraSettings.calPath); //camera can be calibrated
+    // start camera
+    Camera* cam = getCamera(CONFIG_PATH);
     cam->start();
 
     Communicator com(node_name, comSettings.interface);

@@ -1,4 +1,5 @@
 build/
+eagle/config/*.png
 *~
 *.pyc
 todo

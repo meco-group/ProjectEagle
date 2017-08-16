@@ -14,7 +14,7 @@ namespace eagle {
         size_t length;
     } buffer_t;
 
-    class V4L2Camera : public CameraInterface {
+    class V4L2Camera : public Camera {
     private:
         int _fd;
 

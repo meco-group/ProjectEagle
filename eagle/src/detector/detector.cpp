@@ -2,46 +2,41 @@
 
 using namespace eagle;
 
-Detector::Detector(const std::string& param_file, const cv::Mat& background, const cv::Matx33f& cam2world_tf) :
-_background(background) {
-    read_parameters(param_file);
-    init_transformations(cam2world_tf);
-}
-
-Detector::Detector(const std::string& param_file, const std::string& background_path, const cv::Matx33f& cam2world_tf) {
-    _background = cv::imread(background_path, CV_LOAD_IMAGE_COLOR);
+Detector::Detector(const std::string& config_path, const cv::Matx33f& cam2world_tf) {
+    cv::FileStorage fs(config_path, cv::FileStorage::READ);
+    _background = cv::imread(fs["detector"]["background_path"], CV_LOAD_IMAGE_COLOR);
     if (!_background.data) {
-        std::cout << "Could not open " << background_path << "!" << std::endl;
+        std::cout << "Could not open " << (std::string)fs["detector"]["background_path"] << "!" << std::endl;
     }
-    read_parameters(param_file);
+    read_parameters(fs);
     init_transformations(cam2world_tf);
+    fs.release();
 }
 
-void Detector::read_parameters(const std::string& param_file) {
-    cv::FileStorage params(param_file, cv::FileStorage::READ);
-    _min_robot_area = (double)params["min_robot_area"];
-    _min_obstacle_area = (double)params["min_obstacle_area"];
-    _triangle_ratio = (double)params["markers"]["triangle_ratio"];
-    _qr_posx = (double)params["markers"]["qr_posx"];
-    _qr_posy = (double)params["markers"]["qr_posy"];
-    _qr_sizex = (double)params["markers"]["qr_sizex"];
-    _qr_sizey = (double)params["markers"]["qr_sizey"];
-    _qr_nbitx = (int)params["markers"]["qr_nbitx"];
-    _qr_nbity = (int)params["markers"]["qr_nbity"];
-    _th_triangle_ratio = (double)params["thresholds"]["triangle_ratio"];
-    _th_top_marker = (double)params["thresholds"]["top_marker"];
-    _th_bg_subtraction = (int)params["thresholds"]["bg_subtraction"];
-    init_blob(params);
+void Detector::read_parameters(const cv::FileStorage& fs) {
+    _min_robot_area = (double)fs["detector"]["min_robot_area"];
+    _min_obstacle_area = (double)fs["detector"]["min_obstacle_area"];
+    _triangle_ratio = (double)fs["detector"]["markers"]["triangle_ratio"];
+    _qr_posx = (double)fs["detector"]["markers"]["qr_posx"];
+    _qr_posy = (double)fs["detector"]["markers"]["qr_posy"];
+    _qr_sizex = (double)fs["detector"]["markers"]["qr_sizex"];
+    _qr_sizey = (double)fs["detector"]["markers"]["qr_sizey"];
+    _qr_nbitx = (int)fs["detector"]["markers"]["qr_nbitx"];
+    _qr_nbity = (int)fs["detector"]["markers"]["qr_nbity"];
+    _th_triangle_ratio = (double)fs["detector"]["thresholds"]["triangle_ratio"];
+    _th_top_marker = (double)fs["detector"]["thresholds"]["top_marker"];
+    _th_bg_subtraction = (int)fs["detector"]["thresholds"]["bg_subtraction"];
+    init_blob(fs);
 }
 
-void Detector::init_blob(const cv::FileStorage& params) {
+void Detector::init_blob(const cv::FileStorage& fs) {
     cv::SimpleBlobDetector::Params blob_par;
-    blob_par.minThreshold = (int)params["blob"]["minThreshold"];
-    blob_par.maxThreshold = (int)params["blob"]["maxThreshold"];
-    blob_par.filterByArea = (int)params["blob"]["filterByArea"];
-    blob_par.minArea = (int)params["blob"]["minArea"];
-    blob_par.filterByCircularity = (int)params["blob"]["filterByCircularity"];
-    blob_par.minCircularity = (double)params["blob"]["minCircularity"];
+    blob_par.minThreshold = (int)fs["detector"]["blob"]["minThreshold"];
+    blob_par.maxThreshold = (int)fs["detector"]["blob"]["maxThreshold"];
+    blob_par.filterByArea = (int)fs["detector"]["blob"]["filterByArea"];
+    blob_par.minArea = (int)fs["detector"]["blob"]["minArea"];
+    blob_par.filterByCircularity = (int)fs["detector"]["blob"]["filterByCircularity"];
+    blob_par.minCircularity = (double)fs["detector"]["blob"]["minCircularity"];
     _blob_detector = cv::SimpleBlobDetector::create(blob_par);
 }
 

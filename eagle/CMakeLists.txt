@@ -25,12 +25,11 @@ set(LIBRARIES
         ${CMAKE_THREAD_LIBS_INIT}
         )
 
-include_directories(src/include
+include_directories(src/utils
         ${ZMQ_INCLUDE_DIRS}
         ${ZMQ_INCLUDE_DIRS}
         ${CZMQ_INCLUDE_DIRS}
         ${ZYRE_INCLUDE_DIRS}
-        /usr/include/python2.7
         )
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -38,11 +37,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Targets that we develop here
-#enable_testing()
 add_subdirectory(src/exec)
 add_subdirectory(src/camera)
 add_subdirectory(src/calibrator)
 add_subdirectory(src/communicator)
 add_subdirectory(src/configurator)
 add_subdirectory(src/detector)
-add_subdirectory(src/utils)

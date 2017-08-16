@@ -1,7 +1,8 @@
-#ifndef EAGLE_PROTOCOL_H
-#define EAGLE_PROTOCOL_H
+#ifndef PROTOCOL_H
+#define PROTOCOL_H
 
 namespace eagle {
+
     /* helpers */
     typedef enum msg_t {
         MARKER = 0,
@@ -42,6 +43,7 @@ namespace eagle {
         point_t p2;
         point_t p3;
     } obstacle_t;
-}; //eagle
 
-#endif //EAGLE_PROTOCOL_H
+}
+
+#endif //PROTOCOL_H

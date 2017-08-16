@@ -1,5 +1,5 @@
 #include "libcom.hpp"
-#include "utils.cpp"
+#include "utils.h"
 #include "protocol.h"
 
 using namespace eagle;

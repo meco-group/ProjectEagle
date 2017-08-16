@@ -1,23 +1,10 @@
-#include "libcamsettings.hpp"
-#include "libcam.hpp"
-#include "utils.cpp"
+#include "camera.hpp"
+#include "utils.h"
 
 using namespace eagle;
 
 int main(int argc, char* argv[]) {
-    // Parse arguments
-    const string cameraSettingsFile = argc > 1 ? argv[1] : "/home/peter/Documents/Honours/ProjectEagle/config/config.xml";
-
-    // Open settings file
-    CameraSettings cameraSettings;
-    cameraSettings.read(cameraSettingsFile);
-
-    // EXAMPLE_CAMERA_T cam(EXAMPLE_CAMERA_INDEX);
-    V4L2Camera *cam = getCamera(cameraSettings.camIndex, cameraSettings.camType);
-
-    // Start camera
-    cam->setResolution(cameraSettings.res_width, cameraSettings.res_height);
-    // cam->calibrate(cameraSettings.calPath); //camera can be calibrated
+    Camera* cam = getCamera(CONFIG_PATH);
     cam->start();
 
     cv::Mat im;
