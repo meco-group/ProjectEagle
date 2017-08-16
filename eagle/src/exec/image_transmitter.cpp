@@ -3,8 +3,7 @@
 #include "libcamsettings.hpp"
 #include "protocol.h"
 
-using namespace com;
-using namespace cam;
+using namespace eagle;
 
 int main(int argc, char* argv[]) {
     // Parse arguments

@@ -1,6 +1,6 @@
 #include "communicator.h"
 
-using namespace com;
+using namespace eagle;
 
 Communicator::Communicator(const std::string& name, const std::string& iface, int port) :
     _name(name) {

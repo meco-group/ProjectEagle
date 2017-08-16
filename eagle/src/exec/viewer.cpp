@@ -1,8 +1,8 @@
-#include "libcam.hpp"
 #include "libcamsettings.hpp"
+#include "libcam.hpp"
 #include "utils.cpp"
 
-using namespace cam;
+using namespace eagle;
 
 int main(int argc, char* argv[]) {
     // Parse arguments

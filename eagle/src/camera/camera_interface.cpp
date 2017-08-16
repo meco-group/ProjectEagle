@@ -1,7 +1,7 @@
 #include <iostream>
 #include <libcam.hpp>
 
-using namespace cam;
+using namespace eagle;
 
 CameraInterface::CameraInterface(int device) {
     _camera_matrix = cv::Mat::eye(3, 3, CV_32F);

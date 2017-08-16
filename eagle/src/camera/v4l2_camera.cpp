@@ -16,7 +16,7 @@
 #include <iostream>
 #include "v4l2_camera.h"
 
-using namespace cam;
+using namespace eagle;
 
 V4L2Camera::V4L2Camera(int device):
     CameraInterface(0),

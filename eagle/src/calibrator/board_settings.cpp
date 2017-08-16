@@ -1,5 +1,7 @@
 #include "board_settings.h"
 
+using namespace eagle;
+
 BoardSettings::BoardSettings() : Config("BoardSettings") {}
 
 void BoardSettings::write(FileStorage &fs) const {

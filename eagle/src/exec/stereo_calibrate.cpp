@@ -2,7 +2,7 @@
 #include "calibrator.h"
 #include "libcamsettings.hpp"
 
-using namespace cam;
+using namespace eagle;
 
 int main(int argc, char* argv[]) {
     // The first of the two configs should always be for a camera that

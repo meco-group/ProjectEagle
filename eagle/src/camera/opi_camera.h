@@ -5,7 +5,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-namespace cam {
+namespace eagle {
     class OPICamera : public V4L2Camera {
     private:
         int process_buffer(cv::Mat &img);

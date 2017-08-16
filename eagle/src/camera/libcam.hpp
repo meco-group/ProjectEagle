@@ -7,7 +7,7 @@
 #include "latitude_camera.h"
 #include "odroid_camera.h"
 
-namespace cam {
+namespace eagle {
     using namespace std;
     using namespace cv;
 

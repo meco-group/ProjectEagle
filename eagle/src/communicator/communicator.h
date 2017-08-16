@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <ctime>
 
-namespace com {
+namespace eagle {
     class Communicator {
 
     private:

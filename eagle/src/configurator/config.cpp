@@ -4,9 +4,11 @@
 
 #include "config.hpp"
 
-conf::Config::Config(std::string nodeName) : _nodeName(nodeName) {}
+using namespace eagle;
 
-void conf::Config::read(const string path) {
+Config::Config(std::string nodeName) : _nodeName(nodeName) {}
+
+void Config::read(const string path) {
     FileStorage fs(path, FileStorage::READ);
     read(fs[_nodeName]);
     fs.release();

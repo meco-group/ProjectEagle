@@ -8,7 +8,7 @@
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
-namespace cam {
+namespace eagle {
     typedef struct buffer_t {
         void *data;
         size_t length;

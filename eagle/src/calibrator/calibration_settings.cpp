@@ -1,8 +1,6 @@
-//"../config/ceil1_cam.xml"
-// Created by peter on 06/07/17.
-//
-
 #include "calibration_settings.h"
+
+using namespace eagle;
 
 CalSettings::CalSettings() : Config("CalibrationSettings") {}
 

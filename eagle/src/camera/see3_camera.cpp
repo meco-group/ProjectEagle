@@ -1,7 +1,7 @@
 #include "see3_camera.h"
 #include <bitset>
 
-using namespace cam;
+using namespace eagle;
 
 See3Camera::See3Camera(int device) :
     V4L2Camera(device)

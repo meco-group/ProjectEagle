@@ -4,7 +4,7 @@
 
 #include "com_settings.h"
 
-using namespace com;
+using namespace eagle;
 
 ComSettings::ComSettings() : Config("CommunicatorSettings") {}
 

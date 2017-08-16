@@ -1,10 +1,10 @@
 #include "opi_camera.h"
 
-using namespace cam;
+using namespace eagle;
 
 OPICamera::OPICamera(int device) :
     V4L2Camera(device)
-{	
+{
     format(640, 480, V4L2_PIX_FMT_UYVY);
 	buffers(4);
 }

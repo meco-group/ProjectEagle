@@ -4,7 +4,7 @@
 
 #include "camera_settings.h"
 
-using namespace cam;
+using namespace eagle;
 
 CameraSettings::CameraSettings() : Config("CameraSettings") {}
 

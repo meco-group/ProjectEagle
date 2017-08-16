@@ -8,48 +8,48 @@
 
 using namespace cv;
 using namespace std;
-using namespace conf;
 
-class BoardSettings : public Config {
-    public:
-        enum Pattern { NOT_EXISTING, CHESSBOARD, CIRCLES_GRID, ASYMMETRIC_CIRCLES_GRID };
+namespace eagle {
+    class BoardSettings : public Config {
+        public:
+            enum Pattern { NOT_EXISTING, CHESSBOARD, CIRCLES_GRID, ASYMMETRIC_CIRCLES_GRID };
 
-        Size boardSize;                 // The size of the board -> Number of items by width and height
-        float squareSize;               // The size of a square in your defined unit (point, millimeter,etc).
-        Pattern calibrationPattern;
+            Size boardSize;                 // The size of the board -> Number of items by width and height
+            float squareSize;               // The size of a square in your defined unit (point, millimeter,etc).
+            Pattern calibrationPattern;
 
-    private:
-        string patternToUse;
+        private:
+            string patternToUse;
 
-    public:
-        /**
-         * Initialise this new BoardSettings object
-         */
-        BoardSettings();
+        public:
+            /**
+             * Initialise this new BoardSettings object
+             */
+            BoardSettings();
 
-        /**
-         * Write serialization for this class
-         * @param fs file handle to write to
-         */
-        void write(FileStorage &fs) const;
+            /**
+             * Write serialization for this class
+             * @param fs file handle to write to
+             */
+            void write(FileStorage &fs) const;
 
-        /**
-         * Read serialization for this clss
-         * @param node the file node to read
-         */
-        void read(const FileNode &node);
+            /**
+             * Read serialization for this clss
+             * @param node the file node to read
+             */
+            void read(const FileNode &node);
 
-        /**
-         * Read serialization for this class
-         * @note we have to include this line to make the method overloading work
-         */
-        using Config::read;
+            /**
+             * Read serialization for this class
+             * @note we have to include this line to make the method overloading work
+             */
+            using Config::read;
 
-        /**
-         * Parse the data extracted from a settings file
-         */
-        bool parse();
+            /**
+             * Parse the data extracted from a settings file
+             */
+            bool parse();
+    };
 };
-
 
 #endif //PROJECTEAGLE_BOARD_SETTINGS_H

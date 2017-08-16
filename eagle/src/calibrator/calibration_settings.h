@@ -14,75 +14,76 @@
 
 using namespace cv;
 using namespace std;
-using namespace conf;
 
-class CalSettings : public Config {
-    public:
+namespace eagle {
 
-        // The source of the images_ceil1
-        enum SourceType {NONE, STORED, VIDEO, CAMERA};
-        SourceType sourceType;
+    class CalSettings : public Config {
+        public:
 
-        // Amount of frames to take
-        int imageCount;
+            // The source of the images_ceil1
+            enum SourceType {NONE, STORED, VIDEO, CAMERA};
+            SourceType sourceType;
 
-        // Source path;
-        string sourcePath;
+            // Amount of frames to take
+            int imageCount;
 
-        // Data for case of STORED
-        vector<string> imageList;
+            // Source path;
+            string sourcePath;
 
-        // Board settings path
-        string boardSettingsPath;
+            // Data for case of STORED
+            vector<string> imageList;
 
-        // The board settings
-        BoardSettings boardSettings;
+            // Board settings path
+            string boardSettingsPath;
 
-        // The Calibration Flag
-        int flag;
+            // The board settings
+            BoardSettings boardSettings;
 
-        // The output file name
-        string outputFileName;
+            // The Calibration Flag
+            int flag;
 
-        // The aspect ratio
-        float aspectRatio;
+            // The output file name
+            string outputFileName;
 
-        // Flags
-        bool calibZeroTangentDist;
-        bool calibFixPrincipalPoint;
+            // The aspect ratio
+            float aspectRatio;
 
-    private:
-        string sourceTypeString;
+            // Flags
+            bool calibZeroTangentDist;
+            bool calibFixPrincipalPoint;
 
-    public:
-        /**
-         * Initialise this new CalSettings object
-         */
-        CalSettings();
+        private:
+            string sourceTypeString;
 
-        /**
-         * Write serialization for this class
-         * @param fs file handle to write to
-         */
-        void write(FileStorage &fs) const;
+        public:
+            /**
+             * Initialise this new CalSettings object
+             */
+            CalSettings();
 
-        /**
-         * Read serialization for this clss
-         * @param node the file node to read
-         */
-        void read(const FileNode &node);
+            /**
+             * Write serialization for this class
+             * @param fs file handle to write to
+             */
+            void write(FileStorage &fs) const;
 
-        /**
-         * Read serialization for this class
-         * @note we have to include this line to make the method overloading work
-         */
-        using Config::read;
+            /**
+             * Read serialization for this clss
+             * @param node the file node to read
+             */
+            void read(const FileNode &node);
 
-        /**
-         * Parse the data extracted from a settings file
-         */
-        bool parse();
-};
+            /**
+             * Read serialization for this class
+             * @note we have to include this line to make the method overloading work
+             */
+            using Config::read;
 
+            /**
+             * Parse the data extracted from a settings file
+             */
+            bool parse();
+    };
+}
 
 #endif //PROJECTEAGLE_CALIBRATION_SETTINGS_H

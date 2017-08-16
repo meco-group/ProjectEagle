@@ -5,7 +5,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 
-namespace conf {
+namespace eagle {
     using namespace cv;
     using namespace std;
 

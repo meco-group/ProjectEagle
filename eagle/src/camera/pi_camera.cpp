@@ -1,6 +1,6 @@
 #include "pi_camera.h"
 
-using namespace cam;
+using namespace eagle;
 
 PiCamera::PiCamera(int device) :
     V4L2Camera(device) {

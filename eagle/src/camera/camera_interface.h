@@ -4,7 +4,7 @@
 #include <chrono>
 #include <opencv2/core/core.hpp>
 
-namespace cam {
+namespace eagle {
     class CameraInterface {
     protected:
         cv::Mat _camera_matrix;

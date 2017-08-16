@@ -10,12 +10,10 @@
 #include <iostream>
 #include <libconfig.hpp>
 
-namespace com {
-    using namespace cv;
-    using namespace std;
-    using namespace conf;
+using namespace cv;
+using namespace std;
 
-
+namespace eagle {
     class ComSettings : public Config {
     public:
         string interface;

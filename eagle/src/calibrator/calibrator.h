@@ -12,46 +12,46 @@
 using namespace cv;
 using namespace std;
 
+namespace eagle {
+    class Calibrator {
 
-class Calibrator {
+        public:
+            CalSettings _settings;
+            int _imageIndex = 0;
+            Size imageSize;
 
-public:
-    CalSettings _settings;
-    int _imageIndex = 0;
-    Size imageSize;
+            vector<vector<Point2f>> imagePoints;
+            vector<vector<Point3f>> objectPoints;
 
-    vector<vector<Point2f>> imagePoints;
-    vector<vector<Point3f>> objectPoints;
+            vector<Mat> rvecs;
+            vector<Mat> tvecs;
+            Mat cameraMatrix;
+            Mat groundPlane;
+            Mat distCoeffs;
 
-    vector<Mat> rvecs;
-    vector<Mat> tvecs;
-    Mat cameraMatrix;
-    Mat groundPlane;
-    Mat distCoeffs;
+            double totalAvgErr;
+            vector<float> reprojErrs;
 
-    double totalAvgErr;
-    vector<float> reprojErrs;
+        public:
+            Calibrator(string setting_path);
 
-public:
-    Calibrator(string setting_path);
+            bool execute();
+            void saveCameraParams();
+            static void projectToGround(const Point3d &i, Point3d &w, Mat K, Mat ground);
+            static void projectToImage(Point3d &i, const Point3d &w, Mat K);
 
-    bool execute();
-    void saveCameraParams();
-    static void projectToGround(const Point3d &i, Point3d &w, Mat K, Mat ground);
-    static void projectToImage(Point3d &i, const Point3d &w, Mat K);
+        private:
+            bool executed;
 
-private:
-    bool executed;
+            Mat getNextImage(string &name);
 
-    Mat getNextImage(string &name);
+            bool processImage(Mat view, vector<Point2f> &pointBuf);
+            bool processPattern(vector<Point3f> &pointBuf);
 
-    bool processImage(Mat view, vector<Point2f> &pointBuf);
-    bool processPattern(vector<Point3f> &pointBuf);
-
-    bool getCalibration();
-    double computeReprojectionErrors();
-    double rescaleTransformation(bool apply);
+            bool getCalibration();
+            double computeReprojectionErrors();
+            double rescaleTransformation(bool apply);
+    };
 };
-
 
 #endif //PROJECTEAGLE_CALIBRATOR_H

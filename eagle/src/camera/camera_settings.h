@@ -11,12 +11,10 @@
 #include <libcam.hpp>
 #include <libconfig.hpp>
 
-namespace cam {
 
+namespace eagle {
     using namespace cv;
     using namespace std;
-    using namespace conf;
-
     class CameraSettings : public Config {
     public:
         int camIndex;

@@ -1,9 +1,7 @@
-//
-// Created by peter on 06/07/17.
-//
-
 #include "calibration_settings.h"
 #include "calibrator.h"
+
+using namespace eagle;
 
 Calibrator::Calibrator(string settings_path) : executed(false) {
     _settings.read(settings_path);
@@ -153,7 +151,7 @@ bool Calibrator::getCalibration() {
     distCoeffs = Mat::zeros(8, 1, CV_64F);
 
     //Find intrinsic and extrinsic camera parameters
-    
+
     calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix,distCoeffs, rvecs, tvecs, _settings.flag|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
 
     //Process the extrinsic camera parameters:
@@ -197,7 +195,7 @@ double Calibrator::computeReprojectionErrors() {
 };
 
 double Calibrator::rescaleTransformation(bool apply = false) {
-	
+
     double tsum = 0.0;
     int tcount = 0;
 
@@ -217,7 +215,7 @@ double Calibrator::rescaleTransformation(bool apply = false) {
             Point3d P0;
             Calibrator::projectToGround(i1,P1,cameraMatrix,groundPlane);
             Calibrator::projectToGround(i0,P0,cameraMatrix,groundPlane);
-            
+
 //            std::cout << P0 << "," << P1 << std::endl;
 
     		double temp = cv::norm(Mat(P1),Mat(P0));
@@ -236,7 +234,7 @@ double Calibrator::rescaleTransformation(bool apply = false) {
     double scale = tsum/tcount;
     std::cout << "Global average square distance: " << scale << std::endl;
     std::cout << "Relative error: " << (_settings.boardSettings.squareSize-scale)/_settings.boardSettings.squareSize << std::endl;
-	
+
 	return 0;
 };
 
@@ -324,9 +322,9 @@ void Calibrator::projectToGround(const Point3d &i, Point3d &w, Mat K, Mat ground
 {
     // Project image coordinates to a plane ground
     // i is of the form [x;y;1], w is of the form [X,Y,Z], K is the camera matrix
-    // ground holds the coefficients of the ground plane [a,b,c,d] where the 
+    // ground holds the coefficients of the ground plane [a,b,c,d] where the
     // ground plane is represented by ax+by+cz+d=0
-    
+
     Mat M1;
     hconcat(-Mat::eye(3,3,CV_64F),K.inv()*Mat(i),M1);
     Mat M2;

@@ -6,7 +6,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 
-namespace cam {
+namespace eagle {
 	class PiCamera : public V4L2Camera {
 	private:
 		int process_buffer(cv::Mat &img);

@@ -1,6 +1,6 @@
 #include "odroid_camera.h"
 
-using namespace cam;
+using namespace eagle;
 
 OdroidCamera::OdroidCamera(int device) :
     V4L2Camera(device) {

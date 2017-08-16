@@ -2,7 +2,7 @@
 #include <ctime>
 #include <random>
 
-using namespace com;
+using namespace eagle;
 
 int main(void) {
     std::srand(std::time(NULL));

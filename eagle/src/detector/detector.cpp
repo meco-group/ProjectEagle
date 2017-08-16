@@ -1,5 +1,7 @@
 #include "detector.h"
 
+using namespace eagle;
+
 Detector::Detector(const std::string& param_file, const cv::Mat& background, const cv::Matx33f& cam2world_tf) :
 _background(background) {
     read_parameters(param_file);

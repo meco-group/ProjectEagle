@@ -1,7 +1,6 @@
 #include "latitude_camera.h"
 
-using namespace cam;
-
+using namespace eagle;
 
 LatitudeCamera::LatitudeCamera(int device) :
     V4L2Camera(device) {
