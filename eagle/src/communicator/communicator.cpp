@@ -9,22 +9,19 @@ Communicator::Communicator(const std::string& name, const std::string& iface, in
     zyre_set_interface(_node, iface.c_str());
 }
 
-Communicator::Communicator(const std::string& name, const std::string& iface) :
-    _name(name) {
-    _node = zyre_new(name.c_str());
-    zyre_set_interface(_node, iface.c_str());
-}
-
 Communicator::Communicator(const std::string& name) : _name(name) {
     _node = zyre_new(name.c_str());
 }
 
+Communicator::Communicator(const std::string& name, const std::string& config_path) : _name(name) {
+    cv::FileStorage fs(config_path, cv::FileStorage::READ);
+    _node = zyre_new(name.c_str());
+    zyre_set_port(_node, (int)fs["communicator"]["zyre_port"]);
+    zyre_set_interface(_node, ((std::string)fs["communicator"]["interface"]).c_str());
+}
+
 bool Communicator::start() {
-    if (zyre_start(_node) != 0) {
-        return false;
-    }
-    _poller = zpoller_new(zyre_socket(_node));
-    return true;
+    return start(0);
 }
 
 bool Communicator::start(int sleep_time) {

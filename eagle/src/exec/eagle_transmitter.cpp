@@ -1,5 +1,5 @@
-#include "libcom.hpp"
-#include "camera.hpp"
+#include "communicator.h"
+#include "camera.h"
 #include "detector.h"
 #include "protocol.h"
 #include "utils.h"
@@ -10,26 +10,25 @@ using namespace eagle;
 
 int main(int argc, char* argv[]) {
     // Parse arguments
-    string config = argc > 1 ? argv[1] : "/home/odroid/ProjectEagle/src/client/config/devices/eagle0/config.xml";
-    string node_name = argc > 2 ? argv[2] : "eagle0";
-    string frequency_str = argc > 3 ? argv[3] : "10"; // Hz
-    string image_stream_str = argc > 4 ? argv[4] : "0";
+    string node_name = argc > 1 ? argv[1] : "eagle0";
+    string frequency_str = argc > 2 ? argv[2] : "10"; // Hz
+    string image_stream_str = argc > 3 ? argv[3] : "0";
     double frequency = std::stod(frequency_str);
     bool image_stream = (image_stream_str == "1");
 
-
-    // open settings file
-    ComSettings comSettings;
-    comSettings.read(config);
+    // read config file
+    cv::FileStorage fs(CONFIG_PATH, cv::FileStorage::READ);
 
     // start camera
     Camera* cam = getCamera(CONFIG_PATH);
     cam->start();
 
     // setup the communication
-    Communicator com(node_name, comSettings.interface);
-    com.start(comSettings.init_wait_time);
-    com.join(comSettings.group);
+    Communicator com(node_name, CONFIG_PATH);
+    com.start(fs["communicator"]["zyre_wait_time"]);
+    std::string group = fs["communicator"]["group"];
+    com.join(group);
+
     // setup video compression
     std::vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
@@ -43,7 +42,6 @@ int main(int argc, char* argv[]) {
 
     // compute transformation from image plane to ground plane
     cv::Mat R, T, K, ground_plane;
-    cv::FileStorage fs(CONFIG_PATH, cv::FileStorage::READ);
     fs["camera"]["external_transformation"] >> T;
     fs["camera"]["ground_plane"] >> ground_plane;
     fs["camera"]["camera_matrix"] >> K;
@@ -135,14 +133,14 @@ int main(int argc, char* argv[]) {
         }
 
         // send everything
-        com.shout(data, sizes, comSettings.group);
+        com.shout(data, sizes, group);
 
         if (image_stream) {
             // draw everything to give some feedback
             detector.draw(im, robots, obstacles);
             imheader.time = capture_time;
             cv::imencode(".jpg", im, buffer, compression_params);
-            com.shout(&imheader, buffer.data(), sizeof(imheader), buffer.size(), comSettings.group);
+            com.shout(&imheader, buffer.data(), sizeof(imheader), buffer.size(), group);
         }
 
         // detector.draw(im, robots, obstacles);
@@ -159,6 +157,6 @@ int main(int argc, char* argv[]) {
     // stop the program
     cam->stop();
     delete cam;
-    com.leave(comSettings.group);
+    com.leave(group);
     com.stop();
 }

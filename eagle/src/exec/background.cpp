@@ -1,4 +1,4 @@
-#include "camera.hpp"
+#include "camera.h"
 #include "utils.h"
 
 using namespace eagle;

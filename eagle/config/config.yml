@@ -26,6 +26,12 @@ camera:
         dt: d
         data: [1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.]
 
+communicator:
+    interface: 'wlan0'
+    zyre_port: 5670
+    zyre_group: 'EAGLE'
+    zyre_wait_time: 100
+
 detector:
     blob:
         minThreshold: 10

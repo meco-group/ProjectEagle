@@ -1,5 +1,5 @@
-#include "camera.hpp"
-#include "libcom.hpp"
+#include "communicator.h"
+#include "camera.h"
 #include "protocol.h"
 #include "utils.h"
 
@@ -7,27 +7,27 @@ using namespace eagle;
 
 int main(int argc, char* argv[]) {
     // Parse arguments
-    const string config = argc > 1 ? argv[1] : "/home/odroid/ProjectEagle/src/client/config/devices/eagle0/config.xml";
-    const string node_name = argc > 2 ? argv[2] : "eagle0";
+    const string node_name = argc > 1 ? argv[1] : "eagle0";
 
-    ComSettings comSettings;
-    comSettings.read(config);
-
-    cout << "Starting ImageTransmitter - GROUP: "<<comSettings.group<<"\n";
+    // read config file
+    cv::FileStorage fs(CONFIG_PATH, cv::FileStorage::READ);
 
     // start camera
     Camera* cam = getCamera(CONFIG_PATH);
     cam->start();
 
-    Communicator com(node_name, comSettings.interface);
-    com.debug();
-    com.start(comSettings.init_wait_time);
-    com.join(comSettings.group);
+    // start communicator
+    Communicator com(node_name, CONFIG_PATH);
+    com.start(fs["communicator"]["zyre_wait_time"]);
+    std::string group = fs["communicator"]["group"];
+    fs.release();
 
     std::vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
     compression_params.push_back(90);
     std::vector<uchar> buffer(10000,0);
+
+    cout << "Starting ImageTransmitter - GROUP: "<< group<<"\n";
 
     // wait for peer
     std::cout << "waiting for peers" << std::endl;
@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
         }
 
     	cv::imencode(".jpg",temp, buffer, compression_params);
-        if (com.shout(&header, buffer.data(), sizeof(header), buffer.size(), comSettings.group)) {
+        if (com.shout(&header, buffer.data(), sizeof(header), buffer.size(), group)) {
             std::cout << "Sending image " << img_id << ", size: " << buffer.size() << std::endl;
             std::cout << "Header size: "<<sizeof(header)<<"\n";
         }
@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
     // stop the program
     cam->stop();
     delete cam;
-    com.leave(comSettings.group);
+    com.leave(group);
     com.stop();
 }
 
