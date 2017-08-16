@@ -61,7 +61,8 @@ namespace eagle {
     Camera* getCamera(std::string config_path) {
         cv::FileStorage fs(config_path, cv::FileStorage::READ);
         Camera* cam = getCamera(fs["camera"]["index"], fs["camera"]["type"]);
-        cam->setResolution(fs["camera"]["resolution"]["width"], fs["camera"]["resolution"]["height"]);
+        cam->setResolution(fs["camera"]["resolution"]["width"],
+            fs["camera"]["resolution"]["height"]);
         cv::Mat camera_matrix, distortion_vector;
         fs["camera"]["camera_matrix"] >> camera_matrix;
         fs["camera"]["distortion_vector"] >> distortion_vector;
@@ -69,6 +70,7 @@ namespace eagle {
         fs.release();
         return cam;
     }
+
 };
 
-#endif //PROJECTEAGLE_LIBCAM_HPP
+#endif //CAMERA_HPP

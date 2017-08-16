@@ -7,18 +7,20 @@
 #include <iostream>
 
 namespace eagle {
-	class OdroidCamera : public V4L2Camera {
-	private:
-		int process_buffer(cv::Mat &img);
 
-		bool readYUYV(cv::Mat &img);
+    class OdroidCamera : public V4L2Camera {
 
-	public:
-		OdroidCamera(int device = 0);
+        private:
+            int process_buffer(cv::Mat &img);
+            bool readYUYV(cv::Mat &img);
 
-		bool setBrightness(int brightness);
-		bool setResolution(const std::vector<int> &resolution);
+        public:
+            OdroidCamera(int device = 0);
+            bool setBrightness(int brightness);
+            bool setResolution(const std::vector<int> &resolution);
 
-	};
-}
+    };
+
+};
+
 #endif //ODRDOID_CAMERA_H

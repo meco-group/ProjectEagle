@@ -39,8 +39,8 @@ namespace eagle {
             virtual int getHeight() = 0;
             virtual void setResolution(int width, int height) = 0;
 
-        };
+    };
 
-}
+};
 
 #endif //CAMERA_INTERFACE_H
