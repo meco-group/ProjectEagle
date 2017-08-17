@@ -5,9 +5,10 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 
+using namespace cv;
+using namespace std;
+
 namespace eagle {
-    using namespace cv;
-    using namespace std;
 
     class Config {
     protected:

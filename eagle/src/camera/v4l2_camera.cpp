@@ -81,13 +81,15 @@ int V4L2Camera::v4l2_set_pixfmt() {
         perror("Setting Pixel Format");
         return 1;
     }
+    char pixfmt[sizeof(fmt.fmt.pix.pixelformat)];
+    memcpy(&pixfmt, &fmt.fmt.pix.pixelformat, sizeof(fmt.fmt.pix.pixelformat));
     printf("Selected Camera Mode:\n"
             "  Width: %d\n"
             "  Height: %d\n"
             "  PixFmt: %s\n",
             fmt.fmt.pix.width,
             fmt.fmt.pix.height,
-            (char *)&fmt.fmt.pix.pixelformat);
+            pixfmt);
     if (_pixelformat != fmt.fmt.pix.pixelformat) {
         _pixelformat = fmt.fmt.pix.pixelformat;
         perror("Pixel format not accepted");

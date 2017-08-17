@@ -1,5 +1,5 @@
-#ifndef PROJECTEAGLE_CALIBRATOR_H
-#define PROJECTEAGLE_CALIBRATOR_H
+#ifndef CALIBRATOR_H
+#define CALIBRATOR_H
 
 #include "calibration_settings.h"
 #include "board_settings.h"
@@ -13,9 +13,24 @@ using namespace cv;
 using namespace std;
 
 namespace eagle {
+
     class Calibrator {
 
+        private:
+            bool executed;
+
+            Mat getNextImage(string &name);
+
+            bool processImage(Mat view, vector<Point2f> &pointBuf);
+            bool processPattern(vector<Point3f> &pointBuf);
+
+            bool getCalibration();
+            double computeReprojectionErrors();
+            double rescaleTransformation(bool apply);
+
         public:
+            Calibrator(string config_path);
+
             CalSettings _settings;
             int _imageIndex = 0;
             Size imageSize;
@@ -32,26 +47,14 @@ namespace eagle {
             double totalAvgErr;
             vector<float> reprojErrs;
 
-        public:
-            Calibrator(string setting_path);
 
             bool execute();
             void saveCameraParams();
             static void projectToGround(const Point3d &i, Point3d &w, Mat K, Mat ground);
             static void projectToImage(Point3d &i, const Point3d &w, Mat K);
 
-        private:
-            bool executed;
-
-            Mat getNextImage(string &name);
-
-            bool processImage(Mat view, vector<Point2f> &pointBuf);
-            bool processPattern(vector<Point3f> &pointBuf);
-
-            bool getCalibration();
-            double computeReprojectionErrors();
-            double rescaleTransformation(bool apply);
     };
+
 };
 
-#endif //PROJECTEAGLE_CALIBRATOR_H
+#endif // CALIBRATOR_H

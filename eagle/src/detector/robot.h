@@ -14,6 +14,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 namespace eagle {
+
     class Robot {
 
         private:
@@ -93,6 +94,7 @@ namespace eagle {
                 return {static_cast<int>(_code), _position.x, _position.y, _orientation};
             }
     };
+
 };
 
 #endif //ROBOT_H

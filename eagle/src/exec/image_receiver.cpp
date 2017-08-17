@@ -5,29 +5,32 @@
 using namespace eagle;
 
 int main(int argc, char* argv[]) {
-    // Parse arguments
+    // parse arguments
     std::string iface = (argc > 1) ? argv[1] : "wlan0";
     std::string group = (argc > 2) ? argv[2] : "EAGLE";
     std::string peer = (argc > 3) ? argv[3] : "eagle0";
 
+    // start communicator
     Communicator com("receiver", iface, 5670);
     com.start(100.);
     com.join(group);
 
-    // wait for peer
+    // wait for peers
     std::cout << "waiting for peers" << std::endl;
     while(com.peers().size() <= 0) {
         sleep(1);
     }
 
-    // Video stream setup
-    int k = 0;
-    std::cout << "Opening window"<< std::endl;
+    // video stream setup
     cv::namedWindow("Stream");
     eagle::header_t header;
     std::string pr;
 
-    // Start acquiring video stream
+    std::cout << "Start receiving video stream." << std::endl;
+
+    // start acquiring video stream
+    int img_cnt = 0;
+    auto begin = std::chrono::system_clock::now();
     while( !kbhit() ) {
         if (com.listen(pr, 1)) {
             while (com.available()) {
@@ -41,21 +44,23 @@ int main(int argc, char* argv[]) {
                     if (pr == peer) {
                         cv::Mat rawData = cv::Mat( 1, size, CV_8UC1, buffer);
                         cv::Mat im = cv::imdecode(rawData, 1);
-                        imshow("Stream",im);
+                        imshow("Stream", im);
                         cv::waitKey(1);
+                        img_cnt++;
                     }
                     break;
+
                 }
             }
         }
-        k++;
     }
-
-    // Terminate everything
+    auto end = std::chrono::system_clock::now();
+    double fps = img_cnt/(std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()*1e-6);
+    std::cout << "Average framerate: " << fps << std::endl;
+    // stop the program
     cv::destroyWindow("Stream");
     com.leave("EAGLE");
     com.stop();
-
     return 0;
 }
 

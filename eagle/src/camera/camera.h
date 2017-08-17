@@ -13,9 +13,6 @@
 #include "latitude_camera.h"
 #include "odroid_camera.h"
 
-using namespace std;
-using namespace cv;
-
 namespace eagle {
 
     enum CamType {
@@ -64,9 +61,6 @@ namespace eagle {
         cam->setResolution(fs["camera"]["resolution"]["width"],
             fs["camera"]["resolution"]["height"]);
         cv::Mat camera_matrix, distortion_vector;
-        fs["camera"]["camera_matrix"] >> camera_matrix;
-        fs["camera"]["distortion_vector"] >> distortion_vector;
-        cam->calibrate(camera_matrix, distortion_vector);
         fs.release();
         return cam;
     }

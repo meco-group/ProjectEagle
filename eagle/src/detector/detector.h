@@ -9,7 +9,9 @@
 #include "obstacle.h"
 
 namespace eagle {
+
     class Detector {
+
         private:
             cv::Ptr<cv::SimpleBlobDetector> _blob_detector;
             cv::Mat _background;
@@ -55,7 +57,9 @@ namespace eagle {
             Detector(const std::string& config_path, const cv::Matx33f& cam2world_tf);
             void search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
             void draw(cv::Mat& frame, const std::vector<Robot*>& robots, const std::vector<Obstacle*>& obstacles);
+
     };
+
 };
 
 #endif //DETECTOR_H

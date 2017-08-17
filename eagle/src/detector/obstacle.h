@@ -7,6 +7,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 namespace eagle {
+
     class Obstacle {
         protected:
             cv::Point2f _position;
@@ -100,6 +101,7 @@ namespace eagle {
                 return ret;
             }
     };
+
 };
 
 #endif //OBSTACLE_H

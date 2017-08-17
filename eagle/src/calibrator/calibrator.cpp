@@ -3,12 +3,11 @@
 
 using namespace eagle;
 
-Calibrator::Calibrator(string settings_path) : executed(false) {
-    _settings.read(settings_path);
+Calibrator::Calibrator(string config_path) : executed(false) {
+    _settings.read(config_path);
 };
 
 bool Calibrator::execute() {
-
     // Gather images_ceil1
     string filename;
     for (int i=0; i<_settings.imageCount; i++) {

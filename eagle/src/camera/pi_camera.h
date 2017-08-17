@@ -19,7 +19,7 @@ namespace eagle {
             bool setBrightness(int brightness);
             bool setResolution(const std::vector<int> &resolution);
 
-	};
+    };
 
 };
 

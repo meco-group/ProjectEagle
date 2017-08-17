@@ -24,13 +24,17 @@ camera:
         rows: 4
         cols: 4
         dt: d
-        data: [1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.]
+        data: [1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.]
 
 communicator:
     interface: 'wlan0'
+    group: 'EAGLE'
     zyre_port: 5670
-    zyre_group: 'EAGLE'
     zyre_wait_time: 100
+
+calibrator:
+    board_width: 6
+    board_height: 7
 
 detector:
     blob:
@@ -40,8 +44,6 @@ detector:
         minArea: 80
         filterByCircularity: 1
         minCircularity: 0.85
-    # pixelspermeter: 118
-    pixelspermeter: 125
     min_robot_area: 0.06
     min_obstacle_area: 0.02
     markers:
