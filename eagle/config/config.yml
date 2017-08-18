@@ -1,7 +1,7 @@
 %YAML:1.0
 camera:
-    index: 0
-    type: 'LATCAM'
+    index: 1
+    type: 'OCAM'
     resolution:
         width: 640
         height: 480
@@ -55,7 +55,7 @@ detector:
         qr_nbitx: 2
         qr_nbity: 2
     thresholds:
-        bg_subtraction: 31
+        bg_subtraction: 24
         top_marker: 0.1
         triangle_ratio: 0.1
     background_path: '/home/ruben/Documents/Work/Repositories/ProjectEagle/eagle/config/background.png'

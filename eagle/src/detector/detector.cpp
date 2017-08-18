@@ -243,10 +243,10 @@ bool Detector::subtract_robots(std::vector<std::vector<cv::Point>>& contours, co
     std::vector<std::vector<cv::Point>> robocontours(0);
     for (uint k=0; k<robots.size(); k++) {
         if (robots[k]->detected()) {
-            std::vector<cv::Point2f> vert = robots[k]->vertices();
+            std::vector<cv::Point2f> vert = world2camframe(robots[k]->vertices());
             std::vector<cv::Point> vert2(vert.size());
             for (uint l=0; l<vert.size(); l++) {
-                vert2[l] = cv::Point(vert[l].x, vert[l].y);
+                vert2[l] = vert[l];
             }
             robocontours.push_back(vert2);
         }
@@ -295,7 +295,7 @@ void Detector::filter_obstacles(const std::vector<std::vector<cv::Point>>& conto
         if (add) {
             cv::minEnclosingCircle(contours[i], center, radius);
             if (rect.size.width*rect.size.height < M_PI*pow(radius, 2)) {
-                obstacles.push_back(new Rectangle(cam2worldframe(rect.center), -rect.angle*(M_PI/180.), rect.size.width*_pixel2meter, rect.size.height*_pixel2meter));
+                obstacles.push_back(new Rectangle(cam2worldframe(rect.center), rect.angle*(M_PI/180.), rect.size.width*_pixel2meter, rect.size.height*_pixel2meter));
             } else {
                 obstacles.push_back(new Circle(cam2worldframe(center), radius*_pixel2meter));
             }

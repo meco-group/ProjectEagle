@@ -49,9 +49,9 @@ int main(int argc, char* argv[]) {
     Detector detector(CONFIG_PATH, image2ground_tf(ground_plane, camera_matrix, external_tf));
 
     // robots and obstacles that the detector should search for
-    Robot dave(0, 0.55, 0.4, cv::Scalar(17, 110, 138));
-    Robot krist(1, 0.55, 0.4, cv::Scalar(138, 31, 17));
-    Robot kurt(9, 0.55, 0.4, cv::Scalar(17, 138, 19));
+    Robot dave(0, 0.55, 0.4, cv::Scalar(138, 110, 17));
+    Robot krist(1, 0.55, 0.4, cv::Scalar(17, 31, 138));
+    Robot kurt(9, 0.55, 0.4, cv::Scalar(19, 138, 17));
     std::vector< Robot* > robots = std::vector< Robot* >{&dave, &krist, &kurt};
     std::vector< Obstacle* > obstacles;
 
@@ -175,4 +175,5 @@ int main(int argc, char* argv[]) {
     delete cam;
     com.leave(group);
     com.stop();
+    return 0;
 }

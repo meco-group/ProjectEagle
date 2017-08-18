@@ -5,7 +5,7 @@ using namespace eagle;
 OdroidCamera::OdroidCamera(int device) : V4L2Camera(device) {
     format(640, 480, V4L2_PIX_FMT_YUYV);
     buffers(1);
-    setBrightness(5);
+    setBrightness(2);
 }
 
 int OdroidCamera::process_buffer(cv::Mat &img) {
@@ -20,7 +20,7 @@ bool OdroidCamera::readYUYV(cv::Mat &img) {
 }
 
 bool OdroidCamera::setBrightness(int brightness) {
-    if (brightness < 0 || brightness > 8) {
+    if (brightness < -5 || brightness > 5) {
         std::cout << "Brighness should lie between 0 and 8!" << std::endl;
         return false;
     }
