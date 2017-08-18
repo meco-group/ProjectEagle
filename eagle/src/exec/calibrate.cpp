@@ -1,4 +1,3 @@
-#include "calibration_settings.h"
 #include "calibrator.h"
 #include "utils.h"
 
@@ -8,6 +7,6 @@ int main(int argc, char* argv[]) {
     // calibrate
     Calibrator cal(CONFIG_PATH);
     cal.execute();
-    cal.saveCameraParams();
+    cal.save(CONFIG_PATH);
     return 0;
 }

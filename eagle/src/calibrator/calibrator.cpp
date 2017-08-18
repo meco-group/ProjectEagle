@@ -1,346 +1,306 @@
-#include "calibration_settings.h"
 #include "calibrator.h"
 
 using namespace eagle;
 
-Calibrator::Calibrator(string config_path) : executed(false) {
-    _settings.read(config_path);
+Calibrator::Calibrator(const std::string& config_path) : _executed(false) {
+    cv::FileStorage fs(config_path, cv::FileStorage::READ);
+    read_parameters(fs);
+    fs.release();
 };
 
+void Calibrator::read_parameters(const cv::FileStorage& fs) {
+    _square_size = fs["calibrator"]["square_size"];
+    int board_width = fs["calibrator"]["board_width"];
+    int board_height = fs["calibrator"]["board_height"];
+    _board_size = cv::Size(board_width, board_height);
+    _calib_fix_principal_point = ((int)fs["calibrator"]["calib_fix_principal_point"] == 1);
+    _calib_zero_tangent_dist = ((int)fs["calibrator"]["calib_zero_tangent_dist"] == 1);
+    _calib_fix_aspect_ratio = ((int)fs["calibrator"]["calib_fix_aspect_ratio"] == 1);
+    std::string images_path = fs["calibrator"]["images_path"];
+    cv::glob(images_path + "/*.png",  _img_list);
+    const char *pattern_strings[] = {"INVALID", "PICAM", "OPICAM", "SEE3CAM", "LATCAM", "OCAM"};
+    _calibration_pattern = get_pattern(fs["calibrator"]["pattern"]);
+}
+
 bool Calibrator::execute() {
-    // Gather images_ceil1
-    string filename;
-    for (int i=0; i<_settings.imageCount; i++) {
-        Mat view = getNextImage(filename);
-        // TODO what do we do for camera intake, when this takes a while? => does getNextImage freeze the execution?
-
-        if (view.empty())
-            // TODO do something
+    _img_pnts.clear();
+    _object_pnts.clear();
+    cv::Mat img;
+    for (uint i=0; i<_img_list.size(); i++) {
+        // get next image
+        img = cv::imread(_img_list[i]);
+        if (img.empty()) {
             continue;
-
-        imageSize = view.size();
-
-        // Process the image
-        vector<Point2f> imageBuf;
-        bool success = processImage(view, imageBuf);
-        if (success){
-            imagePoints.push_back(imageBuf);
-        } else {
-            std::cout << "Ditch image: " << filename << std::endl;
         }
-            //continue;
-
-        // Gather the object points
-        // TODO this can be more efficient, but is the way it is now for flexibility
-        vector<Point3f> objectBuf;
-        success = processPattern(objectBuf);
-        if (success)
-            objectPoints.push_back(objectBuf);
-        else
-            // TODO we should ditch imagePoints, but this should never happen right now
+        // process image
+        std::vector<cv::Point2f> pnt_buffer;
+        if (process_image(img, pnt_buffer)) {
+            _img_pnts.push_back(pnt_buffer);
+        } else {
+            std::cout << "Ditching image " << _img_list[i] << "." << std::endl;
             continue;
+        }
+        // get object points
+        std::vector<cv::Point3f> object_buffer;
+        process_pattern(object_buffer);
+        _object_pnts.push_back(object_buffer);
     }
+    // calibrate camera
+    _img_size = img.size();
+    std::vector<cv::Mat> rvecs, tvecs;
+    if (_img_pnts.size() && calibrate(_object_pnts, _img_pnts, _img_size, _camera_matrix, _distortion_vector, _ground_plane, rvecs, tvecs)) {
+        double reproj_err = compute_reprojection_error(_object_pnts, _img_pnts,
+            _camera_matrix, _distortion_vector, rvecs, tvecs);
+        double scaling_err = compute_scaling_error(_img_pnts, _camera_matrix,
+            _distortion_vector, _ground_plane);
+        std::cout << "Camera calibration succeeded." << std::endl;
+        std::cout << "\t* average reprojection error: " << reproj_err << " px" << std::endl;
+        std::cout << "\t* relative scaling error: " << scaling_err << std::endl;
+        _executed = true;
+        return true;
+    } else {
+        std::cout << "Camera calibration failed." << std::endl;
+        return false;
+    }
+}
 
-    // TODO check for success
-
-    // Get the intrinsic camera parameters
-    getCalibration();
-
-    // Calculate the reprojection errors
-    computeReprojectionErrors();
-    rescaleTransformation(false);
-
-    executed = true;
+bool Calibrator::save(const std::string& config_path) {
+    if (!_executed) {
+        std::cout << "Calibration has not been executed succesfully yet." << std::endl;
+        return false;
+    }
+    std::map<std::string, cv::Mat> objects;
+    std::map<std::string, cv::Mat>::iterator it;
+    objects["camera_matrix"] = _camera_matrix;
+    objects["distortion_vector"] = _distortion_vector;
+    objects["ground_plane"] = _ground_plane;
+    std::ifstream file_in(config_path);
+    std::string data;
+    std::vector<std::string> lines;
+    std::vector<double> mat_vec;
+    bool found;
+    while (getline(file_in, data)) {
+        found = false;
+        for (it=objects.begin(); it!= objects.end(); it++) {
+            if (data.find(it->first) != std::string::npos) {
+                lines.push_back(data + "\n");
+                for (int k=0; k<3; k++) {
+                    getline(file_in, data);
+                    lines.push_back(data + "\n");
+                }
+                getline(file_in, data);
+                data = "        data: [";
+                mat_vec.assign((double*)(it->second).datastart,
+                    (double*)(it->second).dataend);
+                for (int k=0; k<mat_vec.size(); k++) {
+                    data += std::to_string(mat_vec[k]);
+                    if (k < mat_vec.size()-1) {
+                        data += ", ";
+                    }
+                }
+                data += "]\n";
+                lines.push_back(data);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            lines.push_back(data + "\n");
+        }
+    }
+    file_in.close();
+    std::ofstream file_out(config_path);
+    for (int k=0; k<lines.size(); k++) {
+        file_out << lines[k];
+    }
+    file_out.close();
     return true;
 }
 
-Mat Calibrator::getNextImage(string &name) {
-    Mat result;
-    // Check the source of the images_ceil1
-    switch(_settings.sourceType) {
-        case CalSettings::SourceType::STORED:
-            // We can get an image from the provided file
-            if (_imageIndex < (int) _settings.imageList.size()) {
-                name = _settings.imageList[_imageIndex++];
-                result = imread(name, CV_LOAD_IMAGE_COLOR);
+std::vector<std::vector<cv::Point3f>> Calibrator::object_points() {
+    return _object_pnts;
+}
+
+std::vector<std::vector<cv::Point2f>> Calibrator::image_points() {
+    return _img_pnts;
+}
+
+cv::Size Calibrator::image_size() {
+    return _img_size;
+}
+
+bool Calibrator::process_image(cv::Mat& img, std::vector<cv::Point2f>& pnt_buffer) {
+    bool found;
+    switch (_calibration_pattern) {
+        case CHESSBOARD:
+            found = findChessboardCorners(img, _board_size, pnt_buffer, 0);
+            if (found) {
+                // improve the found coners' coordinate accuracy
+                cv::Mat img_gray;
+                cv::cvtColor(img, img_gray, cv::COLOR_BGR2GRAY);
+                cv::cornerSubPix(img_gray, pnt_buffer, _board_size, cv::Size(-1,-1),
+                    cv::TermCriteria(CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1));
+                // draw the corners
+                cv::drawChessboardCorners(img, _board_size, cv::Mat(pnt_buffer), found);
             }
             break;
-        default:
+        case CIRCLES_GRID:
+            found = findCirclesGrid(img, _board_size, pnt_buffer);
             break;
-    }
-
-    return result;
-};
-
-bool Calibrator::processImage(Mat view, vector<Point2f> &pointBuf) {
-    // Flip the image if requested
-    // if( _settings.flipVertical )
-    //     flip( view, view, 0 );
-
-    // Process image based on format
-    bool found;
-    switch( _settings.boardSettings.calibrationPattern ) {
-        case BoardSettings::CHESSBOARD:
-            found = findChessboardCorners( view, _settings.boardSettings.boardSize, pointBuf, 0);
-                                            // CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
-            break;
-        case BoardSettings::CIRCLES_GRID:
-            found = findCirclesGrid( view, _settings.boardSettings.boardSize, pointBuf );
-            break;
-        case BoardSettings::ASYMMETRIC_CIRCLES_GRID:
-            found = findCirclesGrid( view, _settings.boardSettings.boardSize, pointBuf, CALIB_CB_ASYMMETRIC_GRID );
+        case ASYMMETRIC_CIRCLES_GRID:
+            found = findCirclesGrid(img, _board_size, pnt_buffer, cv::CALIB_CB_ASYMMETRIC_GRID);
             break;
         default:
             found = false;
             break;
     }
-
-    if (found) {
-        // improve the found corners' coordinate accuracy for chessboard
-        if( _settings.boardSettings.calibrationPattern == BoardSettings::CHESSBOARD) {
-            Mat viewGray;
-            cvtColor(view, viewGray, COLOR_BGR2GRAY);
-            cornerSubPix( viewGray, pointBuf, _settings.boardSettings.boardSize,
-                          Size(-1,-1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
-        }
-
-        // Draw the corners.
-        drawChessboardCorners( view, _settings.boardSettings.boardSize, Mat(pointBuf), found );
-    }
-
-    imshow("Image View", view);
-    (char)waitKey(500);
-
+    imshow("Image", img);
+    cv::waitKey(500);
     return found;
 };
 
-bool Calibrator::processPattern(vector<Point3f> &pointBuf) {
+void Calibrator::process_pattern(std::vector<cv::Point3f> &object_buffer) {
     // Reset the corners
-    pointBuf.clear();
+    object_buffer.clear();
 
     // Calculate grid points based on pattern
-    switch(_settings.boardSettings.calibrationPattern) {
-        case BoardSettings::CHESSBOARD:
-        case BoardSettings::CIRCLES_GRID:
-            for( int i = 0; i < _settings.boardSettings.boardSize.height; ++i )
-                for( int j = 0; j < _settings.boardSettings.boardSize.width; ++j )
-                    pointBuf.push_back(Point3f(float( j*_settings.boardSettings.squareSize ), float( i*_settings.boardSettings.squareSize ), 0));
+    switch(_calibration_pattern) {
+        case CHESSBOARD:
+        case CIRCLES_GRID:
+            for (int i=0; i<_board_size.height; i++) {
+                for (int j=0; j<_board_size.width; j++) {
+                    object_buffer.push_back(cv::Point3f(float(j*_square_size), float(i*_square_size), 0));
+                }
+            }
             break;
-
-        case BoardSettings::ASYMMETRIC_CIRCLES_GRID:
-            for( int i = 0; i < _settings.boardSettings.boardSize.height; i++ )
-                for( int j = 0; j < _settings.boardSettings.boardSize.width; j++ )
-                    pointBuf.push_back(Point3f(float((2*j + i % 2)*_settings.boardSettings.squareSize), float(i*_settings.boardSettings.squareSize), 0));
+        case ASYMMETRIC_CIRCLES_GRID:
+            for (int i=0; i <_board_size.height; i++) {
+                for (int j = 0; j <_board_size.width; j++) {
+                    object_buffer.push_back(cv::Point3f(float((2*j+i%2)*_square_size), float(i*_square_size), 0));
+                }
+            }
             break;
         default:
             break;
     }
+}
 
-    return true;
-};
-
-bool Calibrator::getCalibration() {
-
-    // Initialise CameraMatrix
-    cameraMatrix = Mat::eye(3, 3, CV_64F);
-    if( _settings.flag & CV_CALIB_FIX_ASPECT_RATIO )
-        cameraMatrix.at<double>(0,0) = 1.0;
-
-    // Initialise Distortion Coefficients
-    distCoeffs = Mat::zeros(8, 1, CV_64F);
-
-    //Find intrinsic and extrinsic camera parameters
-
-    calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix,distCoeffs, rvecs, tvecs, _settings.flag|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
-
-    //Process the extrinsic camera parameters:
-    //For now only translation is taken into account. Rotated images are not yet.
-    //We still have to write a routine to compute the rotation between the image plane and the world plane.
-    double Z = 0.0;
-    for(int k=0; k<tvecs.size();k++){
-        Z += tvecs[k].at<double>(2,0);
+bool Calibrator::calibrate(const std::vector<std::vector<cv::Point3f>>& object_pnts,
+    const std::vector<std::vector<cv::Point2f>>& img_pnts,  const cv::Size& img_size,
+    cv::Mat& camera_matrix, cv::Mat& distortion_vector, cv::Mat& ground_plane,
+    std::vector<cv::Mat>& rvecs, std::vector<cv::Mat>& tvecs) {
+    // init flag
+    int flag = 0;
+    if (_calib_fix_principal_point) flag |= CV_CALIB_FIX_PRINCIPAL_POINT;
+    if (_calib_zero_tangent_dist) flag |= CV_CALIB_ZERO_TANGENT_DIST;
+    if (_calib_fix_aspect_ratio) flag |= CV_CALIB_FIX_ASPECT_RATIO;
+    // initialize camera_matrix & distortion_vector
+    camera_matrix = cv::Mat::eye(3, 3, CV_64F);
+    if (flag & CV_CALIB_FIX_ASPECT_RATIO) {
+        camera_matrix.at<double>(0, 0) = 1.0;
     }
-    Z = Z/tvecs.size();
+    distortion_vector = cv::Mat::zeros(8, 1, CV_64F);
+    // find intrinsic and extrinsic camera parameters
+    cv::calibrateCamera(object_pnts, img_pnts, img_size, camera_matrix,
+        distortion_vector, rvecs, tvecs, flag|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
+    // get ground plane
+    get_ground_plane(rvecs, tvecs, ground_plane);
+    // check the result
+    return (cv::checkRange(camera_matrix) && cv::checkRange(distortion_vector));
+}
 
-
-    groundPlane = Mat::zeros(1,4,CV_64F);
-    groundPlane.at<double>(0,2) = 1.0;
-    groundPlane.at<double>(0,3) = -Z;
-
-    // Check the result
-    bool success = checkRange(cameraMatrix) && checkRange(distCoeffs);
-    return success;
-};
-
-double Calibrator::computeReprojectionErrors() {
-
-    vector<Point2f> imagePoints2;
-    int i, totalPoints = 0;
-    double totalErr = 0, err;
-    reprojErrs.resize(objectPoints.size());
-
-    for( i = 0; i < (int)objectPoints.size(); ++i ) {
-        projectPoints( Mat(objectPoints[i]), rvecs[i], tvecs[i], cameraMatrix,
-                       distCoeffs, imagePoints2);
-        err = norm(Mat(imagePoints[i]), Mat(imagePoints2), CV_L2);
-
-        int n = (int)objectPoints[i].size();
-        reprojErrs[i] = (float) std::sqrt(err*err/n);
-        totalErr        += err*err;
-        totalPoints     += n;
+double Calibrator::compute_reprojection_error(const std::vector<std::vector<cv::Point3f>>& object_pnts,
+    const std::vector<std::vector<cv::Point2f>>& img_pnts, const cv::Mat& camera_matrix,
+    const cv::Mat& distortion_vector, const std::vector<cv::Mat>& rvecs, const std::vector<cv::Mat>& tvecs) {
+    std::vector<cv::Point2f> img_pnts2;
+    double total_error = 0;
+    double total_pnts = 0;
+    uint n = object_pnts.size();
+    std::vector<double> errors(n);
+    for (uint i=0; i<n; i++) {
+        cv::projectPoints(cv::Mat(object_pnts[i]), rvecs[i], tvecs[i],
+            _camera_matrix, _distortion_vector, img_pnts2);
+        double error = cv::norm(cv::Mat(img_pnts[i]), cv::Mat(img_pnts2), CV_L2);
+        errors[i] = sqrt(error*error/n);
+        total_error += error*error;
+        total_pnts += n;
     }
+    return sqrt(total_error/total_pnts);
+}
 
-    return std::sqrt(totalErr/totalPoints);
-};
-
-double Calibrator::rescaleTransformation(bool apply = false) {
-
-    double tsum = 0.0;
-    int tcount = 0;
-
-    for(int k = 0;k<imagePoints.size();k++){
-    	Mat undistorted;
-    	Mat world;
-        undistortPoints(Mat(imagePoints[k]),undistorted,Mat::eye(3,3,CV_64F),distCoeffs);
-
-    	std::vector<double> norms;
-
-    	double sum = 0.0;
-    	int count = 0;
-    	for(int j = 1;j<imagePoints[k].size();j++){
-            Point3d i1(imagePoints[k][j].x,imagePoints[k][j].y,1);
-            Point3d P1;
-            Point3d i0(imagePoints[k][j-1].x,imagePoints[k][j-1].y,1);
-            Point3d P0;
-            Calibrator::projectToGround(i1,P1,cameraMatrix,groundPlane);
-            Calibrator::projectToGround(i0,P0,cameraMatrix,groundPlane);
-
-//            std::cout << P0 << "," << P1 << std::endl;
-
-    		double temp = cv::norm(Mat(P1),Mat(P0));
-    		if(count==0 || (temp <= 1.2*(sum/count))){
-    			sum += temp;
-    			count++;
-    		}
-    	}
-
-	    double average = sum/count;
-	    std::cout << "Average square distance " << k << ": " << average << std::endl;
-
-        tsum += sum;
-        tcount += count;
-    }
-    double scale = tsum/tcount;
-    std::cout << "Global average square distance: " << scale << std::endl;
-    std::cout << "Relative error: " << (_settings.boardSettings.squareSize-scale)/_settings.boardSettings.squareSize << std::endl;
-
-	return 0;
-};
-
-void Calibrator::saveCameraParams() {
-
-    if (!executed) {
-        cerr << "can\'t store calibration that has not been executed yet";
-        return;
-    }
-
-    CalSettings s = _settings;
-
-    FileStorage fs( s.outputFileName, FileStorage::WRITE );
-
-    time_t tm;
-    time( &tm );
-    struct tm *t2 = localtime( &tm );
-    char buf[1024];
-    strftime( buf, sizeof(buf)-1, "%c", t2 );
-
-    fs << "calibration_Time" << buf;
-
-    if( !rvecs.empty() || !reprojErrs.empty() )
-        fs << "nrOfFrames" << (int)std::max(rvecs.size(), reprojErrs.size());
-    fs << "image_Width" << imageSize.width;
-    fs << "image_Height" << imageSize.height;
-    fs << "board_Width" << s.boardSettings.boardSize.width;
-    fs << "board_Height" << s.boardSettings.boardSize.height;
-    fs << "square_Size" << s.boardSettings.squareSize;
-
-    if( s.flag & CV_CALIB_FIX_ASPECT_RATIO )
-        fs << "FixAspectRatio" << s.aspectRatio;
-
-    if( s.flag ) {
-        sprintf( buf, "flags: %s%s%s%s",
-                 s.flag & CV_CALIB_USE_INTRINSIC_GUESS ? " +use_intrinsic_guess" : "",
-                 s.flag & CV_CALIB_FIX_ASPECT_RATIO ? " +fix_aspectRatio" : "",
-                 s.flag & CV_CALIB_FIX_PRINCIPAL_POINT ? " +fix_principal_point" : "",
-                 s.flag & CV_CALIB_ZERO_TANGENT_DIST ? " +zero_tangent_dist" : "" );
-        cvWriteComment( *fs, buf, 0 );
-
-    }
-
-    fs << "flagValue" << s.flag;
-
-    fs << "camera_matrix" << cameraMatrix;
-    fs << "distortion_vector" << distCoeffs;
-    fs << "ground_plane" << groundPlane;
-
-    fs << "Avg_Reprojection_Error" << totalAvgErr;
-    if( !reprojErrs.empty() )
-        fs << "Per_View_Reprojection_Errors" << Mat(reprojErrs);
-
-    if( !rvecs.empty() && !tvecs.empty() ) {
-        CV_Assert(rvecs[0].type() == tvecs[0].type());
-        Mat bigmat((int)rvecs.size(), 6, rvecs[0].type());
-        for( int i = 0; i < (int)rvecs.size(); i++ ) {
-            Mat r = bigmat(Range(i, i+1), Range(0,3));
-            Mat t = bigmat(Range(i, i+1), Range(3,6));
-
-            CV_Assert(rvecs[i].rows == 3 && rvecs[i].cols == 1);
-            CV_Assert(tvecs[i].rows == 3 && tvecs[i].cols == 1);
-            //*.t() is MatExpr (not Mat) so we can use assignment operator
-            r = rvecs[i].t();
-            t = tvecs[i].t();
+double Calibrator::compute_scaling_error(const std::vector<std::vector<cv::Point2f>>& img_pnts,
+    const cv::Mat& camera_matrix, const cv::Mat& distortion_vector, const cv::Mat& ground_plane) {
+    double total_sum = 0.0;
+    int total_cnt = 0;
+    cv::Mat undistorted;
+    for (uint i=0; i<img_pnts.size(); i++) {
+        cv::undistortPoints(cv::Mat(img_pnts[i]), undistorted,
+            cv::Mat::eye(3, 3, CV_64F), distortion_vector);
+        double sum = 0.0;
+        int cnt = 0;
+        for (int j=1; j<img_pnts[i].size(); j++) {
+            cv::Point3f i1(img_pnts[i][j].x, img_pnts[i][j].y, 1);
+            cv::Point3f P1;
+            cv::Point3f i0(img_pnts[i][j-1].x, img_pnts[i][j-1].y, 1);
+            cv::Point3f P0;
+            project_to_ground(i1, P1, camera_matrix, ground_plane);
+            project_to_ground(i0, P0, camera_matrix, ground_plane);
+            double dist = cv::norm(cv::Mat(P1), cv::Mat(P0));
+            if (cnt == 0 || (dist <= 1.2*(sum/cnt))) {
+                sum += dist;
+                cnt++;
+            }
         }
-        cvWriteComment( *fs, "a set of 6-tuples (rotation vector + translation vector) for each view", 0 );
-        fs << "Extrinsic_Parameters" << bigmat;
+        // std::cout << "Average square distance image " << i << ": " << (sum/cnt) << std::endl;
+        total_sum += sum;
+        total_cnt += cnt;
     }
+    double square_size = total_sum/total_cnt;
+    // std::cout << "Global average square size: " << square_size << std::endl;
+    // std::cout << "Relative error: " << (_square_size-square_size)/_square_size << std::endl;
+    return (_square_size-square_size)/_square_size;
+}
 
-    if( !imagePoints.empty() ) {
-        Mat imagePtMat((int)imagePoints.size(), (int)imagePoints[0].size(), CV_32FC2);
-        for( int i = 0; i < (int)imagePoints.size(); i++ ) {
-            Mat r = imagePtMat.row(i).reshape(2, imagePtMat.cols);
-            Mat imgpti(imagePoints[i]);
-            imgpti.copyTo(r);
-        }
-        fs << "Image_points" << imagePtMat;
+void Calibrator::get_ground_plane(const std::vector<cv::Mat>& rvecs, const std::vector<cv::Mat>& tvecs, cv::Mat& ground_plane) {
+    // For now only translation is taken into account. Rotated images are not yet.
+    // We still have to write a routine to compute the rotation between the image plane and the world plane.
+    double z = 0.;
+    for (int k=0; k<tvecs.size(); k++) {
+        z += tvecs[k].at<double>(2, 0);
     }
+    z /= tvecs.size();
+    ground_plane = cv::Mat::zeros(1, 4, CV_64F);
+    ground_plane.at<double>(0, 2) = 1.;
+    ground_plane.at<double>(0, 3) = -z;
+}
 
-    fs.release();
-};
-
-void Calibrator::projectToGround(const Point3d &i, Point3d &w, Mat K, Mat ground)
-{
+void Calibrator::project_to_ground(const cv::Point3f& i, cv::Point3f& w, cv::Mat camera_matrix, const cv::Mat& ground_plane) {
     // Project image coordinates to a plane ground
     // i is of the form [x;y;1], w is of the form [X,Y,Z], K is the camera matrix
     // ground holds the coefficients of the ground plane [a,b,c,d] where the
     // ground plane is represented by ax+by+cz+d=0
 
-    Mat M1;
-    hconcat(-Mat::eye(3,3,CV_64F),K.inv()*Mat(i),M1);
-    Mat M2;
-    hconcat(ground(Rect(0,0,3,1)),Mat::zeros(1,1,CV_64F),M2);
-    Mat A;
-    vconcat(M1,M2,A);
-
-    Mat b = Mat::zeros(4,1,CV_64F);
-    b.at<double>(3,0) = -ground.at<double>(0,3);
-
-    Mat W = A.inv()*b;
-    w = Point3d(W(Rect(0,0,1,3)));
+    cv::Mat M1, M2, A, i_m;
+    cv::Mat(i).convertTo(i_m, CV_64F);
+    cv::hconcat(-cv::Mat::eye(3,3,CV_64F), camera_matrix.inv()*i_m, M1);
+    cv::hconcat(ground_plane(cv::Rect(0,0,3,1)), cv::Mat::zeros(1, 1, CV_64F), M2);
+    cv::vconcat(M1, M2, A);
+    cv::Mat b = cv::Mat::zeros(4,1,CV_64F);
+    b.at<double>(3, 0) = -ground_plane.at<double>(0, 3);
+    cv::Mat W = A.inv()*b;
+    w = cv::Point3f(W(cv::Rect(0, 0, 1, 3)));
 }
 
-static void projectToImage(Point3d &i, const Point3d &w, Mat K)
-{
-    Mat p = K*Mat(w);
-    p = p*(1.0/p.at<double>(2,0));
-    i = Point3d(p.at<double>(0,0),p.at<double>(1,0),p.at<double>(2,0));
+void Calibrator::project_to_image(cv::Point3f& i, const cv::Point3f& w, cv::Mat& camera_matrix) {
+    cv::Mat p = camera_matrix*cv::Mat(w);
+    p = p*(1.0/p.at<double>(2, 0));
+    i = cv::Point3f(p.at<double>(0, 0), p.at<double>(1, 0), p.at<double>(2, 0));
+}
+
+Calibrator::Pattern Calibrator::get_pattern(const std::string& pattern) {
+    Pattern result = INVALID;
+    if (!pattern.compare("CHESSBOARD")) result = CHESSBOARD;
+    if (!pattern.compare("CIRCLES_GRID")) result = CIRCLES_GRID;
+    if (!pattern.compare("ASYMMETRIC_CIRCLES_GRID")) result = ASYMMETRIC_CIRCLES_GRID;
+    return result;
 }

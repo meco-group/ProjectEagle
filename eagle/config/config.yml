@@ -9,17 +9,17 @@ camera:
         rows: 3
         cols: 3
         dt: d
-        data: [4.1466407296187219e+02, 0., 3.2784876526935585e+02, 0., 4.1466407296187219e+02, 2.4200655525167369e+02, 0., 0., 1.]
+        data: [414.664073, 0.000000, 327.848765, 0.000000, 414.664073, 242.006555, 0.000000, 0.000000, 1.000000]
     distortion_vector: !!opencv-matrix
         rows: 5
         cols: 1
         dt: d
-        data: [-2.2410764577362879e-01, 6.8924178601529357e-02, -1.3048654638913226e-03, -3.2936580596897979e-04, -1.2663040687623292e-02]
+        data: [-0.224108, 0.068924, -0.001305, -0.000329, -0.012663]
     ground_plane: !!opencv-matrix
         rows: 1
         cols: 4
         dt: d
-        data: [0., 0., 1., -2.4561764952647471e+00]
+        data: [0.000000, 0.000000, 1.000000, -2.456176]
     external_transformation: !!opencv-matrix
         rows: 4
         cols: 4
@@ -33,8 +33,12 @@ communicator:
     zyre_wait_time: 100
 
 calibrator:
+    images_path: '/home/ruben/Documents/Work/Repositories/ProjectEagle/eagle/config/calibration'
+    pattern: 'CHESSBOARD'
     board_width: 6
     board_height: 7
+    square_size: 0.108
+    calib_fix_aspect_ratio: 1
 
 detector:
     blob:
@@ -59,4 +63,3 @@ detector:
         top_marker: 0.1
         triangle_ratio: 0.1
     background_path: '/home/ruben/Documents/Work/Repositories/ProjectEagle/eagle/config/background.png'
-

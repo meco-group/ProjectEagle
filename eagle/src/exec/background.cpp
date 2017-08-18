@@ -21,6 +21,10 @@ int main(int argc, char* argv[]) {
     cv::Mat frame, background;
     cam->read(frame);
     background = cv::Mat(frame.size(), CV_32FC3, cv::Scalar(0, 0, 0));
+    for (int i=0; i<10; i++) {
+        cam->read(frame);
+        cv::waitKey(1); // give camera time to reload
+    }
     for (int i=0; i<50; i++) {
         cam->read(frame);
         cv::accumulate(frame, background);

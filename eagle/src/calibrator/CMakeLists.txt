@@ -19,4 +19,4 @@ target_compile_features(Calibrator
         PRIVATE cxx_variadic_templates)
 
 # Depend on a library that we defined in the top-level file
-target_link_libraries(Calibrator ${LIBRARIES} Configurator)
+target_link_libraries(Calibrator ${LIBRARIES})

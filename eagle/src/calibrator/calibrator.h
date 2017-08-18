@@ -1,57 +1,60 @@
 #ifndef CALIBRATOR_H
 #define CALIBRATOR_H
 
-#include "calibration_settings.h"
-#include "board_settings.h"
-
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv/cv.hpp>
 #include <iostream>
-
-using namespace cv;
-using namespace std;
+#include <fstream>
+#include <map>
 
 namespace eagle {
 
     class Calibrator {
 
         private:
-            bool executed;
+            enum Pattern { INVALID, CHESSBOARD, CIRCLES_GRID, ASYMMETRIC_CIRCLES_GRID };
 
-            Mat getNextImage(string &name);
+            bool _executed;
+            Pattern _calibration_pattern;
+            double _square_size;
+            cv::Size _board_size;
+            bool _calib_fix_principal_point;
+            bool _calib_zero_tangent_dist;
+            bool _calib_fix_aspect_ratio;
+            std::vector<cv::String> _img_list;
 
-            bool processImage(Mat view, vector<Point2f> &pointBuf);
-            bool processPattern(vector<Point3f> &pointBuf);
+            void read_parameters(const cv::FileStorage& fs);
+            bool process_image(cv::Mat& img, std::vector<cv::Point2f>& pnt_buffer);
+            void process_pattern(std::vector<cv::Point3f> &object_buffer);
+            bool calibrate(const std::vector<std::vector<cv::Point3f>>& object_pnts,
+                const std::vector<std::vector<cv::Point2f>>& img_pnts, const cv::Size& img_size,
+                cv::Mat& camera_matrix, cv::Mat& distortion_vector, cv::Mat& ground_plane,
+                std::vector<cv::Mat>& rvecs, std::vector<cv::Mat>& tvecs);
+            double compute_reprojection_error(const std::vector<std::vector<cv::Point3f>>& object_pnts,
+                const std::vector<std::vector<cv::Point2f>>& img_pnts, const cv::Mat& camera_matrix,
+                const cv::Mat& distortion_vector, const std::vector<cv::Mat>& rvecs, const std::vector<cv::Mat>& tvecs);
+            double compute_scaling_error(const std::vector<std::vector<cv::Point2f>>& img_pnts,
+                const cv::Mat& camera_matrix, const cv::Mat& distortion_vector, const cv::Mat& ground_plane);
+            void get_ground_plane(const std::vector<cv::Mat>& rvecs, const std::vector<cv::Mat>& tvecs, cv::Mat& ground_plane);
+            void project_to_ground(const cv::Point3f& i, cv::Point3f& w, cv::Mat camera_matrix, const cv::Mat& ground_plane);
+            void project_to_image(cv::Point3f& i, const cv::Point3f& w, cv::Mat& camera_matrix);
+            Pattern get_pattern(const std::string& pattern);
 
-            bool getCalibration();
-            double computeReprojectionErrors();
-            double rescaleTransformation(bool apply);
+            cv::Mat _camera_matrix;
+            cv::Mat _distortion_vector;
+            cv::Mat _ground_plane;
+            std::vector<std::vector<cv::Point3f>> _object_pnts;
+            std::vector<std::vector<cv::Point2f>> _img_pnts;
+            cv::Size _img_size;
 
         public:
-            Calibrator(string config_path);
-
-            CalSettings _settings;
-            int _imageIndex = 0;
-            Size imageSize;
-
-            vector<vector<Point2f>> imagePoints;
-            vector<vector<Point3f>> objectPoints;
-
-            vector<Mat> rvecs;
-            vector<Mat> tvecs;
-            Mat cameraMatrix;
-            Mat groundPlane;
-            Mat distCoeffs;
-
-            double totalAvgErr;
-            vector<float> reprojErrs;
-
-
+            Calibrator(const std::string& config_path);
             bool execute();
-            void saveCameraParams();
-            static void projectToGround(const Point3d &i, Point3d &w, Mat K, Mat ground);
-            static void projectToImage(Point3d &i, const Point3d &w, Mat K);
+            bool save(const std::string& config_path);
+            std::vector<std::vector<cv::Point3f>> object_points();
+            std::vector<std::vector<cv::Point2f>> image_points();
+            cv::Size image_size();
 
     };
 
