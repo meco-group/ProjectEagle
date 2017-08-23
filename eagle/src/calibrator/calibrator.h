@@ -5,7 +5,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv/cv.hpp>
 #include <iostream>
-#include <fstream>
 #include <map>
 
 namespace eagle {
@@ -55,6 +54,7 @@ namespace eagle {
             std::vector<std::vector<cv::Point3f>> object_points();
             std::vector<std::vector<cv::Point2f>> image_points();
             cv::Size image_size();
+            static void dump_matrices(const std::string& xml_path, std::map<std::string, cv::Mat>& matrices);
 
     };
 

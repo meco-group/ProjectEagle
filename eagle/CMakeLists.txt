@@ -15,14 +15,12 @@ find_package(OpenCV REQUIRED)
 find_package(ZMQ REQUIRED)
 find_package(CZMQ REQUIRED)
 find_package(ZYRE REQUIRED)
-find_package(Threads REQUIRED)
 
 set(LIBRARIES
         ${OpenCV_LIBS}
         ${ZMQ_LIBRARIES}
         ${CZMQ_LIBRARIES}
         ${ZYRE_LIBRARIES}
-        ${CMAKE_THREAD_LIBS_INIT}
         )
 
 include_directories(src/utils

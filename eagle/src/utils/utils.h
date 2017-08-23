@@ -1,11 +1,13 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#define CONFIG_PATH "/home/ruben/Documents/Work/Repositories/ProjectEagle/eagle/config/config.yml"
+#define CONFIG_PATH "/home/ruben/Documents/Work/Repositories/ProjectEagle/eagle/config/config.xml"
 
 #include <cstdio>
 #include <zconf.h>
 #include <chrono>
+#include <iostream>
+#include <opencv2/core/core.hpp>
 
 namespace eagle {
 
@@ -24,11 +26,11 @@ namespace eagle {
         return std::chrono::duration_cast< std::chrono::milliseconds >(std::chrono::system_clock::now().time_since_epoch()).count();
     }
 
-    cv::Matx33f image2ground_tf(const cv::Mat& ground_plane, const cv::Mat& camera_matrix, const cv::Mat& external_tf) {
+    cv::Matx33f image2ground_tf(const cv::Mat& ground_plane, const cv::Mat& camera_matrix, const cv::Mat& l_tf) {
         cv::Mat gp, cm, ext_tf;
         ground_plane.convertTo(gp, CV_32F);
         camera_matrix.convertTo(cm, CV_32F);
-        external_tf.convertTo(ext_tf, CV_32F);
+        l_tf.convertTo(ext_tf, CV_32F);
         cv::Mat t1, t2, int_tf, sel_tf;
         float h = -gp.at<float>(0,3)/gp.at<float>(0,2);
         cv::hconcat(cv::Mat::zeros(1, 2, CV_32F), cv::Mat::ones(1, 1, CV_32F), t2);
@@ -42,7 +44,7 @@ namespace eagle {
         return cv::Matx33f((float*)(tf.ptr()));
     }
 
-};
+}
 
 #endif //UTILS_H
 

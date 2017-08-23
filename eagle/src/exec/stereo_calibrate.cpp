@@ -3,45 +3,6 @@
 
 using namespace eagle;
 
-void save_external_tf(const std::string& config_path, const cv::Mat& T) {
-    std::ifstream file_in(config_path);
-    std::string data;
-    std::vector<std::string> lines;
-    std::vector<double> mat_vec;
-    bool found;
-    while (getline(file_in, data)) {
-        found = false;
-
-        if (data.find("external_transformation") != std::string::npos) {
-            lines.push_back(data + "\n");
-            for (int k=0; k<3; k++) {
-                getline(file_in, data);
-                lines.push_back(data + "\n");
-            }
-            getline(file_in, data);
-            data = "        data: [";
-            mat_vec.assign((double*)(T).datastart,
-                (double*)(T).dataend);
-            for (int k=0; k<mat_vec.size(); k++) {
-                data += std::to_string(mat_vec[k]);
-                if (k < mat_vec.size()-1) {
-                    data += ", ";
-                }
-            }
-            data += "]\n";
-            lines.push_back(data);
-        } else {
-            lines.push_back(data + "\n");
-        }
-    }
-    file_in.close();
-    std::ofstream file_out(config_path);
-    for (int k=0; k<lines.size(); k++) {
-        file_out << lines[k];
-    }
-    file_out.close();
-}
-
 int main(int argc, char* argv[]) {
     std::string config_path1 = ""; // fill in
     std::string config_path2 = "";
@@ -91,5 +52,6 @@ int main(int argc, char* argv[]) {
     // ruben doesn't get this??
     cv::Mat T20 = T10*T12.inv();
     std::cout << T20 << std::endl;
-    save_external_tf(config_path2, T20);
+    std::map<std::string, cv::Mat> mat_map({{"external_transformatiton", T20}});
+    Calibrator::dump_matrices(config_path2, mat_map);
 }
