@@ -11,26 +11,26 @@
 			<rows>3</rows>
 			<cols>3</cols>
 			<dt>d</dt>
-			<data>316.371591 0.000000 325.274535 0.000000 314.424814 240.587214 0.000000 0.000000 1.000000 </data>
+			<data>414.664073 0.000000 327.848765 0.000000 414.664073 242.006555 0.000000 0.000000 1.000000 </data>
 		</camera_matrix>
 		<distortion_vector type_id="opencv-matrix">
 			<rows>5</rows>
 			<cols>1</cols>
 			<dt>d</dt>
-			<data>-0.135430 0.026901 -0.000402 0.000226 -0.003352 </data>
+			<data>-0.224108 0.068924 -0.001305 -0.000329 -0.012663 </data>
 		</distortion_vector>
 		<ground_plane type_id="opencv-matrix">
 			<rows>1</rows>
 			<cols>4</cols>
 			<dt>d</dt>
-			<data>0.000000 0.000000 1.000000 -1.862810 </data>
+			<data>0.000000 0.000000 1.000000 -2.456176 </data>
 		</ground_plane>
-		<external_transformatiton type_id="opencv-matrix">
+		<external_transformation type_id="opencv-matrix">
 			<rows>4</rows>
 			<cols>4</cols>
 			<dt>d</dt>
 			<data>1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 -0.000000 0.000000 -0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 </data>
-		</external_transformatiton>
+		</external_transformation>
 	</camera>
 	<communicator>
 		<interface>wlan0</interface>
@@ -43,7 +43,7 @@
 		<board_width>6</board_width>
 		<board_height>7</board_height>
 		<square_size>0.108</square_size>
-		<calib_fix_aspect_ration>1</calib_fix_aspect_ration>
+		<calib_fix_aspect_ratio>1</calib_fix_aspect_ratio>
 		<integrated>1</integrated>
 		<calibrated>1</calibrated>
 	</calibrator>
@@ -59,7 +59,7 @@
 		<min_robot_area>0.06</min_robot_area>
 		<min_obstacle_area>0.02</min_obstacle_area>
 		<markers>
-			<triangle_ration>0.625</triangle_ration>
+			<triangle_ratio>0.625</triangle_ratio>
 			<qr_posx>0</qr_posx>
 			<qr_posy>0</qr_posy>
 			<qr_sizex>0.8</qr_sizex>

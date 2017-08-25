@@ -25,12 +25,12 @@
 			<dt>d</dt>
 			<data>0.000000 0.000000 1.000000 -2.075572 </data>
 		</ground_plane>
-		<external_transformatiton type_id="opencv-matrix">
+		<external_transformation type_id="opencv-matrix">
 			<rows>4</rows>
 			<cols>4</cols>
 			<dt>d</dt>
 			<data>1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 -0.000000 0.000000 -0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 </data>
-		</external_transformatiton>
+		</external_transformation>
 	</camera>
 	<communicator>
 		<interface>wlan0</interface>
@@ -43,7 +43,7 @@
 		<board_width>6</board_width>
 		<board_height>7</board_height>
 		<square_size>0.108</square_size>
-		<calib_fix_aspect_ration>1</calib_fix_aspect_ration>
+		<calib_fix_aspect_ratio>1</calib_fix_aspect_ratio>
 		<integrated>1</integrated>
 		<calibrated>1</calibrated>
 	</calibrator>
@@ -59,7 +59,7 @@
 		<min_robot_area>0.06</min_robot_area>
 		<min_obstacle_area>0.02</min_obstacle_area>
 		<markers>
-			<triangle_ration>0.625</triangle_ration>
+			<triangle_ratio>0.625</triangle_ratio>
 			<qr_posx>0</qr_posx>
 			<qr_posy>0</qr_posy>
 			<qr_sizex>0.8</qr_sizex>
@@ -75,4 +75,3 @@
 		<background_path>/home/odroid/ProjectEagle/eagle/config/background.png</background_path>
 	</detector>
 </opencv_storage>
-
