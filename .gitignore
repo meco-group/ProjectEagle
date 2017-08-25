@@ -1,5 +1,5 @@
-build/
-eagle/config/*
+eagle/config/
+eagle/build/
 *~
 *.pyc
 todo
