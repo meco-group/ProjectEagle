@@ -76,14 +76,14 @@ class SSHManager:
             return True
 
         def stop(self):
-            if not self.wait_until_started(timeout=1):
-                return
-            if not self.running:
-                return
+            # if not self.wait_until_started(timeout=1):
+            #     print 'not started'
+            # if not self.running:
+            #     return
             print 'Closing process ' + self.name + ' ...',
             # kill the process
             self.__control.exec_command("kill -9 %s" % self.pid)
-            if not self.wait_until_finished(timeout=3):
+            if not self.wait_until_finished(timeout=1):
                 print 'failed.'
             else:
                 print 'done.'

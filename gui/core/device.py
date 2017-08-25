@@ -66,7 +66,7 @@ class Device:
             ssh = self.ssh_manager.get_ssh()
             sftp = ssh.open_sftp()
             # create folder if it doesn't exist yet
-            sftp.mkdir(paths.REMOTE_CONFIG_DIR)
+            sftp.mkdir(paths.get_remote_config_dir(self))
         except socket.error:
             self.set_online(False)
             return False

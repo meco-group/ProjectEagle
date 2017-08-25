@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
     T12.convertTo(T10, CV_64F);
     cv::Mat T20 = T10*T12.inv();
     std::cout << T20 << std::endl;
-    std::map<std::string, cv::Mat> mat_map({{"external_transformatiton", T20}});
+    std::map<std::string, cv::Mat> mat_map({{"external_transformation", T20}});
     Calibrator::dump_matrices(config_path2, mat_map);
     Calibrator::set_integrated(config_path2, true);
 }

@@ -44,9 +44,9 @@ int main(int argc, char* argv[]) {
     Communicator com(node_name, CONFIG_PATH);
     com.start(zyre_wait_time);
     com.join(group);
-
     // setup detector
-    Detector detector(CONFIG_PATH, image2ground_tf(ground_plane, camera_matrix, external_tf));
+    cv::Matx33f cam2world_tf = image2ground_tf(ground_plane, camera_matrix, external_tf);
+    Detector detector(CONFIG_PATH, cam2world_tf);
 
     // robots and obstacles that the detector should search for
     Robot dave(0, 0.55, 0.4, cv::Scalar(138, 110, 17));

@@ -54,4 +54,4 @@ def get_remote_config_file(device):
 
 
 def get_remote_config_dir(device):
-    return os.path.join(device.remote_root_dir, '/config/')
+    return os.path.join(device.remote_root_dir, 'config/')

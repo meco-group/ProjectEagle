@@ -38,7 +38,7 @@ class Communicator(Pyre):
             header_size = struct.unpack('@I', data[offset:offset+4])[0]
             offset += 4
             # parse the header
-            h_id, h_time = struct.unpack('IL', data[offset:(offset + header_size)])
+            h_id, h_time = struct.unpack('II', data[offset:(offset + header_size)])
             offset += header_size
             # get the size of the data
             data_size = struct.unpack('@I', data[offset:offset+4])[0]

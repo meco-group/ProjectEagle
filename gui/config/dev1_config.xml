@@ -2,7 +2,7 @@
 <opencv_storage>
 	<camera>
 		<index>0</index>
-		<type>LATCAM</type>
+		<type>OCAM</type>
 		<resolution>
 			<width>640</width>
 			<height>480</height>
@@ -33,10 +33,10 @@
 		</external_transformatiton>
 	</camera>
 	<communicator>
-		<interface>eth0</interface>
+		<interface>wlan0</interface>
 		<group>EAGLE</group>
 		<zyre_port>5670</zyre_port>
-		<zyre_wait_time>100</zyre_wait_time>
+		<zyre_wait_time>0</zyre_wait_time>
 	</communicator>
 	<calibrator>
 		<pattern>CHESSBOARD</pattern>
@@ -44,8 +44,8 @@
 		<board_height>7</board_height>
 		<square_size>0.108</square_size>
 		<calib_fix_aspect_ration>1</calib_fix_aspect_ration>
-		<calibrated>1</calibrated>
 		<integrated>1</integrated>
+		<calibrated>1</calibrated>
 	</calibrator>
 	<detector>
 		<blob>
@@ -75,3 +75,4 @@
 		<background_path>/home/odroid/ProjectEagle/eagle/config/background.png</background_path>
 	</detector>
 </opencv_storage>
+

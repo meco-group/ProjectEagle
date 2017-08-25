@@ -1,6 +1,5 @@
 build/
-eagle/config/*.png
-eagle/config/calibration/*.png
+eagle/config/*
 *~
 *.pyc
 todo

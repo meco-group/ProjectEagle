@@ -21,10 +21,7 @@ class ImageStream(QtGui.QLabel):
         self.receiver_thread = QThread()
         self.receiver_thread.start()
 
-        self.com = Communicator('receiver')
-        self.com.join(self.group)
-
-        self.image_receiver = ImageReceiver(self.device, self.group, self.com)
+        self.image_receiver = ImageReceiver(self.device, self.group)
         self.image_receiver.moveToThread(self.receiver_thread)
         self.connect(self.image_receiver, self.image_receiver.signal, self.update_image)
 
@@ -63,8 +60,8 @@ class ImageStream(QtGui.QLabel):
         # download snapshot
         ssh = self.device.ssh_manager.get_ssh()
         sftp = ssh.open_sftp()
-        sftp.get(os.path.join(REMOTE_CONFIG_DIR, 'snapshot.png'), self.cal_wizard.get_next_snap_path(self.device))
-        sftp.remove(os.path.join(REMOTE_CONFIG_DIR, 'snapshot.png'))
+        sftp.get(os.path.join(paths.get_remote_config_dir(self.device), 'snapshot.png'), self.cal_wizard.get_next_snap_path(self.device))
+        sftp.remove(os.path.join(paths.get_remote_config_dir(self.device), 'snapshot.png'))
         ssh.close()
         self.emit(self.signal_snap, 'snapshot taken')
 
@@ -103,12 +100,14 @@ class ImageTransmitter(QObject):
 
 
 class ImageReceiver(QObject):
-    def __init__(self, device, group, com):
+    def __init__(self, device, group):
         super(ImageReceiver, self).__init__()
         self.device = device
         self.group = group
         self.img = None
-        self.com = com
+
+        self.com = Communicator('receiver')
+        self.com.join(self.group)
 
         self._isRunning = False
         self._isDead = False
@@ -122,6 +121,7 @@ class ImageReceiver(QObject):
 
             # start communicator
             self.com.start()
+            time.sleep(0.1)
 
             # Wait for peers to connect
             if (not self.com.wait_for_peer(self.device.name, 2)):
