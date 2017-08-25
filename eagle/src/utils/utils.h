@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #define CONFIG_PATH "/home/ruben/Documents/Work/Repositories/ProjectEagle/eagle/config/config.xml"
+#define CAL_IMAGES_PATH "/home/ruben/Documents/Work/Repositories/ProjectEagle/eagle/config/calibration/"
 
 #include <cstdio>
 #include <zconf.h>

@@ -1,20 +1,23 @@
 #include "calibrator.h"
 #include "camera.h"
+#include "utils.h"
 
 using namespace eagle;
 
 int main(int argc, char* argv[]) {
-    std::string config_path1 = ""; // fill in
-    std::string config_path2 = "";
+    std::string config_path1 = (argc > 1) ? argv[1] : CONFIG_PATH;
+    std::string config_path2 = (argc > 2) ? argv[2] : CONFIG_PATH;
+    std::string images_path1 = (argc > 3) ? argv[3] : CAL_IMAGES_PATH;
+    std::string images_path2 = (argc > 4) ? argv[4] : CAL_IMAGES_PATH;
 
     // calibrate the first camera
     Calibrator cal1(config_path1);
-    cal1.execute();
+    cal1.execute(images_path1);
     // cal1.save(config_path1);
 
     // calibrate the second camera
     Calibrator cal2(config_path1);
-    cal2.execute();
+    cal2.execute(images_path2);
     // cal2.save(config_path2);
 
     // TODO we could get cameraMatrix, distCoeffs from cal file (from intrinsic calibration)
@@ -50,8 +53,11 @@ int main(int argc, char* argv[]) {
     // R0 = R20 * R2
     // i.e. T0 = T20*T2
     // ruben doesn't get this??
+    T12.convertTo(T12, CV_64F);
+    T12.convertTo(T10, CV_64F);
     cv::Mat T20 = T10*T12.inv();
     std::cout << T20 << std::endl;
     std::map<std::string, cv::Mat> mat_map({{"external_transformatiton", T20}});
     Calibrator::dump_matrices(config_path2, mat_map);
+    Calibrator::set_integrated(config_path2, true);
 }

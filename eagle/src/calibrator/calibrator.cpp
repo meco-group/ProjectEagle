@@ -20,13 +20,12 @@ void Calibrator::read_parameters(const cv::FileStorage& fs) {
     _calib_fix_principal_point = ((int)fs["calibrator"]["calib_fix_principal_point"] == 1);
     _calib_zero_tangent_dist = ((int)fs["calibrator"]["calib_zero_tangent_dist"] == 1);
     _calib_fix_aspect_ratio = ((int)fs["calibrator"]["calib_fix_aspect_ratio"] == 1);
-    std::string images_path = fs["calibrator"]["images_path"];
-    cv::glob(images_path + "/*.png",  _img_list);
     const char *pattern_strings[] = {"INVALID", "PICAM", "OPICAM", "SEE3CAM", "LATCAM", "OCAM"};
     _calibration_pattern = get_pattern(fs["calibrator"]["pattern"]);
 }
 
-bool Calibrator::execute() {
+bool Calibrator::execute(const std::string& images_path) {
+    cv::glob(images_path + "/*.png",  _img_list);
     _img_pnts.clear();
     _object_pnts.clear();
     cv::Mat img;
@@ -70,7 +69,6 @@ bool Calibrator::execute() {
 
 bool Calibrator::save(const std::string& config_path) {
     if (!_executed) {
-        std::cout << "Calibration has not been executed succesfully yet." << std::endl;
         return false;
     }
     std::map<std::string, cv::Mat> matrices;
@@ -78,6 +76,8 @@ bool Calibrator::save(const std::string& config_path) {
     matrices["distortion_vector"] = _distortion_vector;
     matrices["ground_plane"] = _ground_plane;
     Calibrator::dump_matrices(config_path, matrices);
+    Calibrator::set_calibrated(config_path, true);
+    std::cout << "Saved calibration information succesfully." << std::endl;
     return true;
 }
 
@@ -295,6 +295,40 @@ void Calibrator::dump_matrices(const std::string& xml_path, std::map<std::string
         node->remove_node((node->first_node("data")));
         node->append_node(doc.allocate_node(node_element, node_name, node_value));
     }
+    std::ofstream ofile(xml_path);
+    ofile << "<?xml version=\"1.0\"?>\n";
+    ofile << doc;
+    ofile.close();
+}
+
+void Calibrator::set_calibrated(const std::string& xml_path, bool value) {
+    using namespace rapidxml;
+    std::ifstream ifile(xml_path);
+    std::vector<char> buffer((std::istreambuf_iterator<char>(ifile)), std::istreambuf_iterator<char>());
+    buffer.push_back('\0');
+    ifile.close();
+    xml_document<> doc;
+    doc.parse<0>(&buffer[0]);
+    xml_node<>* calibrator_node = doc.first_node("opencv_storage")->first_node("calibrator");
+    calibrator_node->remove_node((calibrator_node->first_node("calibrated")));
+    calibrator_node->append_node(doc.allocate_node(node_element, "calibrated", (value) ? "1" : "0"));
+    std::ofstream ofile(xml_path);
+    ofile << "<?xml version=\"1.0\"?>\n";
+    ofile << doc;
+    ofile.close();
+}
+
+void Calibrator::set_integrated(const std::string& xml_path, bool value) {
+    using namespace rapidxml;
+    std::ifstream ifile(xml_path);
+    std::vector<char> buffer((std::istreambuf_iterator<char>(ifile)), std::istreambuf_iterator<char>());
+    buffer.push_back('\0');
+    ifile.close();
+    xml_document<> doc;
+    doc.parse<0>(&buffer[0]);
+    xml_node<>* calibrator_node = doc.first_node("opencv_storage")->first_node("calibrator");
+    calibrator_node->remove_node((calibrator_node->first_node("integrated")));
+    calibrator_node->append_node(doc.allocate_node(node_element, "integrated", (value) ? "1" : "0"));
     std::ofstream ofile(xml_path);
     ofile << "<?xml version=\"1.0\"?>\n";
     ofile << doc;

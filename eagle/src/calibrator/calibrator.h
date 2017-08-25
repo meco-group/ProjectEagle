@@ -49,13 +49,14 @@ namespace eagle {
 
         public:
             Calibrator(const std::string& config_path);
-            bool execute();
+            bool execute(const std::string& images_path);
             bool save(const std::string& config_path);
             std::vector<std::vector<cv::Point3f>> object_points();
             std::vector<std::vector<cv::Point2f>> image_points();
             cv::Size image_size();
             static void dump_matrices(const std::string& xml_path, std::map<std::string, cv::Mat>& matrices);
-
+            static void set_calibrated(const std::string& xml_path, bool value);
+            static void set_integrated(const std::string& xml_path, bool value);
     };
 
 };

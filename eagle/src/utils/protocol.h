@@ -7,7 +7,8 @@ namespace eagle {
     typedef enum msg_t {
         MARKER = 0,
         OBSTACLE = 1,
-        IMAGE = 2
+        IMAGE = 2,
+        CMD = 3,
     } msg_t;
 
     typedef enum shape_t {
@@ -43,6 +44,10 @@ namespace eagle {
         point_t p2;
         point_t p3;
     } obstacle_t;
+
+    typedef enum cmd_t {
+        SNAPSHOT = 0
+    } cmd_t;
 
 }
 

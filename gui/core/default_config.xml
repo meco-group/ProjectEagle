@@ -1,42 +1,45 @@
-<?xml version="1.0"?>
 <opencv_storage>
 	<camera>
 		<index>0</index>
-		<type>LATCAM</type>
+		<type>OCAM</type>
 		<resolution>
 			<width>640</width>
 			<height>480</height>
 		</resolution>
+		<stream_resolution>
+			<width>640</width>
+			<height>480</height>
+		</stream_resolution>
 		<camera_matrix type_id="opencv-matrix">
 			<rows>3</rows>
 			<cols>3</cols>
 			<dt>d</dt>
-			<data>316.371591 0.000000 325.274535 0.000000 314.424814 240.587214 0.000000 0.000000 1.000000 </data>
+			<data>1. 0. 0. 0. 1. 0. 0. 0. 1. </data>
 		</camera_matrix>
 		<distortion_vector type_id="opencv-matrix">
 			<rows>5</rows>
 			<cols>1</cols>
 			<dt>d</dt>
-			<data>-0.135430 0.026901 -0.000402 0.000226 -0.003352 </data>
+			<data>0. 0. 0. 0. 0. </data>
 		</distortion_vector>
 		<ground_plane type_id="opencv-matrix">
 			<rows>1</rows>
 			<cols>4</cols>
 			<dt>d</dt>
-			<data>0.000000 0.000000 1.000000 -1.862810 </data>
+			<data>0.000000 0.000000 1.000000 0. </data>
 		</ground_plane>
 		<external_transformatiton type_id="opencv-matrix">
 			<rows>4</rows>
 			<cols>4</cols>
 			<dt>d</dt>
-			<data>1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 -0.000000 0.000000 -0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 </data>
+			<data>1. 0. 0. 0. 0. 1. 0. 0. 0. 0. 1. 0. 0. 0. 0. 1.</data>
 		</external_transformatiton>
 	</camera>
 	<communicator>
-		<interface>eth0</interface>
+		<interface>wlan0</interface>
 		<group>EAGLE</group>
 		<zyre_port>5670</zyre_port>
-		<zyre_wait_time>100</zyre_wait_time>
+		<zyre_wait_time>0</zyre_wait_time>
 	</communicator>
 	<calibrator>
 		<pattern>CHESSBOARD</pattern>
@@ -44,8 +47,8 @@
 		<board_height>7</board_height>
 		<square_size>0.108</square_size>
 		<calib_fix_aspect_ration>1</calib_fix_aspect_ration>
-		<calibrated>1</calibrated>
-		<integrated>1</integrated>
+		<calibrated>0</calibrated>
+		<integrated>0</integrated>
 	</calibrator>
 	<detector>
 		<blob>
@@ -72,6 +75,6 @@
 			<top_marker>0.1</top_marker>
 			<triangle_ratio>0.1</triangle_ratio>
 		</thresholds>
-		<background_path>/home/ruben/Documents/Work/Repositories/ProjectEagle/eagle/config/background.png</background_path>
+		<background_path>/home/odroid/ProjectEagle/eagle/config/background.png</background_path>
 	</detector>
 </opencv_storage>

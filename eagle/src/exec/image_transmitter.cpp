@@ -10,6 +10,8 @@ int main(int argc, char* argv[]) {
     std::string node_name = (argc > 1) ? argv[1] : "eagle0";
     bool undistort = (argc > 2) ? (strcmp(argv[2], "1") == 0) : true;
     bool detect_chb = (argc > 3) ? (strcmp(argv[3], "1") == 0) : true;
+    bool snap_cmd = (argc > 4) ? (strcmp(argv[4], "1") == 0) : false;
+    std::string snapshot_path = (argc > 5) ? argv[5] : "../config/snapshot.png";
 
     // read config file
     cv::FileStorage fs(CONFIG_PATH, cv::FileStorage::READ);
@@ -37,15 +39,15 @@ int main(int argc, char* argv[]) {
 
     // start communicator
     Communicator com(node_name, CONFIG_PATH);
+    com.join(group);
     com.start(zyre_wait_time);
 
-    std::cout << "Starting ImageTransmitter - GROUP: "<< group << std::endl;
-
     // wait for peers
-    std::cout << "waiting for peers" << std::endl;
+    std::cout << "Waiting for peers ... ";
     while(com.peers().size() <= 0) {
         sleep(1);
     }
+    std::cout << "done." << std::endl;
 
     // start capturing
     std::cout << "Start transmitting video stream." << std::endl;
@@ -73,16 +75,40 @@ int main(int argc, char* argv[]) {
     	cv::imencode(".jpg", img, buffer, compression_params);
         // transmit image
         if (com.shout(&header, buffer.data(), sizeof(header), buffer.size(), group)) {
-            std::cout << "Sending image " << img_cnt << ", size: " << buffer.size() << " - ";
-            std::cout << "Header size: "<< sizeof(header) << "\n";
+            // std::cout << "Sending image " << img_cnt << ", size: " << buffer.size() << " - ";
+            // std::cout << "Header size: "<< sizeof(header) << "\n";
         }
         img_cnt++;
+
+        if (snap_cmd) {
+            std::string pr;
+            eagle::header_t header;
+            eagle::cmd_t cmd;
+            if (com.receive(pr)) {
+                while (com.available()) {
+                    // 1. read the header
+                    com.read(&header);
+                    // 2. read data based on the header
+                    if (header.id == eagle::CMD) {
+                        size_t size = com.framesize();
+                        uchar buffer2[size];
+                        com.read(buffer2);
+                        cmd = *((eagle::cmd_t*)(buffer2));
+                        if (cmd == SNAPSHOT) {
+                            cv::imwrite(snapshot_path, img);
+                            std::cout << "Took snapshot." << std::endl;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     // Stop the loop: no peers connected
     auto end = std::chrono::system_clock::now();
     double fps = img_cnt/(std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()*1e-6);
-    std::cout << "Average framerate: " << fps << std::endl;
+    std::cout << "Stopped image transmission (average framerate: " << fps << ")." << std::endl;
 
     // stop the program
     cam->stop();
