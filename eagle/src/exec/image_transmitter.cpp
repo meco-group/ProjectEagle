@@ -61,25 +61,7 @@ int main(int argc, char* argv[]) {
     while(com.peers().size() > 0 ) {
         cam->read(img);
         header.time = timestamp();
-        if (detect_chb) {
-            // look for chessboard
-            std::vector<cv::Point2f> pnt_buf;
-            if (cv::findChessboardCorners(img, cv::Size(chb_h, chb_w), pnt_buf, 0)) {
-                cv::Mat img_gray;
-                cv::cvtColor(img, img_gray, cv::COLOR_BGR2GRAY);
-                cv::cornerSubPix(img_gray, pnt_buf, cv::Size(chb_h, chb_w), cv::Size(-1, -1), cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
-                cv::drawChessboardCorners(img, cv::Size(chb_h, chb_w), cv::Mat(pnt_buf), true);
-            }
-        }
-        // compress image
-    	cv::imencode(".jpg", img, buffer, compression_params);
-        // transmit image
-        if (com.shout(&header, buffer.data(), sizeof(header), buffer.size(), group)) {
-            // std::cout << "Sending image " << img_cnt << ", size: " << buffer.size() << " - ";
-            // std::cout << "Header size: "<< sizeof(header) << "\n";
-        }
-        img_cnt++;
-
+        
         if (snap_cmd) {
             std::string pr;
             eagle::header_t header;
@@ -103,6 +85,25 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
+        
+        if (detect_chb) {
+            // look for chessboard
+            std::vector<cv::Point2f> pnt_buf;
+            if (cv::findChessboardCorners(img, cv::Size(chb_h, chb_w), pnt_buf, 0)) {
+                cv::Mat img_gray;
+                cv::cvtColor(img, img_gray, cv::COLOR_BGR2GRAY);
+                cv::cornerSubPix(img_gray, pnt_buf, cv::Size(chb_h, chb_w), cv::Size(-1, -1), cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
+                cv::drawChessboardCorners(img, cv::Size(chb_h, chb_w), cv::Mat(pnt_buf), true);
+            }
+        }
+        // compress image
+    	  cv::imencode(".jpg", img, buffer, compression_params);
+        // transmit image
+        if (com.shout(&header, buffer.data(), sizeof(header), buffer.size(), group)) {
+            // std::cout << "Sending image " << img_cnt << ", size: " << buffer.size() << " - ";
+            // std::cout << "Header size: "<< sizeof(header) << "\n";
+        }
+        img_cnt++;
     }
 
     // Stop the loop: no peers connected
