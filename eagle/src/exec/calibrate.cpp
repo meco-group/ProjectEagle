@@ -8,7 +8,7 @@ int main(int argc, char* argv[]) {
     std::string images_path = (argc > 2) ? argv[2] : CAL_IMAGES_PATH;
     // calibrate
     Calibrator cal(config_path);
-    cal.execute(images_path);
+    cal.execute(images_path,false);
     cal.save(config_path);
     return 0;
 }
