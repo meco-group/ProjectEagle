@@ -17,21 +17,21 @@ namespace eagle {
             double _dimension;
     
         public:
-    
-            Pattern(const type_t type = INVALID, const int rows = 0, const int cols = 0, const double dimension = 1.0) : 
-                _type(type), _rows(rows), _cols(cols), _dimension(dimension) {}
+            Pattern(const type_t type = INVALID, const int rows = 0, const int cols = 0, const double dimension = 1.0);
+            Pattern(const cv::String& config);
             static Pattern Chessboard(const int rows, const int cols, const double dimension = 1.0);
             static Pattern Circles(const int rows, const int cols, const double dimension = 1.0);
             static Pattern AsymCircles(const int rows, const int cols, const double dimension = 1.0);
     
-            const int rows() { return _rows; }
-            const int cols() { return _cols; }
-            const cv::Size size(){ return cv::Size(_cols, _rows); } //_rows, _cols); }
-            const int numel() { return _rows*_cols; }
-            const double dimension() { return _dimension; }
+            int rows() { return _rows; }
+            int cols() { return _cols; }
+            const cv::Size size(){ return cv::Size(_cols, _rows); }
+            int numel() { return _rows*_cols; }
+            double dimension() { return _dimension; }
     
-            bool find_pattern(cv::Mat& img, std::vector<cv::Point2f> &points, bool display = true);
-            void reference_pattern(std::vector<cv::Point3f> &points);
+            std::vector<cv::Point2f> find(const cv::Mat& img, bool display = false);
+            std::vector<cv::Point3f> reference();
+            std::vector<std::vector<cv::Point3f>> reference(uint N);
     
     };
 };

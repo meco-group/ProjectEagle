@@ -4,6 +4,28 @@
 
 using namespace eagle;
 
+Pattern::Pattern(const type_t type, const int rows, const int cols, const double dimension) : 
+    _type(type), _rows(rows), _cols(cols), _dimension(dimension)
+{
+    //do nothing
+}
+
+Pattern::Pattern(const cv::String& config) {
+    // parse config file
+    cv::FileStorage fs(config, cv::FileStorage::READ);
+    _rows = fs["calibrator"]["board_height"];
+    _cols = fs["calibrator"]["board_width"];
+    _dimension = fs["calibrator"]["square_size"];
+    cv::String ttype = fs["calibrator"]["pattern"];
+    fs.release();
+
+    // set pattern type right
+    _type = INVALID;
+    if (!ttype.compare("CHESSBOARD")) _type = CHESSBOARD;
+    if (!ttype.compare("CIRCLES_GRID")) _type = CIRCLES_GRID;
+    if (!ttype.compare("ASYMMETRIC_CIRCLES_GRID")) _type = ASYMMETRIC_CIRCLES_GRID;
+}
+
 Pattern Pattern::Chessboard(const int rows, const int cols, const double dimension)
 {
     return Pattern(CHESSBOARD, rows, cols, dimension);
@@ -19,9 +41,11 @@ Pattern Pattern::AsymCircles(const int rows, const int cols, const double dimens
     return Pattern(ASYMMETRIC_CIRCLES_GRID, rows, cols, dimension);
 }
 
-bool Pattern::find_pattern(cv::Mat& img, std::vector<cv::Point2f> &points, bool display)
+std::vector<cv::Point2f> Pattern::find(const cv::Mat& img, bool display)
 {
     bool found = false;
+    std::vector<cv::Point2f> points;
+
     switch (_type) {
         case CHESSBOARD:
             found = findChessboardCorners(img, size(), points, 0);
@@ -48,12 +72,16 @@ bool Pattern::find_pattern(cv::Mat& img, std::vector<cv::Point2f> &points, bool 
         cv::waitKey(500);
     }
 
-    return found;
+    if (!found)
+        points.clear();
+
+    return points;
 }
 
-void Pattern::reference_pattern(std::vector<cv::Point3f> &points)
+std::vector<cv::Point3f> Pattern::reference()
 {
     // Reset the corners
+    std::vector<cv::Point3f> points;
     points.clear();
 
     // Calculate grid points based on pattern
@@ -75,5 +103,11 @@ void Pattern::reference_pattern(std::vector<cv::Point3f> &points)
             }
             break;
     }
+
+    return points;
 }
 
+std::vector<std::vector<cv::Point3f>> Pattern::reference(uint N) {
+    std::vector<cv::Point3f> points = reference();
+    return std::vector<std::vector<cv::Point3f>>(N, points);
+}
