@@ -25,6 +25,7 @@ namespace eagle {
     
             Pattern pattern() { return _pattern; }
             void set_skip_invalid(bool skip = true) { _skip_invalid = skip; }
+            bool skip_invalid() { return _skip_invalid; }
     };
 };
     

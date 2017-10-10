@@ -22,6 +22,8 @@ namespace eagle {
             std::vector<cloud3_t> extractpath(const cv::String& path, bool display = false);
 
             void set_skip_invalid(bool skip = true) { _pattern_extractor.set_skip_invalid(skip); }
+            bool skip_invalid() { return _pattern_extractor.skip_invalid(); }
+            Pattern pattern() { return _pattern_extractor.pattern(); } 
     };
 };
     

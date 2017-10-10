@@ -19,7 +19,12 @@ std::vector<cloud3_t> PatternExtractor3::extract(const std::vector<cv::Mat>& lis
     patterns.reserve(list.size());
 
     for (uint k=0; k<list.size(); k++) {
-        patterns.push_back(extract(list[k], display));
+        cloud3_t temp = extract(list[k], display);
+        if (!(skip_invalid() && temp.empty())) {
+            patterns.push_back(temp);
+        } else {
+            std::cout << "Pattern not found in image " << k << std::endl;
+        }
     }
     
     return patterns;

@@ -72,8 +72,9 @@ std::vector<cv::Point2f> Pattern::find(const cv::Mat& img, bool display)
         cv::waitKey(500);
     }
 
-    if (!found)
+    if (!found){
         points.clear();
+    }
 
     return points;
 }
