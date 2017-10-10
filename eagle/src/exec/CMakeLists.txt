@@ -11,6 +11,7 @@ add_executable(ImageTransmitter image_transmitter.cpp)
 add_executable(Snapshot snapshot.cpp)
 add_executable(EagleTransmitter eagle_transmitter.cpp)
 add_executable(Background background.cpp)
+add_executable(GroundCalibrate calibrate_ground.cpp)
 
 set(LIBS ${LIBRARIES} Communicator Camera Calibrator Detector)
 
@@ -24,3 +25,4 @@ target_link_libraries(ImageTransmitter ${LIBS})
 target_link_libraries(Snapshot ${LIBS})
 target_link_libraries(EagleTransmitter ${LIBS})
 target_link_libraries(Background ${LIBS})
+target_link_libraries(GroundCalibrate ${LIBS})

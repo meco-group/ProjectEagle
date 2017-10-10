@@ -123,6 +123,7 @@ class CalibrateWizard(QtGui.QDialog):
 
     def handle_calibrate(self):
         subprocess.call([os.path.join(paths.LOCAL_BIN_DIR, 'Calibrate'), self.device.local_config_path, self.calibration_dir])
+        subprocess.call([os.path.join(paths.LOCAL_BIN_DIR, 'GroundCalibrate'), self.device.local_config_path, self.calibration_dir])
         self.device.upload()
         self.device.update()
         # self.image_stream.finish()
