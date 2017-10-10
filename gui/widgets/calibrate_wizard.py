@@ -63,7 +63,7 @@ class CalibrateWizard(QtGui.QDialog):
         # Build the window
         self.setLayout(self.content)
 
-        self.setModal(True)
+        self.setModal(False)
         self.show()
 
         # Start image stream
