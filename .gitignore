@@ -1,5 +1,6 @@
 eagle/config/
 eagle/build/
+config.bak/
 *~
 *.pyc
 todo
