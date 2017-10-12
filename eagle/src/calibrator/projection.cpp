@@ -99,3 +99,19 @@ cv::Point2f Projection::project_to_image(const cv::Point3f& w) {
     cv::Point3f i3 = project_to_image3(w);
     return cv::Point2f(i3.x, i3.y);
 }
+std::vector<cv::Point3f> Projection::project_to_image3(const std::vector<cv::Point3f>& w) {
+    std::vector<cv::Point3f> p; p.reserve(w.size());
+    for (uint k=0; k<w.size(); k++) {
+        p.push_back(project_to_image3(w[k]));
+    }
+
+    return p;
+}
+std::vector<cv::Point2f> Projection::project_to_image(const std::vector<cv::Point3f>& w) {
+    std::vector<cv::Point2f> p; p.reserve(w.size());
+    for (uint k=0; k<w.size(); k++) {
+        p.push_back(project_to_image(w[k]));
+    }
+
+    return p;
+}

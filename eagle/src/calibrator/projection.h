@@ -36,6 +36,8 @@ namespace eagle {
             // Projection to the image plane
             cv::Point3f project_to_image3(const cv::Point3f& w);
             cv::Point2f project_to_image(const cv::Point3f& w);
+            std::vector<cv::Point3f> project_to_image3(const std::vector<cv::Point3f>& w);
+            std::vector<cv::Point2f> project_to_image(const std::vector<cv::Point3f>& w);
 
             // helpers
             cv::Mat camera_matrix() { return _camera_matrix; }
