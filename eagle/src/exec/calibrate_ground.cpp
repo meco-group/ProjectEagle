@@ -5,6 +5,7 @@
 
 #include <pnp_pattern_extractor3.h>
 #include <planar_pattern_extractor3.h>
+#include <transform.h>
 #include <utils.h>
 #include <config_helper.h>
 
@@ -100,9 +101,36 @@ int main(int argc, char* argv[]) {
 
     // saving ground plane
     cv::hconcat(optimal_plane.t(),cv::Mat::ones(1,1,CV_64F),optimal_plane);
+
+    // compute the extrinsic transform to the ground
+    double cx = optimal_plane.at<double>(0,0);
+    double cy = optimal_plane.at<double>(0,1);
+    double cz = optimal_plane.at<double>(0,2);
+    double d = optimal_plane.at<double>(0,3);
+    double gamma = -d/cz;
+    double rx = -(cx+d)/cz;
+    double t = 1.0/std::sqrt(1.0+(rx-gamma)*(rx-gamma));
+    cv::Point3f O1(0,0,0);
+    cv::Point3f O2(0,0,gamma);
+    cv::Point3f ex1(1,0,0);
+    cv::Point3f ex2(1,0,rx); ex2 = ex2*t;
+    cv::Point3f ez1(0,0,1);
+    cv::Point3f ez2(cx,cy,cz); ez2 = ez2/norm(ez2); 
+    if (cz >= 0)
+        ez2 = -ez2;
+    ez2 += O2;
+
+    std::vector<cv::Point3f> points1 {O1, ex1, ez1};
+    std::vector<cv::Point3f> points2 {O2, ex2, ez2};
+    cv::Mat T = compute_transform(points1, points2);
+    T.convertTo(T,CV_64F);
+
+    // Save everything to the config file
     std::cout << "ground plane " << optimal_plane << std::endl;
+    std::cout << "Extrinsic transform: "<< T << std::endl;
     std::map<std::string, cv::Mat> matrices;
     matrices["ground_plane"] = optimal_plane;
+    matrices["external_transformation"] = T;
     dump_matrices(config_path, matrices);
     std::cout << "Saved ground plane information succesfully." << std::endl;
     
