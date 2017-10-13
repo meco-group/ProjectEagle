@@ -18,7 +18,7 @@ namespace eagle {
             PnpPatternExtractor3(const cv::String& config);
             PnpPatternExtractor3(const Pattern& pattern, const cv::Mat& camera_matrix, const cv::Mat& distortion_vector, const cv::Mat& T);
     
-            virtual cloud3_t extract(const cv::Mat& img, bool display = false);
+            virtual cloud3_t extract(cv::Mat& img, bool display = false);
             virtual void set_transform(const cv::Mat& T);
     
     };

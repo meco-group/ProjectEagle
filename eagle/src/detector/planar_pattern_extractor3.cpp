@@ -16,7 +16,7 @@ PlanarPatternExtractor3::PlanarPatternExtractor3(const Pattern& pattern, const P
 
 }
 
-cloud3_t PlanarPatternExtractor3::extract(const cv::Mat& img, bool display) {
+cloud3_t PlanarPatternExtractor3::extract(cv::Mat& img, bool display) {
     // undistort image via projection
     cv::Mat undist;
     _projection.remap(img,undist);

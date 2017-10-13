@@ -17,8 +17,8 @@ namespace eagle {
             PatternExtractor3(const cv::String& config);
             PatternExtractor3(const Pattern& pattern);
     
-            virtual cloud3_t extract(const cv::Mat& img, bool display = false) = 0;
-            std::vector<cloud3_t> extract(const std::vector<cv::Mat>& list, bool display = false); 
+            virtual cloud3_t extract(cv::Mat& img, bool display = false) = 0;
+            std::vector<cloud3_t> extract(std::vector<cv::Mat>& list, bool display = false); 
             std::vector<cloud3_t> extractpath(const cv::String& path, bool display = false);
 
             void set_skip_invalid(bool skip = true) { _pattern_extractor.set_skip_invalid(skip); }

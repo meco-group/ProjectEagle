@@ -14,11 +14,12 @@ PatternExtractor::PatternExtractor(const Pattern& pattern) :
 
 }
 
-cloud2_t PatternExtractor::extract(const cv::Mat& img, bool display) {
+cloud2_t PatternExtractor::extract(cv::Mat& img, bool display) {
+    std::cout << _pattern.find(img, display).size() << std::endl;
     return _pattern.find(img, display);
 }
 
-std::vector<cloud2_t> PatternExtractor::extract(const std::vector<cv::Mat>& list, bool display) {
+std::vector<cloud2_t> PatternExtractor::extract(std::vector<cv::Mat>& list, bool display) {
     std::vector<cloud2_t> patterns;
     patterns.reserve(list.size());
 

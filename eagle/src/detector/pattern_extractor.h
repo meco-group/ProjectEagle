@@ -19,8 +19,8 @@ namespace eagle {
             PatternExtractor(const cv::String& config);
             PatternExtractor(const Pattern& pattern);
     
-            cloud2_t extract(const cv::Mat& img, bool display = false);
-            std::vector<cloud2_t> extract(const std::vector<cv::Mat>& list, bool display = false);
+            cloud2_t extract(cv::Mat& img, bool display = false);
+            std::vector<cloud2_t> extract(std::vector<cv::Mat>& list, bool display = false);
             std::vector<cloud2_t> extract(const cv::String& path, bool display = false);
     
             Pattern pattern() { return _pattern; }

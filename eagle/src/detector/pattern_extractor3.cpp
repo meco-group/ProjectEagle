@@ -14,7 +14,7 @@ PatternExtractor3::PatternExtractor3(const Pattern& pattern) :
 
 }
 
-std::vector<cloud3_t> PatternExtractor3::extract(const std::vector<cv::Mat>& list, bool display) {
+std::vector<cloud3_t> PatternExtractor3::extract(std::vector<cv::Mat>& list, bool display) {
     std::vector<cloud3_t> patterns;
     patterns.reserve(list.size());
 
