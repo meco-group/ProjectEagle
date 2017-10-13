@@ -40,6 +40,7 @@ int main(int argc, char* argv[]) {
     // extract image points
     PnpPatternExtractor3 pnp_extractor(config_path);
     pnp_extractor.set_skip_invalid(true);
+    pnp_extractor.set_transform(cv::Mat::eye(4,4,CV_32F));
     std::vector<cloud3_t> points = pnp_extractor.extractpath(images_path, false);
 
     // Ransac algorithm for robust outlier detection
