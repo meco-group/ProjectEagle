@@ -34,6 +34,7 @@ namespace eagle {
         int id;
         double x;
         double y;
+        double z;
         double t;
     } robot_t;
 
