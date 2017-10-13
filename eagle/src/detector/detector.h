@@ -7,6 +7,7 @@
 #include "opencv2/opencv.hpp"
 #include "robot.h"
 #include "obstacle.h"
+#include <projection.h>
 
 namespace eagle {
 
@@ -16,8 +17,8 @@ namespace eagle {
             cv::Ptr<cv::SimpleBlobDetector> _blob_detector;
             cv::Mat _background;
             cv::Mat _cont_mask;
-            cv::Matx23f _cam2world_tf;
-            cv::Matx23f _world2cam_tf;
+            Projection _projection;
+            cv::Mat _ground;
 
             // parameters
             double _pixel2meter;
@@ -43,20 +44,20 @@ namespace eagle {
             void decode_robot(const cv::Mat& roi, const cv::Point2f& roi_location, const std::vector<cv::Point2f>& points, const std::vector<Robot*>& robots);
             bool get_markers(const std::vector<cv::Point2f>& points, std::vector<cv::Point2f>& markers);
             bool subtract_robots(std::vector<std::vector<cv::Point>>& contours, const std::vector<Robot*>& robots);
-            void detect_obstacles(const cv::Mat& frame, const std::vector<std::vector<cv::Point> >& contours, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
-            void filter_obstacles(const std::vector<std::vector<cv::Point>>& contours, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
-            void sort_obstacles(std::vector<Obstacle*>& obstacles);
-            void init_transformations(const cv::Matx33f& c2w);
+            //void detect_obstacles(const cv::Mat& frame, const std::vector<std::vector<cv::Point> >& contours, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
+            //void filter_obstacles(const std::vector<std::vector<cv::Point>>& contours, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
+            //void sort_obstacles(std::vector<Obstacle*>& obstacles);
+            //void init_transformations(const cv::Matx33f& c2w);
 
-            std::vector<cv::Point2f> cam2worldframe(const std::vector<cv::Point2f>& points);
-            cv::Point2f cam2worldframe(const cv::Point2f& point);
-            std::vector<cv::Point2f> world2camframe(const std::vector<cv::Point2f>& points);
-            cv::Point2f world2camframe(const cv::Point2f& point);
+            //std::vector<cv::Point2f> cam2worldframe(const std::vector<cv::Point2f>& points);
+            //cv::Point2f cam2worldframe(const cv::Point2f& point);
+            //std::vector<cv::Point2f> world2camframe(const std::vector<cv::Point2f>& points);
+            //cv::Point2f world2camframe(const cv::Point2f& point);
 
         public:
-            Detector(const std::string& config_path, const cv::Matx33f& cam2world_tf);
+            Detector(const std::string& config_path, const cv::Mat& background = cv::Mat(0,0,CV_8UC3));
             void search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
-            void draw(cv::Mat& frame, const std::vector<Robot*>& robots, const std::vector<Obstacle*>& obstacles);
+            cv::Mat draw(cv::Mat& frame, const std::vector<Robot*>& robots, const std::vector<Obstacle*>& obstacles);
 
     };
 

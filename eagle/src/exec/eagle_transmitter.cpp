@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     com.join(group);
     // setup detector
     cv::Matx33f cam2world_tf = image2ground_tf(ground_plane, camera_matrix, external_tf);
-    Detector detector(CONFIG_PATH, cam2world_tf);
+    Detector detector(CONFIG_PATH);
 
     // robots and obstacles that the detector should search for
     Robot dave(0, 0.55, 0.4, cv::Scalar(138, 110, 17));
