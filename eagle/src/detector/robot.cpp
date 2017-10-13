@@ -25,7 +25,7 @@ eagle::marker_t Robot::serialize() const {
 }
 
 cv::Point3f Robot::translation() const {
-    return ((1./3.)*(_markers[0] + _markers[1] + _markers[2]));
+    return ((1./2.)*(_markers[0] + _markers[1]));
 }
 
 cv::Point3f Robot::rotation() const {
