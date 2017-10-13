@@ -199,7 +199,8 @@ void compute_reprojection_ground(const cv::String& config_path, const cv::String
     }
 
     translation_error = translation_error/translation_N;
-    double dim = planar_extractor.pattern().dimension();
+    CalibrationPattern* p = (CalibrationPattern*)(planar_extractor.pattern().pattern());
+    double dim = p->dimension();
     scaling_error = ((scaling_error/scaling_N)-dim)/dim;
     std::cout << "<Translation error> = " << translation_error << std::endl;
     std::cout << "<Scaling error> = " << scaling_error << std::endl;
