@@ -8,11 +8,13 @@ PnpPatternExtractor3::PnpPatternExtractor3(const cv::String& config) :
     cv::FileStorage fs(config, cv::FileStorage::READ);
     fs["camera"]["camera_matrix"] >> _camera_matrix;
     fs["camera"]["distortion_vector"] >> _distortion_vector;
+    fs["camera"]["external_transformation"] >> _T;
+    _T.convertTo(_T,CV_32F);
     fs.release();
 }
 
-PnpPatternExtractor3::PnpPatternExtractor3(const Pattern& pattern, const cv::Mat& camera_matrix, const cv::Mat& distortion_vector) :
-    PatternExtractor3(pattern), _camera_matrix(camera_matrix), _distortion_vector(distortion_vector)
+PnpPatternExtractor3::PnpPatternExtractor3(const Pattern& pattern, const cv::Mat& camera_matrix, const cv::Mat& distortion_vector, const cv::Mat& T) :
+    PatternExtractor3(pattern), _camera_matrix(camera_matrix), _distortion_vector(distortion_vector), _T(T)
 {
 
 }
@@ -35,13 +37,19 @@ cloud3_t PnpPatternExtractor3::extract(const cv::Mat& img, bool display) {
         R.convertTo(R, CV_32F);
         tvec.convertTo(tvec, CV_32F);
         
-        world_points.reserve(image_points.size());
+        cloud3_t camera_points;
+        camera_points.reserve(image_points.size());
         for (uint k=0; k<object_points.size(); k++) {
             //do the transformation
             temp = R*cv::Mat(object_points[k]) + tvec;
-            world_points.push_back(cv::Point3f(temp));
+            camera_points.push_back(cv::Point3f(temp));
         }
+        world_points = transform(_T, camera_points);
     }
 
     return world_points;
+}
+
+void PnpPatternExtractor3::set_transform(const cv::Mat& T) {
+    T.convertTo(_T,CV_32F);
 }

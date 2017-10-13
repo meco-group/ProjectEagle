@@ -13,7 +13,7 @@ add_executable(EagleTransmitter eagle_transmitter.cpp)
 add_executable(Background background.cpp)
 add_executable(GroundCalibrate calibrate_ground.cpp)
 
-set(LIBS ${LIBRARIES} Communicator Camera Calibrator Detector)
+set(LIBS ${LIBRARIES} Communicator Camera Detector)
 
 # Define the libraries this project depends upon
 target_link_libraries(TestCommunicator ${LIBS})

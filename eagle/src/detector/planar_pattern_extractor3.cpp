@@ -30,3 +30,7 @@ cloud3_t PlanarPatternExtractor3::extract(const cv::Mat& img, bool display) {
 
     return world_points;
 }
+
+void PlanarPatternExtractor3::set_transform(const cv::Mat& T) {
+    _projection.set_transform(T);
+}

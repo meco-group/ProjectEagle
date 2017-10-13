@@ -4,6 +4,7 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv/cv.hpp>
 #include <iostream>
+#include <transform.h>
 
 namespace eagle {
 
@@ -14,12 +15,13 @@ namespace eagle {
             cv::Mat _intrinsic_map2; //y
             //cv::Mat _extrinsic_map;
             cv::Mat _camera_matrix;
+            cv::Mat _T = cv::Mat::eye(4,4,CV_32F);
     
-            void init(const cv::Mat& camera_matrix, const cv::Mat& distortion_vector, const cv::Size& size);
+            void init(const cv::Mat& camera_matrix, const cv::Mat& distortion_vector, const cv::Size& size, const cv::Mat& T = cv::Mat::eye(4,4,CV_32F));
     
         public:
-            Projection(const cv::Mat& camera_matrix, const cv::Mat& distortion_vector, const cv::Size& size);
-            Projection(const cv::Mat& camera_matrix, const cv::Mat& distortion_vector, const cv::Mat& sample);
+            Projection(const cv::Mat& camera_matrix, const cv::Mat& distortion_vector, const cv::Size& size, const cv::Mat& T = cv::Mat::eye(4,4,CV_32F));
+            Projection(const cv::Mat& camera_matrix, const cv::Mat& distortion_vector, const cv::Mat& sample, const cv::Mat& T = cv::Mat::eye(4,4,CV_32F));
             Projection(const cv::String& config);
     
             // remap ground plane to image plane
@@ -42,6 +44,8 @@ namespace eagle {
             // helpers
             cv::Mat camera_matrix() { return _camera_matrix; }
             cv::Size image_size() { return _intrinsic_map1.size(); }
+            cv::Mat get_transform() const { return _T; }
+            void set_transform(const cv::Mat& T);
     };
 };
 

@@ -16,10 +16,10 @@ namespace eagle {
             PlanarPatternExtractor3(const Pattern& pattern, const Projection& projection, const cv::Mat& plane);
     
             virtual cloud3_t extract(const cv::Mat& img, bool display = false);
+            virtual void set_transform(const cv::Mat& T);
             
             Projection projection() { return _projection; }
             cv::Mat Plane() { return _plane; }
-    
     
     };
 };

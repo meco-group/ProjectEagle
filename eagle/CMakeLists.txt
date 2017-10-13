@@ -37,6 +37,5 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # Targets that we develop here
 add_subdirectory(src/exec)
 add_subdirectory(src/camera)
-add_subdirectory(src/calibrator)
 add_subdirectory(src/communicator)
 add_subdirectory(src/detector)
