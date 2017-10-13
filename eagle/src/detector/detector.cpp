@@ -1,4 +1,5 @@
 #include "detector.h"
+#include <circle_triangle.h>
 
 using namespace eagle;
 
@@ -129,6 +130,9 @@ bool Detector::subtract_background(const cv::Mat& frame, std::vector<std::vector
 }
 
 void Detector::detect_robots(const cv::Mat& frame, const std::vector<std::vector<cv::Point>>& contours, const std::vector<Robot*>& robots) {
+
+    CircleTriangle pattern(cv::Point2f(0.10,0.16), cv::Point2f(0.8,0.8));
+
     std::vector<cv::Point> contour;
     cv::Rect roi_rectangle; //region-of-interest rectangle
     cv::Point2f roi_location;
@@ -141,7 +145,18 @@ void Detector::detect_robots(const cv::Mat& frame, const std::vector<std::vector
             frame(roi_rectangle).copyTo(roi);
             
 
-            find_robots(roi, roi_location, robots);
+            //find_robots(roi, roi_location, robots);
+            int id;
+            std::vector<cv::Point2f> points = pattern.find(roi, id, false);
+            for (uint i=0; i<robots.size(); i++) {
+                if (id == robots[i]->code()) {
+                    std::vector<cv::Point2f> markers_glob(3);
+                    for (int i=0; i<3; i++) {
+                        markers_glob[i] = 0.5*points[i] + roi_location;
+                    }
+                    robots[i]->update(_projection.project_to_plane(markers_glob, _ground));
+                }
+            }
         }
     }
 }
