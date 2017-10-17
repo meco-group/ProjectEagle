@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
     
     // extract pattern from images
     PatternExtractor extractor(config_path);
-    std::vector<cloud2_t> image_pnts = extractor.extract(images_path, false);
+    std::vector<cloud2_t> image_pnts = extractor.extract(images_path);
     std::vector<std::vector<cv::Point3f>> pattern_pnts = extractor.pattern().reference(image_pnts.size());
 
     // Read config file

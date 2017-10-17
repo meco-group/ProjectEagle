@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
     PnpPatternExtractor3 pnp_extractor(config_path);
     pnp_extractor.set_skip_invalid(true);
     pnp_extractor.set_transform(cv::Mat::eye(4,4,CV_32F));
-    std::vector<cloud3_t> points = pnp_extractor.extractpath(images_path, false);
+    std::vector<cloud3_t> points = pnp_extractor.extractpath(images_path);
 
     // Ransac algorithm for robust outlier detection
     cv::Mat plane = cv::Mat::zeros(3, 1, CV_64F);
@@ -136,7 +136,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Saved ground plane information succesfully." << std::endl;
     
     // compute reprojection to ground
-    //compute_reprojection_ground(config_path, images_path, false);
+    //compute_reprojection_ground(config_path, images_path);
 }
 
 std::vector<double> model_cost(const std::vector<cloud3_t>& points, const cv::Mat& plane) {
@@ -158,7 +158,7 @@ std::vector<double> model_cost(const std::vector<cloud3_t>& points, const cv::Ma
     return distances;
 }
 
-void compute_reprojection_ground(const cv::String& config_path, const cv::String& image_path, bool display) {
+void compute_reprojection_ground(const cv::String& config_path, const cv::String& image_path) {
     double translation_error = 0.0;
     double scaling_error = 0.0;
     uint translation_N = 0;
@@ -167,12 +167,12 @@ void compute_reprojection_ground(const cv::String& config_path, const cv::String
     // construct Planar pattern extractor
     PlanarPatternExtractor3 planar_extractor(config_path);
     planar_extractor.set_skip_invalid(false);
-    std::vector<cloud3_t> planar_points = planar_extractor.extractpath(image_path, display);
+    std::vector<cloud3_t> planar_points = planar_extractor.extractpath(image_path);
 
     // construct pnp pattern extractor
     PnpPatternExtractor3 pnp_extractor(config_path);
     pnp_extractor.set_skip_invalid(false);
-    std::vector<cloud3_t> pnp_points = pnp_extractor.extractpath(image_path, display);
+    std::vector<cloud3_t> pnp_points = pnp_extractor.extractpath(image_path);
 
     // Compute errors
     for (uint i=0; i<planar_points.size(); i++) {
