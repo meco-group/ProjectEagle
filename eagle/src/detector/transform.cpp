@@ -69,6 +69,30 @@ cv::Mat eagle::compute_transform(const cv::Mat& points1, const cv::Mat& points2)
 
     return T21;
 }
+cv::Mat eagle::compute_inplane_transform(const cv::Point3f& n1) {
+    cv::Point3f ez = n1;
+    ez /= cv::norm(ez);
+    cv::Point3f ex(ez.z, 0, -ez.x);
+    ex /= cv::norm(ex);
+    cv::Point3f ey = ez.cross(ex);
+    ey /= cv::norm(ey);
+
+    std::vector<cv::Point3f> unitvectors {ex,ey,ez};
+    cv::Mat R(unitvectors.size(),3,CV_32FC1,unitvectors.data());
+    //R = R.t();
+    
+    cv::Mat T = cv::Mat::eye(4,4,CV_32F);
+    R.copyTo(T(cv::Rect(0,0,3,3)));
+
+    return T;
+}
+
+cv::Mat eagle::compute_inplane_transform(const cv::Mat& plane) {
+    cv::Mat t;
+    plane.convertTo(t, CV_32F);
+    cv::Point3f n(t(cv::Rect(0,0,3,1)));
+    return compute_inplane_transform(n);
+}
 
 cv::Mat eagle::get_rotation(const cv::Mat& T) {
     return T(cv::Rect(0,0,3,3)).clone();
@@ -123,4 +147,79 @@ std::vector<std::vector<cv::Point3f>> eagle::transform(const cv::Mat& T, const s
     }
 
     return pt;
+}
+
+cv::Point2f eagle::transform2(const cv::Mat& T, const cv::Point3f& p) {
+    return dropz(transform(T,p));
+}
+
+std::vector<cv::Point2f> eagle::transform2(const cv::Mat& T, const std::vector<cv::Point3f>& points) {
+    std::vector<cv::Point2f> pt; pt.reserve(points.size());
+    for (uint k=0; k<points.size(); k++) {
+        pt.push_back(transform2(T, points[k]));
+    }
+
+    return pt;
+}
+
+std::vector<std::vector<cv::Point2f>> eagle::transform2(const cv::Mat& T, const std::vector<std::vector<cv::Point3f>>& points) {
+    std::vector<std::vector<cv::Point2f>> pt; pt.reserve(points.size());
+    for (uint k=0; k<points.size(); k++) {
+        pt.push_back(transform2(T, points[k]));
+    }
+
+    return pt;
+}
+
+cv::Point2f eagle::dropz(const cv::Point3f& p) {
+    return cv::Point2f(p.x,p.y);
+}
+
+std::vector<cv::Point2f> eagle::dropz(const std::vector<cv::Point3f>& points) {
+    std::vector<cv::Point2f> pt; pt.reserve(points.size());
+    for (uint k=0; k<points.size(); k++) {
+        pt.push_back(dropz(points[k]));
+    }
+
+    return pt;
+}
+
+std::vector<std::vector<cv::Point2f>> eagle::dropz(const std::vector<std::vector<cv::Point3f>>& points) {
+    std::vector<std::vector<cv::Point2f>> pt; pt.reserve(points.size());
+    for (uint k=0; k<points.size(); k++) {
+        pt.push_back(dropz(points[k]));
+    }
+
+    return pt;
+
+}
+
+cv::Point3f eagle::addz(const cv::Point2f& p, float z) {
+    return cv::Point3f(p.x, p.y, z);
+}
+
+std::vector<cv::Point3f> eagle::addz(const std::vector<cv::Point2f>& points, float z) {
+    std::vector<cv::Point3f> p(points.size());
+    for (uint k=0; k<points.size(); k++) {
+        p[k] = addz(points[k], z);
+    }
+
+    return p;
+}
+
+std::vector<std::vector<cv::Point3f>> eagle::addz(const std::vector<std::vector<cv::Point2f>>& points, float z) {
+    std::vector<std::vector<cv::Point3f>> p(points.size());
+    for (uint k=0; k<points.size(); k++) {
+        p[k] = addz(points[k], z);
+    }
+
+    return p;
+
+}
+
+cv::Mat eagle::transform_plane(const cv::Mat& T, const cv::Mat& plane) {
+    cv::Mat p, t;
+    plane.convertTo(p, CV_32F);
+    T.convertTo(t, CV_32F);
+    return p*t;    
 }

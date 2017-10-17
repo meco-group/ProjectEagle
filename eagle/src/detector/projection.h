@@ -30,10 +30,13 @@ namespace eagle {
             // Projections to a world reference plane
             cv::Point3f project_to_plane(const cv::Point3f& i, const cv::Mat& plane);
             cv::Point3f project_to_plane(const cv::Point2f& i, const cv::Mat& plane);
+            cv::Point3f project_to_plane(const cv::Point& i, const cv::Mat& plane);
             std::vector<cv::Point3f> project_to_plane(const std::vector<cv::Point3f> i, const cv::Mat& plane);
             std::vector<cv::Point3f> project_to_plane(const std::vector<cv::Point2f> i, const cv::Mat& plane);
+            std::vector<cv::Point3f> project_to_plane(const std::vector<cv::Point> i, const cv::Mat& plane);
             std::vector<std::vector<cv::Point3f>> project_to_plane(const std::vector<std::vector<cv::Point3f>> i, const cv::Mat& plane);
             std::vector<std::vector<cv::Point3f>> project_to_plane(const std::vector<std::vector<cv::Point2f>> i, const cv::Mat& plane);
+            std::vector<std::vector<cv::Point3f>> project_to_plane(const std::vector<std::vector<cv::Point>> i, const cv::Mat& plane);
     
             // Projection to the image plane
             cv::Point3f project_to_image3(const cv::Point3f& w);

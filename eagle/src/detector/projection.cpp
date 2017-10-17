@@ -60,6 +60,11 @@ cv::Point3f Projection::project_to_plane(const cv::Point2f& i, const cv::Mat& pl
     return project_to_plane(i3, plane);
 }
 
+cv::Point3f Projection::project_to_plane(const cv::Point& i, const cv::Mat& plane) {
+    cv::Point2f t(i);
+    return project_to_plane(t, plane);
+}
+
 std::vector<cv::Point3f> Projection::project_to_plane(const std::vector<cv::Point3f> i, const cv::Mat& plane) {
     std::vector<cv::Point3f> w; w.reserve(i.size());
     for (uint k=0; k<i.size(); k++) {
@@ -78,6 +83,15 @@ std::vector<cv::Point3f> Projection::project_to_plane(const std::vector<cv::Poin
     return w;
 }
 
+std::vector<cv::Point3f> Projection::project_to_plane(const std::vector<cv::Point> i, const cv::Mat& plane) {
+    std::vector<cv::Point3f> w; w.reserve(i.size());
+    for (uint k=0; k<i.size(); k++) {
+        w.push_back(project_to_plane(i[k], plane));
+    }
+
+    return w;
+}
+
 std::vector<std::vector<cv::Point3f>> Projection::project_to_plane(const std::vector<std::vector<cv::Point3f>> i, const cv::Mat& plane) {
     std::vector<std::vector<cv::Point3f>> w; w.reserve(i.size());
     for (uint k=0; k<i.size(); k++) {
@@ -88,6 +102,15 @@ std::vector<std::vector<cv::Point3f>> Projection::project_to_plane(const std::ve
 }
 
 std::vector<std::vector<cv::Point3f>> Projection::project_to_plane(const std::vector<std::vector<cv::Point2f>> i, const cv::Mat& plane) {
+    std::vector<std::vector<cv::Point3f>> w; w.reserve(i.size());
+    for (uint k=0; k<i.size(); k++) {
+        w.push_back(project_to_plane(i[k], plane));
+    }
+
+    return w;
+}
+
+std::vector<std::vector<cv::Point3f>> Projection::project_to_plane(const std::vector<std::vector<cv::Point>> i, const cv::Mat& plane) {
     std::vector<std::vector<cv::Point3f>> w; w.reserve(i.size());
     for (uint k=0; k<i.size(); k++) {
         w.push_back(project_to_plane(i[k], plane));
