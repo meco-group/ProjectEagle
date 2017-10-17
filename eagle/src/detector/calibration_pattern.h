@@ -22,7 +22,8 @@ namespace eagle {
             int numel() const { return _rows*_cols; }
             double dimension() const { return _dimension; }
     
-            virtual std::vector<cv::Point2f> find(cv::Mat& img, bool draw = false) const = 0;
+            virtual std::vector<cv::Point2f> find(cv::Mat& img) const = 0;
+            virtual std::vector<cv::Point2f> find(cv::Mat& img, int& id, bool draw = false) const = 0;
             virtual std::vector<cv::Point3f> reference() const = 0;
     
     };

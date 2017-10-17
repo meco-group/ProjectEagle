@@ -16,11 +16,12 @@ PlanarPatternExtractor3::PlanarPatternExtractor3(const Pattern& pattern, const P
 
 }
 
-cloud3_t PlanarPatternExtractor3::extract(cv::Mat& img, bool display) {
+cloud3_t PlanarPatternExtractor3::extract(cv::Mat& img, const cv::Point2f& offset, int& id, bool display)
+{
     // undistort image via projection
     cv::Mat undist;
     _projection.remap(img,undist);
-    cloud2_t image_points = _pattern_extractor.extract(undist, display);
+    cloud2_t image_points = _pattern_extractor.extract(undist, offset, id, display);
 
     // map image coordinates to the world
     cloud3_t world_points;

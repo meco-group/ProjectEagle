@@ -19,9 +19,18 @@ namespace eagle {
             PatternExtractor(const cv::String& config);
             PatternExtractor(const Pattern& pattern);
     
-            cloud2_t extract(cv::Mat& img, bool display = false);
-            std::vector<cloud2_t> extract(std::vector<cv::Mat>& list, bool display = false);
-            std::vector<cloud2_t> extract(const cv::String& path, bool display = false);
+            cloud2_t extract(cv::Mat& img);
+            cloud2_t extract(cv::Mat& img, int& id);
+            cloud2_t extract(cv::Mat& img, const cv::Point2f& offset);
+            cloud2_t extract(cv::Mat& img, const cv::Point2f& offset, int& id, bool display = false);
+
+            std::vector<cloud2_t> extract(std::vector<cv::Mat>& list);
+            std::vector<cloud2_t> extract(std::vector<cv::Mat>& list, std::vector<int>& id);
+            std::vector<cloud2_t> extract(std::vector<cv::Mat>& list, const std::vector<cv::Point2f>& offset);
+            std::vector<cloud2_t> extract(std::vector<cv::Mat>& list, const std::vector<cv::Point2f>& offset, std::vector<int>& id, bool display = false);
+
+            std::vector<cloud2_t> extract(const cv::String& path);
+            std::vector<cloud2_t> extract(const cv::String& path, std::vector<int>& id);
     
             Pattern pattern() { return _pattern; }
             void set_skip_invalid(bool skip = true) { _skip_invalid = skip; }

@@ -19,9 +19,9 @@ PnpPatternExtractor3::PnpPatternExtractor3(const Pattern& pattern, const cv::Mat
 
 }
 
-cloud3_t PnpPatternExtractor3::extract(cv::Mat& img, bool display) {
+cloud3_t PnpPatternExtractor3::extract(cv::Mat& img, const cv::Point2f& offset, int& id, bool display) {
     //extract pattern image points
-    cloud2_t image_points = _pattern_extractor.extract(img, display);
+    cloud2_t image_points = _pattern_extractor.extract(img, offset, id, display);
 
     // map image coordinates to the world
     cloud3_t world_points;
