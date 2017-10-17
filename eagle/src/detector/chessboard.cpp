@@ -14,12 +14,19 @@ Chessboard::Chessboard(const cv::String& config) :
 
 }
 
-std::vector<cv::Point2f> Chessboard::find(cv::Mat& img, bool draw) const
+std::vector<cv::Point2f> Chessboard::find(cv::Mat& img) const
+{
+    int t;
+    return find(img, t, false);
+}
+
+std::vector<cv::Point2f> Chessboard::find(cv::Mat& img, int& id, bool draw) const
 {
     std::vector<cv::Point2f> points;
     bool found = findChessboardCorners(img, size(), points, 0);
 
     if (found) {
+        id = 0;
         // improve the found coners' coordinate accuracy
         cv::Mat img_gray;
         cv::cvtColor(img, img_gray, cv::COLOR_BGR2GRAY);
@@ -31,6 +38,7 @@ std::vector<cv::Point2f> Chessboard::find(cv::Mat& img, bool draw) const
         }
     } else {
         points.clear();
+        id = -1;
     }
 
     return points;

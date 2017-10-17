@@ -23,9 +23,10 @@ namespace eagle {
             float _th_triangle_ratio = 0.1;
 
         public:
+            CircleTriangle(const cv::String& config);
             CircleTriangle(const cv::Point2f& dimension, const cv::Point2f& qr_size, const cv::Point2f& qr_pos = cv::Point2f(0,0), const cv::Point2i& qr_n = cv::Point2i(2,2));
 
-            virtual std::vector<cv::Point2f> find(cv::Mat& img, bool draw = false) const;
+            virtual std::vector<cv::Point2f> find(cv::Mat& img) const;
             virtual std::vector<cv::Point2f> find(cv::Mat& img, int& id, bool draw) const;
             virtual std::vector<cv::Point3f> reference() const;
     

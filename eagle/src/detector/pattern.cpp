@@ -16,14 +16,31 @@ Pattern::Pattern(const cv::String& config, const type_t type) {
             break;}
     
         case DETECTION: {
-            //_pattern = new CircleTriangle(config);
+            _pattern = new CircleTriangle(config);
             break;}
     }
 }
 
-std::vector<cv::Point2f> Pattern::find(cv::Mat& img, bool draw)
+Pattern::Pattern(PatternInterface* pattern) :
+    _pattern(pattern)
 {
-    return _pattern->find(img, draw);
+    //do nothing else
+}
+
+Pattern::~Pattern() {
+    //delete _pattern;
+    //_pattern = NULL;
+}
+
+std::vector<cv::Point2f> Pattern::find(cv::Mat& img) 
+{
+    int t;
+    return _pattern->find(img, t, false);
+}
+
+std::vector<cv::Point2f> Pattern::find(cv::Mat& img, int& id, bool draw) 
+{
+    return _pattern->find(img, id, draw);
 }
 
 std::vector<cv::Point3f> Pattern::reference()

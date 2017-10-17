@@ -3,16 +3,32 @@
 
 using namespace eagle;
 
+CircleTriangle::CircleTriangle(const cv::String& config)
+{
+    cv::FileStorage fs(config, cv::FileStorage::READ);
+    double min_obstacle_area = (double)fs["detector"]["min_obstacle_area"];
+    double triangle_ratio = (double)fs["detector"]["markers"]["triangle_ratio"];
+    double qr_posx = (double)fs["detector"]["markers"]["qr_posx"];
+    double qr_posy = (double)fs["detector"]["markers"]["qr_posy"];
+    double qr_sizex = (double)fs["detector"]["markers"]["qr_sizex"];
+    double qr_sizey = (double)fs["detector"]["markers"]["qr_sizey"];
+    double qr_nbitx = (int)fs["detector"]["markers"]["qr_nbitx"];
+    double qr_nbity = (int)fs["detector"]["markers"]["qr_nbity"];
+    _th_triangle_ratio = (double)fs["detector"]["thresholds"]["triangle_ratio"];
+    _th_top_marker = (double)fs["detector"]["thresholds"]["top_marker"];
+    fs.release();
+}
+
 CircleTriangle::CircleTriangle(const cv::Point2f& dimension, const cv::Point2f& qr_size, const cv::Point2f& qr_pos, const cv::Point2i& qr_n) :
     _dimension(dimension), _qr_size(qr_size), _qr_pos(qr_pos), _qr_n(qr_n)
 {
 
 }
 
-std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img, bool draw) const 
+std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img) const 
 {
-    int id;
-    return find(img, id, draw);
+    int t;
+    return find(img, t, false);
 }
 
 std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img, int& id, bool draw) const
@@ -24,17 +40,18 @@ std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img, int& id, bool draw) 
     cv::Mat roi;
     cv::cvtColor(img, roi, CV_RGB2GRAY);
     std::vector<cv::KeyPoint> blobs;
-    cv::resize(roi, roi, cv::Size(), 2, 2); //is this necessary?
+    //cv::resize(roi, roi, cv::Size(), 2, 2); //is this necessary?
 
     //initialize blob detector
     cv::SimpleBlobDetector::Params blob_par;
     blob_par.minThreshold = 10;
     blob_par.maxThreshold = 200;
     blob_par.filterByArea = 1;
-    blob_par.minArea = 80;
+    blob_par.minArea = 20;
     blob_par.filterByCircularity = 1;
     blob_par.minCircularity = 0.85;
     cv::Ptr<cv::SimpleBlobDetector> blob_detector = cv::SimpleBlobDetector::create(blob_par);
+    //cv::resize(roi, roi, cv::Size(), 2, 2);
     blob_detector->detect(roi, blobs);
     
     // do some
@@ -42,11 +59,11 @@ std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img, int& id, bool draw) 
 //    cv::adaptiveThreshold(roi,roic,255,cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 5, 3);
 //    cv::Mat roic2; 
 //    cv::cornerHarris(roic,roic2,11,3,0.04);
-//    for (uint k=0; k<blobs.size(); k++){
-//        cv::circle(roi, blobs[k].pt, 5, cv::Scalar(255,0,0), -2);
-//    }
+    for (uint k=0; k<blobs.size(); k++){
+        cv::circle(roi, blobs[k].pt, 5, cv::Scalar(255,0,0), -2);
+    }
 //    cv::imshow("ROI",roi);
-//    cv::imshow("ROIC",roic2);
+////    cv::imshow("ROIC",roic2);
 //    cv::waitKey(0);
 
     // get all possible combinations of 3 points
