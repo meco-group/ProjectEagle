@@ -109,12 +109,13 @@ int main(int argc, char* argv[]) {
     double cz = optimal_plane.at<double>(0,2);
     double d = optimal_plane.at<double>(0,3);
     double gamma = -d/cz;
-    double rx = -(cx+d)/cz;
-    double t = 1.0/std::sqrt(1.0+(rx-gamma)*(rx-gamma));
+    double rx = std::abs(cz)/std::sqrt(cx*cx+cz*cz);
+    double rz = -(d +rx*cx)/cz;
+    
     cv::Point3f O1(0,0,0);
     cv::Point3f O2(0,0,gamma);
     cv::Point3f ex1(1,0,0);
-    cv::Point3f ex2(1,0,rx); ex2 = ex2*t;
+    cv::Point3f ex2(rx,0,rz); 
     cv::Point3f ez1(0,0,1);
     cv::Point3f ez2(cx,cy,cz); ez2 = ez2/norm(ez2); 
     if (cz >= 0)
@@ -126,8 +127,13 @@ int main(int argc, char* argv[]) {
     cv::Mat T = compute_transform(points1, points2);
     T.convertTo(T,CV_64F);
 
-    // Save everything to the config file
+    // change optimal plane coordinates to world coordinates:
+    // optimal_plane = optimal_plane*T;
+    // But the optimal plane should not be at z=0 so let's store this immediately
     std::cout << "ground plane " << optimal_plane << std::endl;
+    optimal_plane = (cv::Mat_<double>(1,4) << 0,0,1,0);
+
+    // Save everything to the config file
     std::cout << "Extrinsic transform: "<< T << std::endl;
     std::map<std::string, cv::Mat> matrices;
     matrices["ground_plane"] = optimal_plane;

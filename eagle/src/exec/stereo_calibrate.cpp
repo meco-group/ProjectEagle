@@ -54,15 +54,19 @@ int main(int argc, char* argv[]) {
 
     // Load the extrinsic matrices of the already intrinsic device
     Tc2_to_w.convertTo(Tc2_to_w, CV_64F); //
-    cv::Mat Tc1_to_w;
+    cv::Mat Tc1_to_w, ground;
     cv::FileStorage fs = cv::FileStorage(config_path1, cv::FileStorage::READ);
     fs["camera"]["external_transformation"] >> Tc1_to_w;
+    fs["camera"]["ground_plane"] >> ground;
     fs.release();
     cv::Mat Tc2_to_c1 = Tc1_to_w.inv()*Tc2_to_w;
     std::cout << "Cam2Cam transformation matrix: " << Tc2_to_c1 << std::endl;
     std::cout << "Total external transformation matrix: " << std::endl << Tc2_to_w << std::endl;
-    std::map<std::string, cv::Mat> mat_map({{"external_transformation", Tc2_to_w}});
 
+    // Add the ground plane
+    std::cout << "Equation of the ground plane: " << std::endl << ground << std::endl;
+    
+    std::map<std::string, cv::Mat> mat_map({{"external_transformation", Tc2_to_w},{"ground_plane",ground}});
     dump_matrices(config_path2, mat_map);
     set_integrated(config_path2, true);
 }
