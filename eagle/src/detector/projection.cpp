@@ -36,20 +36,28 @@ void Projection::remap(const cv::Mat& origin, cv::Mat& destination) {
 }
 
 cv::Point3f Projection::project_to_plane(const cv::Point3f& i, const cv::Mat& plane) {
-    // Project image coordinates to a plane
+    // Project image coordinates to a plane given in world coordinates
     // i is of the form [x;y;1], w is of the form [X,Y,Z]
     // plane holds the coefficients of the plane [a,b,c,d]
     // which is represented by ax+by+cz+d=0
 
-    cv::Mat M1, M2, A, i_m, pl, K;
-    _camera_matrix.convertTo(K,CV_64F);
-    plane.convertTo(pl,CV_64F);
-    cv::Mat(i).convertTo(i_m, CV_64F);
-    cv::hconcat(-cv::Mat::eye(3,3,CV_64F), K.inv()*i_m, M1);
-    cv::hconcat(pl(cv::Rect(0,0,3,1)), cv::Mat::zeros(1, 1, CV_64F), M2);
+    cv::Mat M1, M2, A, i64, plane64, K64, T64;
+    _camera_matrix.convertTo(K64,CV_64F);
+    plane.convertTo(plane64,CV_64F);
+    cv::Mat(i).convertTo(i64, CV_64F);
+    _T.convertTo(T64, CV_64F);
+    plane64 = plane64*T64;
+
+    //construct A
+    cv::hconcat(-cv::Mat::eye(3,3,CV_64F), K64.inv()*i64, M1);
+    cv::hconcat(plane64(cv::Rect(0,0,3,1)), cv::Mat::zeros(1, 1, CV_64F), M2);
     cv::vconcat(M1, M2, A);
+
+    //construct b
     cv::Mat b = cv::Mat::zeros(4,1,CV_64F);
-    b.at<double>(3, 0) = -pl.at<double>(0, 3);
+    b.at<double>(3, 0) = -plane64.at<double>(0, 3);
+    
+    // solve the system
     cv::Mat W = A.inv()*b;
     cv::Point3f w(W(cv::Rect(0, 0, 1, 3)));
     return transform(_T, w);
