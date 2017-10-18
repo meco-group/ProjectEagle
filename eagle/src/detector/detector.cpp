@@ -18,8 +18,11 @@ Detector::Detector(const std::string& config_path, const cv::Mat& background):
     _projection.remap(_background, _background);
 
     _th_bg_subtraction = (double)fs["detector"]["thresholds"]["bg_subtraction"];
-    fs["camera"]["ground_plane"] >> _ground;
     fs.release();
+
+    // set fixed ground/marker plane at z = 0.1 wrt the world plane 
+    _ground = (cv::Mat_<float>(1,4) << 0,0,1,-0.1); 
+    
 }
 
 void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles) {
