@@ -23,6 +23,10 @@ int main(int argc, char* argv[]) {
             std::cout << "Position: " <<robots[k]->translation() << std::endl << "Roll-pitch-yaw: " << robots[k]->rotation() << std::endl;
         }
     }
+    for (uint k=0; k<obstacles.size(); k++) {
+        cloud3_t p = obstacles[k]->points(4);
+        std::cout << "Obstacle: " << p[0] << p[1] << p[2] << p[3] << std::endl;
+    }
 
     cv::imshow("image",undist);
     cv::waitKey(0);
