@@ -68,6 +68,15 @@ void Robot::draw_markers(cv::Mat& frame, Projection& projection) const {
     //cv::arrowedLine(frame, projection.project_to_image(translation()), projection.project_to_image(translation()+ey()), _color, 2);
 }
 
+void Robot::draw_id(cv::Mat& frame, Projection& projection) const {
+    // id
+    std::vector<cv::Point2f> markers_cam = projection.project_to_image(_markers);
+    markers_cam.push_back(markers_cam[3]);
+    for (uint k=4; k<markers_cam.size(); k++) {
+        cv::line(frame, markers_cam[k-1], markers_cam[k], _color, 2);
+    }
+}
+
 void Robot::draw_box(cv::Mat& frame, Projection& projection) const {
     // box
     std::vector<cv::Point2f> vertices_cam = projection.project_to_image(vertices());
@@ -79,6 +88,7 @@ void Robot::draw_box(cv::Mat& frame, Projection& projection) const {
 
 void Robot::draw(cv::Mat& frame, Projection& projection) const {
     draw_markers(frame, projection);
+    draw_id(frame, projection);
     draw_box(frame, projection);
 }
 

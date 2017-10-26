@@ -37,6 +37,7 @@ namespace eagle {
             void reset() { _detected = false; }
             void draw(cv::Mat& frame, Projection& projection) const;
             void draw_markers(cv::Mat& frame, Projection& projection) const;
+            void draw_id(cv::Mat& frame, Projection& projection) const;
             void draw_box(cv::Mat& frame, Projection& projection) const;
 
             // getters
