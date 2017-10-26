@@ -39,6 +39,8 @@ std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img, int& id, bool draw) 
     // blob detection
     cv::Mat roi;
     cv::cvtColor(img, roi, CV_RGB2GRAY);
+    cv::Mat corner_img;
+    roi.copyTo(corner_img);
     std::vector<cv::KeyPoint> blobs;
     //cv::resize(roi, roi, cv::Size(), 2, 2); //is this necessary?
 
@@ -59,9 +61,9 @@ std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img, int& id, bool draw) 
 //    cv::adaptiveThreshold(roi,roic,255,cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 5, 3);
 //    cv::Mat roic2; 
 //    cv::cornerHarris(roic,roic2,11,3,0.04);
-    for (uint k=0; k<blobs.size(); k++){
-        cv::circle(roi, blobs[k].pt, 5, cv::Scalar(255,0,0), -2);
-    }
+//    for (uint k=0; k<blobs.size(); k++){
+//        cv::circle(roi, blobs[k].pt, 5, cv::Scalar(255,0,0), -2);
+//    }
 //    cv::imshow("ROI",roi);
 ////    cv::imshow("ROIC",roic2);
 //    cv::waitKey(0);
@@ -80,6 +82,7 @@ std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img, int& id, bool draw) 
             }
             if (check(points)) {
                 id = decode(roi, points);
+                check(roi, points);
                 found = true;
             }
         } while ((!found) && std::prev_permutation(selector.begin(), selector.end()));
@@ -95,10 +98,16 @@ std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img, int& id, bool draw) 
 
 std::vector<cv::Point3f> CircleTriangle::reference() const 
 {
-    std::vector<cv::Point3f> points(3);
+    std::vector<cv::Point3f> points(7);
     points[0] = cv::Point3f(0,_dimension.y*0.5,0);
     points[1] = cv::Point3f(0,-_dimension.y*0.5,0);
     points[2] = cv::Point3f(_dimension.x,0,0);
+
+    cv::Point3f offset(_dimension.x*_qr_pos.x, _dimension.y*_qr_pos.y, 0);
+    points[3] = 0.5*cv::Point3f(-_dimension.x*_qr_size.x, _dimension.y*_qr_size.y, 0) + offset;
+    points[4] = 0.5*cv::Point3f(-_dimension.x*_qr_size.x, -_dimension.y*_qr_size.y, 0) + offset;
+    points[5] = 0.5*cv::Point3f(_dimension.x*_qr_size.x, -_dimension.y*_qr_size.y, 0) + offset;
+    points[6] = 0.5*cv::Point3f(_dimension.x*_qr_size.x, _dimension.y*_qr_size.y, 0) + offset;
 
     return points;
 }
@@ -151,6 +160,133 @@ bool CircleTriangle::check(std::vector<cv::Point2f>& points) const
     }
 
     return (std::fabs(height/width - ratio())/ratio() < _th_triangle_ratio);
+}
+
+bool CircleTriangle::check(const cv::Mat& img, std::vector<cv::Point2f>& points) const
+{
+    bool found;
+    
+    // determine scale
+    int z = std::round(std::max(1.0, 300.0/cv::arcLength(points,true)));
+    cv::Mat res;
+    resize(img,res,cv::Size(),z,z,cv::INTER_CUBIC);
+
+    //Threshold image to get contours
+    cv::Mat bin;
+    cv::threshold(res, bin, 150, 255, cv::THRESH_BINARY_INV);
+
+    //Select region of interest for contours
+    cv::Point2f center = (points[0] + points[1] + points[2])/3;
+    double radius = std::max(cv::norm(center-points[0]), cv::norm(center-points[1]));
+    radius = std::max(radius*1.4, cv::norm(center-points[2]));
+    
+    cv::Mat mask(bin.size[0], bin.size[1], CV_8U, cv::Scalar(0));
+    cv::circle(mask, center*z, radius*z, 255, -2);
+    cv::bitwise_and(mask, bin, bin);
+
+    //Find contour with maximum area
+    std::vector<cv::Vec4i> hierarchy;
+    std::vector<std::vector<cv::Point>> contours;
+    cv::findContours(bin, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+    if (contours.empty()) {
+        return false;
+    }
+
+    int max_l = 0;
+    double area = cv::contourArea(contours[0]);
+    double t_area;
+    std::vector<cv::Point2f> points_refined(3);
+    for (uint l=0; l<contours.size(); l++) {
+        t_area = cv::contourArea(contours[l]);
+        if( t_area > area ) {
+            max_l = l;
+            area = t_area;
+        }
+    }
+    std::vector<cv::Point2f> corners;
+    cv::approxPolyDP(contours[max_l],corners,5,true);
+
+    // Rescale corners
+    for (uint k=0; k<corners.size(); k++){
+        cv::circle(res, corners[k], 4, cv::Scalar(0,0,255), 1);
+        corners[k] /= z;
+    }
+    for (uint k=0; k<points.size(); k++){
+        cv::circle(res, points[k]*z, 4, cv::Scalar(0,255,0), 1);
+    }
+
+    if (corners.size() !=4) {
+        return false;
+    }
+        
+    //reorder points
+    cv::Point2f square_center = (corners[0] + corners[1] + corners[2] + corners[3])*0.25;
+    std::vector<cv::Point2f> mid = {(points[1] + points[2])*0.5, (points[2] + points[0])*0.5, (points[0] + points[1])*0.5};
+
+    double dist = cv::norm(square_center - mid[0]);
+    int top = 0;
+    std::vector<int> bot;
+    double t;
+    for (uint l=1; l<3; l++) {
+        t = cv::norm(square_center - mid[l]);
+        if (dist > t) {
+            bot.push_back(top);
+            dist = t;
+            top = l;
+        } else {
+            bot.push_back(l);
+        }
+    }
+
+    std::cout << "Distance to center found: " << dist << std::endl << "top index: " << top << std::endl; 
+
+    double cp = (points[bot[1]]-points[bot[0]]).cross(points[top]-points[bot[0]]);
+    std::vector<cv::Point2f> points_copy = points;
+    if (cp <= 0) {
+        points[0] = points_copy[bot[0]];
+        points[1] = points_copy[bot[1]];
+    } else {
+        points[0] = points_copy[bot[1]];
+        points[1] = points_copy[bot[0]];
+    }
+    points[2] = points_copy[top];
+
+    //reorder marker corners
+    if (cv::contourArea(corners,true) > 0) {
+        std::reverse(corners.begin(), corners.end());
+    }
+
+    cv::Point2f vx = points[1] - points[0];
+    cv::Point2f vy = points[2] - 0.5*(points[0] + points[1]);
+    cv::Point2f tp;
+    double s;
+    std::vector<int> start_idx;
+    for (uint l=0; l<4; l++) {
+        tp = corners[l] - square_center;
+        if ((tp.dot(vx)<0) && (tp.dot(vy)<0)) {
+            start_idx.push_back(l);
+        }
+
+        //rescale by half a pixel
+        s = cv::norm(tp);
+        corners[l] = square_center + tp*((s+0.5)/s);
+    }
+
+    if (start_idx.size() != 1) {
+        return false;
+    }
+    std::rotate(corners.begin(), corners.begin()+start_idx[0], corners.end());
+    points.insert(points.end(), corners.begin(), corners.end());
+
+    for (uint l=0; l<points.size(); l++) {
+        cv::putText(res, cv::format("%i",l), points[l]*z, cv::FONT_HERSHEY_SCRIPT_SIMPLEX, 1, cv::Scalar(127,0,0));
+    }
+
+    cv::imshow("numbers",res);
+    cv::waitKey(0);
+
+    return true;
 }
 
 int CircleTriangle::decode(cv::Mat& img, const std::vector<cv::Point2f>& points) const

@@ -15,6 +15,7 @@ namespace eagle {
             cv::Point2i _qr_n;
 
             bool check(std::vector<cv::Point2f>& points) const;
+            bool check(const cv::Mat& img, std::vector<cv::Point2f>& points) const;
             int decode(cv::Mat& img, const std::vector<cv::Point2f>& points) const;
             float ratio() const { return _dimension.x/_dimension.y; }
 
