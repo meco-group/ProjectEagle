@@ -9,6 +9,7 @@
 #include <obstacle_circle.h>
 #include <obstacle_rectangle.h>
 #include <planar_pattern_extractor3.h>
+#include <pnp_pattern_extractor3.h>
 #include <transform.h>
 
 namespace eagle {
@@ -23,6 +24,8 @@ namespace eagle {
             Projection _projection;
             cv::Mat _ground;
 
+            Pattern _pat;
+            PnpPatternExtractor3* _extr;
 
             cv::Mat get_mask(const cv::Mat& frame);
             std::vector<std::vector<cv::Point>> get_contours(const cv::Mat& frame);

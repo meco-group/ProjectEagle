@@ -4,7 +4,8 @@
 using namespace eagle;
 
 Detector::Detector(const std::string& config_path, const cv::Mat& background):
-    _projection(config_path)
+    _projection(config_path),
+    _pat(new CircleTriangle(cv::Point2f(0.10,0.16), cv::Point2f(0.8,0.5)))
 {
     cv::FileStorage fs(config_path, cv::FileStorage::READ);
     if(background.empty()) {
@@ -21,8 +22,18 @@ Detector::Detector(const std::string& config_path, const cv::Mat& background):
     fs.release();
 
     // set fixed ground/marker plane at z = 0.1 wrt the world plane 
-    _ground = (cv::Mat_<float>(1,4) << 0,0,1,-0.1); 
+    _ground = (cv::Mat_<float>(1,4) << 0,0,1,-0.07); 
     
+
+    // pnp pattern extraction test
+    fs = cv::FileStorage(config_path, cv::FileStorage::READ);
+    cv::Mat K, D, T;
+    fs["camera"]["camera_matrix"] >> K;
+    fs["camera"]["distortion_vector"] >> D;
+    fs["camera"]["external_transformation"] >> T;
+    T.convertTo(T,CV_32F);
+    fs.release();
+    _extr = new PnpPatternExtractor3(_pat, _projection.camera_matrix(), cv::Mat(0,0,CV_32F), T);
 }
 
 void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles) {
@@ -104,7 +115,7 @@ std::vector<std::vector<cv::Point>> Detector::get_contours(const cv::Mat& mask) 
 
 void Detector::detect_robots(const cv::Mat& frame, const std::vector<std::vector<cv::Point>>& contours, const std::vector<Robot*>& robots) {
     
-    Pattern pat(new CircleTriangle(cv::Point2f(0.10,0.16), cv::Point2f(0.8,0.8)));
+    Pattern pat(new CircleTriangle(cv::Point2f(0.10,0.16), cv::Point2f(0.8,0.5)));
 
     std::vector<cv::Point> contour;
     cloud2_t marker_points2(3);
@@ -125,10 +136,19 @@ void Detector::detect_robots(const cv::Mat& frame, const std::vector<std::vector
 
         marker_points3 = _projection.project_to_plane(marker_points2, _ground);
 
+        // test with pnp extractor
+        cloud3_t pnppoints;
+        pnppoints = _extr->extract(roi, roi_location, id, false);
+        
         for (uint i=0; i<robots.size(); i++) {
             if (id == robots[i]->code()) {
-                robots[i]->update(marker_points3);
+                robots[i]->update(pnppoints);// marker_points3);
             }
+        }
+
+        
+        for (uint l=0; l<pnppoints.size(); l++) {
+            std::cout << pnppoints[l] << " | " << marker_points3[l] << " | " << pnppoints[l] - marker_points3[l] << std::endl;
         }
     }
 }
