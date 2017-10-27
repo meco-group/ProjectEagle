@@ -158,3 +158,14 @@ std::vector<cv::Point2f> Projection::project_to_image(const std::vector<cv::Poin
 void Projection::set_transform(const cv::Mat& T) {
     T.convertTo(_T,CV_32F);
 }
+
+cv::Mat Projection::get_homography(float z0) const {
+    cv::Mat Tp = (_T.inv());
+    Tp = Tp.rowRange(0,3).clone();
+    cv::Mat Tp1 = Tp.colRange(0,2);
+    cv::Mat Tp2 = (Tp.col(2)*z0 + Tp.col(3)); 
+    cv::hconcat(Tp1 ,Tp2 ,Tp);
+    cv::Mat Hinv = _camera_matrix*Tp;
+
+    return (Hinv.inv());
+}

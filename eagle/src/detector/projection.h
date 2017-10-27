@@ -49,6 +49,8 @@ namespace eagle {
             cv::Size image_size() { return _intrinsic_map1.size(); }
             cv::Mat get_transform() const { return _T; }
             void set_transform(const cv::Mat& T);
+
+            cv::Mat get_homography(float z0) const;
     };
 };
 
