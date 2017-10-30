@@ -80,9 +80,8 @@ std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img, int& id, bool draw) 
                     k++;
                 }
             }
-            if (check(points)) {
+            if (check(roi, points)) {
                 id = decode(roi, points);
-                check(roi, points);
                 found = true;
             }
         } while ((!found) && std::prev_permutation(selector.begin(), selector.end()));
