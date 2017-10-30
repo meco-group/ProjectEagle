@@ -157,7 +157,7 @@ class StereoCalibrateWizard(QtGui.QDialog):
 
     def handle_calibrate(self):
         subprocess.call([os.path.join(paths.LOCAL_BIN_DIR, 'StereoCalibrate'),
-            self.left_device.config_path, self.right_device.config_path,
+            self.left_device.local_config_path, self.right_device.local_config_path,
             self.cal_dir_ldev+'/', self.cal_dir_rdev+'/'])
         self.left_device.upload()
         self.right_device.upload()
