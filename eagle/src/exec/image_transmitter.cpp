@@ -70,11 +70,11 @@ int main(int argc, char* argv[]) {
                 while (com.available()) {
                     // 1. read the header
                     com.read(&header);
+                    size_t size = com.framesize();
+                    uchar buffer2[size];
+                    com.read(buffer2);
                     // 2. read data based on the header
                     if (header.id == eagle::CMD) {
-                        size_t size = com.framesize();
-                        uchar buffer2[size];
-                        com.read(buffer2);
                         cmd = *((eagle::cmd_t*)(buffer2));
                         if (cmd == SNAPSHOT) {
                             cv::imwrite(snapshot_path, img);
