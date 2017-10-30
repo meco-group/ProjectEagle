@@ -49,7 +49,19 @@ namespace eagle {
     } obstacle_t;
 
     typedef enum cmd_t {
-        SNAPSHOT = 0
+        SNAPSHOT = 0,
+        IMAGE_STREAM_ON = 10,
+        IMAGE_STREAM_OFF = 11,
+        IMAGE_STREAM_TOGGLE = 12,
+        DETECTION_ON = 20,
+        DETECTION_OFF = 21,
+        DETECTION_TOGGLE = 22,
+        DEBUG_MODE_ON = 30,
+        DEBUG_MODE_OFF = 31,
+        DEBUG_MODE_TOGGLE = 32,
+        CALIBRATION_ON = 40,
+        CALIBRATION_OFF = 41,
+        CALIBRATION_TOGGLE = 42,
     } cmd_t;
 
 }

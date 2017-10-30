@@ -10,6 +10,11 @@
 #include <iostream>
 #include <opencv2/core/core.hpp>
 
+// Timing macros
+#define INIT_TIMING auto begin = std::chrono::system_clock::now(); auto end = std::chrono::system_clock::now(); double elapsed_time = 0;
+#define TIMING(expression) begin = std::chrono::system_clock::now(); expression; end = std::chrono::system_clock::now(); elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()*1e-6; begin = std::chrono::system_clock::now();
+#define DURATION elapsed_time
+
 namespace eagle {
 
     int kbhit() {

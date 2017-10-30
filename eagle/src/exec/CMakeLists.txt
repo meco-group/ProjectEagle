@@ -14,6 +14,7 @@ add_executable(Background background.cpp)
 add_executable(GroundCalibrate calibrate_ground.cpp)
 add_executable(DetectorTest detector_test.cpp)
 add_executable(Fuse fuse.cpp)
+add_executable(ImageStreamCmd image_stream_cmd.cpp)
 
 set(LIBS ${LIBRARIES} Communicator Camera Detector)
 
@@ -30,3 +31,4 @@ target_link_libraries(Background ${LIBS})
 target_link_libraries(GroundCalibrate ${LIBS})
 target_link_libraries(DetectorTest ${LIBS})
 target_link_libraries(Fuse ${LIBS})
+target_link_libraries(ImageStreamCmd ${LIBS})
