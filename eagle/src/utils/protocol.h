@@ -35,7 +35,9 @@ namespace eagle {
         double x;
         double y;
         double z;
-        double t;
+        double roll;
+        double pitch;
+        double yaw;
     } robot_t;
 
     typedef struct obstacle_t {

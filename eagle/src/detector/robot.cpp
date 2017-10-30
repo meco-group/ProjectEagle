@@ -20,7 +20,9 @@ eagle::marker_t Robot::serialize() const {
     m.x = t.x;
     m.y = t.y;
     m.z = t.z;
-    m.t = r.z;
+    m.roll = r.x;
+    m.pitch = r.y;
+    m.yaw = r.z;
     return m;
 }
 
