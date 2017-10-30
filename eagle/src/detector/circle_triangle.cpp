@@ -283,8 +283,8 @@ bool CircleTriangle::check(const cv::Mat& img, std::vector<cv::Point2f>& points)
         cv::putText(res, cv::format("%i",l), points[l]*z, cv::FONT_HERSHEY_SCRIPT_SIMPLEX, 1, cv::Scalar(127,0,0));
     }
 
-    cv::imshow("numbers",res);
-    cv::waitKey(0);
+//    cv::imshow("numbers",res);
+//    cv::waitKey(0);
 
     return true;
 }
