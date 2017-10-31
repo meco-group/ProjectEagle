@@ -135,12 +135,14 @@ int main(int argc, char* argv[]) {
     bool time = (argc > 5) ? (strcmp(argv[5], "1") == 0) : false;
     settings.detection_on = true;
     settings.calibration_on = false;
-    settings.debug_mode_on = true;
+    settings.debug_mode_on = false;
     settings.snapshot = false;
 
     /******************/
     /* INITIALIZATION */
     /******************/
+
+    std::cout << "Initialization started!" << std::endl;
 
     // read config file
     cv::FileStorage fs(CONFIG_PATH, cv::FileStorage::READ);
@@ -176,8 +178,6 @@ int main(int argc, char* argv[]) {
     std::vector< Robot* > robots = std::vector< Robot* >{&dave, &krist, &kurt};
     std::vector< Obstacle* > obstacles;
 
-    std::cout << "Starting eagle transmitter\n";
-
     if (settings.image_viewer_on) {
         cv::namedWindow("Viewer", cv::WINDOW_AUTOSIZE);
     }
@@ -185,6 +185,8 @@ int main(int argc, char* argv[]) {
     /*************/
     /* MAIN LOOP */
     /*************/
+    
+    std::cout << "Main loop started!" << std::endl;
 
     INIT_TIMING;
 
