@@ -66,7 +66,7 @@ std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img, int& id, bool draw) 
 ////    cv::imshow("ROIC",roic2);
 //    cv::waitKey(0);
 
-    // get all possible combinations of 3 points
+    // get all possible combinations of 3 points: are these really all combinations?? checked and valid!!
     if( blobs.size() >= 3) {
         std::vector<bool> selector(blobs.size());
         std::fill(selector.begin(), selector.begin() + 3, true);
@@ -277,6 +277,7 @@ bool CircleTriangle::check(const cv::Mat& img, std::vector<cv::Point2f>& points)
         return false;
     }
     std::rotate(corners.begin(), corners.begin()+start_idx[0], corners.end());
+    points.erase(points.begin()+3,points.end());
     points.insert(points.end(), corners.begin(), corners.end());
 
     for (uint l=0; l<points.size(); l++) {
