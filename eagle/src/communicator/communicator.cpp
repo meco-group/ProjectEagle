@@ -2,8 +2,7 @@
 
 using namespace eagle;
 
-Communicator::Communicator(const std::string& name, const std::string& iface, int port) :
-    _name(name) {
+Communicator::Communicator(const std::string& name, const std::string& iface, int port) : _name(name) {
     _node = zyre_new(name.c_str());
     zyre_set_port(_node, port);
     zyre_set_interface(_node, iface.c_str());
@@ -205,6 +204,9 @@ bool Communicator::receive(std::string& peer) {
         }
         return true;
     }
+
+    //add ENTER/JOIN to fill out unused _groups map
+
     return false;
 }
 

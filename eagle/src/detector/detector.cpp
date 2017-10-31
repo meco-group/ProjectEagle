@@ -90,6 +90,11 @@ cv::Mat Detector::draw(cv::Mat& frame, const std::vector<Robot*>& robots, const 
 
     return img;
 }
+
+void Detector::set_background(const cv::Mat& bg) {
+    _projection.remap(bg, _background);
+}
+
 cv::Mat Detector::get_mask(const cv::Mat& frame) {
     cv::Mat mask;
     // background subtraction

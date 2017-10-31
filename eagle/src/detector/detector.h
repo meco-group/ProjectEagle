@@ -41,6 +41,7 @@ namespace eagle {
             Detector(const std::string& config_path, const cv::Mat& background = cv::Mat(0,0,CV_8UC3));
             void search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
             cv::Mat draw(cv::Mat& frame, const std::vector<Robot*>& robots, const std::vector<Obstacle*>& obstacles);
+            void set_background(const cv::Mat& bg);
 
     };
 
