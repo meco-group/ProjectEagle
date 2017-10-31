@@ -143,12 +143,8 @@ void Detector::detect_robots(const cv::Mat& frame, const std::vector<std::vector
         for (uint i=0; i<robots.size(); i++) {
             if (id == robots[i]->code()) {
                 robots[i]->update(pnppoints);// marker_points3);
+                std::cout << "Marker [" << id << "] at " << robots[i]->translation() << robots[i]->rotation() << std::endl;
             }
-        }
-
-        
-        for (uint l=0; l<pnppoints.size(); l++) {
-            std::cout << pnppoints[l] << " | " << marker_points3[l] << " | " << pnppoints[l] - marker_points3[l] << std::endl;
         }
     }
 }
