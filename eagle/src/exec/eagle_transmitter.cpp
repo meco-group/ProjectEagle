@@ -208,10 +208,12 @@ int main(int argc, char* argv[]) {
     int bg_counter = 0;
 
     while ( !kbhit() ) {
+        // process communication
+        process_communication(com, settings);
+        
         //  check time
         auto t = std::chrono::high_resolution_clock::now();
         if (std::chrono::duration_cast<std::chrono::milliseconds>(t-t0).count() < dt) {
-            process_communication(com, settings);
             continue;
         }
         t0 = t;
