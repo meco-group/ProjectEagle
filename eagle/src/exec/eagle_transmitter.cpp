@@ -141,6 +141,7 @@ int main(int argc, char* argv[]) {
     settings.calibration_on = false;
     settings.debug_mode_on = false;
     settings.snapshot = false;
+    settings.background = false;
 
     /******************/
     /* INITIALIZATION */
