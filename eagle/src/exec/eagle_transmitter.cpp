@@ -9,12 +9,13 @@
 using namespace eagle;
 
 typedef struct settings_t {
-    bool image_stream_on;
-    bool image_viewer_on;
-    bool detection_on;
-    bool calibration_on;
     bool snapshot;
+    bool background;
+    bool image_stream_on;
+    bool detection_on;
     bool debug_mode_on;
+    bool calibration_on;
+    bool image_viewer_on;
 };
 
 void transmit_detected(Communicator& com, const std::vector<Robot*>& robots, const std::vector<Obstacle*>& obstacles, std::string group, unsigned long capture_time) {
@@ -79,6 +80,9 @@ void process_communication(Communicator& com, settings_t& settings) {
                 switch(cmd) {
                     case SNAPSHOT: {
                         settings.snapshot = true;
+                        break; }
+                    case BACKGROUND: {
+                        settings.background = true;
                         break; }
                     case IMAGE_STREAM_ON: {
                         settings.image_stream_on = true;
@@ -198,6 +202,10 @@ int main(int argc, char* argv[]) {
     auto t0 = std::chrono::high_resolution_clock::now(); 
     double t_cap, t_det, t_com;
     unsigned long capture_time;
+
+    cv::Mat background = cv::Mat(cam->getHeight(), cam->getWidth(), CV_32FC3, cv::Scalar(0,0,0));
+    int bg_counter = 0;
+
     while ( !kbhit() ) {
         //  check time
         auto t = std::chrono::high_resolution_clock::now();
@@ -217,6 +225,23 @@ int main(int argc, char* argv[]) {
             std::cout << "Snapshot taken." << std::endl;
         }
 
+        if (settings.background) {
+            bg_counter++;
+            cv::accumulate(im, background);
+            if (bg_counter >= 50) {
+                background /= bg_counter;
+                background.convertTo(background, CV_8UC3);
+                detector.set_background(background);
+                cv::imwrite("../config/background.png", im);
+                std::cout << "New background ready." << std::endl;
+
+                //re-init
+                settings.background = false;
+                cv::Mat background = cv::Mat(cam->getHeight(), cam->getWidth(), CV_32FC3, cv::Scalar(0,0,0));
+                bg_counter = 0;
+            }
+        }
+
         if (settings.detection_on) {
             // detect the robots/obstacles
             TIMING(detector.search(im, robots, obstacles););
@@ -224,7 +249,7 @@ int main(int argc, char* argv[]) {
             // send detected robots/obstacles
             TIMING(transmit_detected(com, robots, obstacles, group, capture_time););
             t_com = DURATION;
-            if ((settings.image_viewer_on || settings.image_stream_on) && settings.debug_mode_on) {
+            if ((settings.image_viewer_on || settings.image_stream_on) && settings.detection_on) {
                 im = detector.draw(im, robots, obstacles);
             }
         }
