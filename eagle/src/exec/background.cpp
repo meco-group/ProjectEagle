@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
 
     // start camera
     Camera* cam = getCamera(CONFIG_PATH);
-    cam->undistort(camera_matrix, distortion_vector);
+    //cam->undistort(camera_matrix, distortion_vector);
     cam->start();
 
     // capture and save background
@@ -32,8 +32,8 @@ int main(int argc, char* argv[]) {
     background /= 50;
     background.convertTo(background, CV_8UC3);
     cv::imwrite(background_path, background);
-    imshow("Background", background);
-    cv::waitKey(2000);
+    //imshow("Background", background);
+    //cv::waitKey(2000);
 
     cam->stop();
     delete cam;
