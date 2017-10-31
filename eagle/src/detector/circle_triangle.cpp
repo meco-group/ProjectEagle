@@ -34,26 +34,24 @@ std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img) const
 std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img, int& id, bool draw) const
 {
     bool found = false;
-    std::vector<cv::Point2f> points(3);
+    std::vector<cv::Point2f> points(7);
+    int scale = 2; //adaptive scaling possible?
 
     // blob detection
     cv::Mat roi;
     cv::cvtColor(img, roi, CV_RGB2GRAY);
-    cv::Mat corner_img;
-    roi.copyTo(corner_img);
+    cv::resize(roi, roi, cv::Size(), scale, scale); //is this necessary? => yes! otherwise, blob detection is unstable and code is hard to decode
     std::vector<cv::KeyPoint> blobs;
-    //cv::resize(roi, roi, cv::Size(), 2, 2); //is this necessary?
 
     //initialize blob detector
     cv::SimpleBlobDetector::Params blob_par;
     blob_par.minThreshold = 10;
     blob_par.maxThreshold = 200;
     blob_par.filterByArea = 1;
-    blob_par.minArea = 20;
+    blob_par.minArea = 80;
     blob_par.filterByCircularity = 1;
     blob_par.minCircularity = 0.85;
     cv::Ptr<cv::SimpleBlobDetector> blob_detector = cv::SimpleBlobDetector::create(blob_par);
-    //cv::resize(roi, roi, cv::Size(), 2, 2);
     blob_detector->detect(roi, blobs);
     
     // do some
@@ -82,6 +80,9 @@ std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img, int& id, bool draw) 
             }
             if (check(roi, points)) {
                 id = decode(roi, points);
+                for (uint i=0; i<points.size(); i++) {
+                    points[i] /= scale;
+                }
                 found = true;
             }
         } while ((!found) && std::prev_permutation(selector.begin(), selector.end()));
@@ -238,7 +239,7 @@ bool CircleTriangle::check(const cv::Mat& img, std::vector<cv::Point2f>& points)
         }
     }
 
-    std::cout << "Distance to center found: " << dist << std::endl << "top index: " << top << std::endl; 
+    //std::cout << "Distance to center found: " << dist << std::endl << "top index: " << top << std::endl; 
 
     double cp = (points[bot[1]]-points[bot[0]]).cross(points[top]-points[bot[0]]);
     std::vector<cv::Point2f> points_copy = points;
