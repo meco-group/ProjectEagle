@@ -75,6 +75,7 @@ void process_communication(Communicator& com, settings_t& settings) {
             if (header.id == eagle::CMD) {
                 eagle::cmd_t cmd;
                 cmd = *((eagle::cmd_t*)(buffer));
+                std::cout << "CMD [" << cmd << "] received from " << pr << std::endl;
                 switch(cmd) {
                     case SNAPSHOT: {
                         settings.snapshot = true;
