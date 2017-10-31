@@ -222,7 +222,7 @@ int main(int argc, char* argv[]) {
             TIMING(transmit_detected(com, robots, obstacles, group, capture_time););
             t_com = DURATION;
             if ((settings.image_viewer_on || settings.image_stream_on) && settings.debug_mode_on) {
-                detector.draw(im, robots, obstacles);
+                im = detector.draw(im, robots, obstacles);
             }
         }
 
