@@ -50,6 +50,7 @@ namespace eagle {
 
     typedef enum cmd_t {
         SNAPSHOT = 0,
+        BACKGROUND = 1,
         IMAGE_STREAM_ON = 10,
         IMAGE_STREAM_OFF = 11,
         IMAGE_STREAM_TOGGLE = 12,

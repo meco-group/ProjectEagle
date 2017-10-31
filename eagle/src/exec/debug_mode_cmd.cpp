@@ -13,11 +13,11 @@ int main(int argc, char* argv[]) {
     // set command
     cmd_t cmd;
     if (strcmp(strcmd.c_str(),"on") == 0) {
-        cmd = IMAGE_STREAM_ON;
+        cmd = DEBUG_MODE_ON;
     } else if (strcmp(strcmd.c_str(),"off") == 0) {
-        cmd = IMAGE_STREAM_OFF;
+        cmd = DEBUG_MODE_OFF;
     } else if (strcmp(strcmd.c_str(),"toggle") == 0) {
-        cmd = IMAGE_STREAM_TOGGLE;
+        cmd = DEBUG_MODE_TOGGLE;
     } else {
         perror("Input error: unknown command. Supported: on, off, toggle");
     }
@@ -28,3 +28,4 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+
