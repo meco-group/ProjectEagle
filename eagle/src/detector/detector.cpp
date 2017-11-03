@@ -142,12 +142,13 @@ void Detector::detect_robots(const cv::Mat& frame, const std::vector<std::vector
         marker_points3 = _projection.project_to_plane(marker_points2, _ground);
 
         // test with pnp extractor
-        cloud3_t pnppoints;
-        pnppoints = _extr->extract(roi, roi_location, id, false);
+        //cloud3_t pnppoints;
+        //pnppoints = _extr->extract(roi, roi_location, id, false);
         
         for (uint i=0; i<robots.size(); i++) {
             if (id == robots[i]->code()) {
-                robots[i]->update(pnppoints);// marker_points3);
+                //robots[i]->update(pnppoints);
+                robots[i]->update(marker_points3);
                 //std::cout << "Marker [" << id << "] at " << robots[i]->translation() << robots[i]->rotation() << std::endl;
             }
         }

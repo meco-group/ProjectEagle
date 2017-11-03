@@ -8,7 +8,7 @@
 
 using namespace eagle;
 
-typedef struct settings_t {
+struct settings_t {
     bool snapshot;
     bool background;
     bool image_stream_on;
