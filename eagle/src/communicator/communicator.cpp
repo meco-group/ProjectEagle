@@ -62,51 +62,38 @@ void Communicator::debug() {
 }
 
 std::vector<std::string> Communicator::mygroups() {
-    std::vector<std::string> groups(0);
-    zlist_t* group_lst = zyre_own_groups(_node);
-    void* data = zlist_next(group_lst);
-    while (data != NULL) {
-        groups.push_back(std::string(static_cast<char*>(data)));
-        data = zlist_next(group_lst);
+    std::vector<std::string> groups;
+    for (auto it = _groups.begin(); it != _groups.end(); it++) {
+        auto loc = std::find(it->second.begin(), it->second.end(), _name);
+        if (loc != it->second.end()) {
+            groups.push_back(it->first);
+        }
     }
-    zlist_destroy(&group_lst);
+
     return groups;
 }
 
 std::vector<std::string> Communicator::allgroups() {
-    std::vector<std::string> groups(0);
-    zlist_t* group_lst = zyre_peer_groups(_node);
-    void* data = zlist_next(group_lst);
-    while (data != NULL) {
-        groups.push_back(std::string(static_cast<char*>(data)));
-        data = zlist_next(group_lst);
-    }
-    zlist_destroy(&group_lst);
+    std::vector<std::string> groups;
+    for (auto it = _groups.begin(); it != _groups.end(); it++)
+        groups.push_back(it->first);
+
     return groups;
 }
 
 std::vector<std::string> Communicator::peers() {
-    std::vector<std::string> peers(0);
-    zlist_t* peer_lst = zyre_peers(_node);
-    void* data = zlist_next(peer_lst);
-    while (data != NULL) {
-        peers.push_back(std::string(static_cast<char*>(data)));
-        data = zlist_next(peer_lst);
-    }
-    zlist_destroy(&peer_lst);
+    std::vector<std::string> peers;
+    for (auto it = _peers.begin(); it != _peers.end(); it++)
+        peers.push_back(it->first);
+
     return peers;
 }
 
 std::vector<std::string> Communicator::peers(const std::string& group) {
-    std::vector<std::string> peers(0);
-    zlist_t* peer_lst = zyre_peers_by_group(_node, group.c_str());
-    void* data = zlist_next(peer_lst);
-    while (data != NULL) {
-        peers.push_back(std::string(static_cast<char*>(data)));
-        data = zlist_next(peer_lst);
-    }
-    zlist_destroy(&peer_lst);
-    return peers;
+    if (_groups.find(group) != _groups.end())
+        return _groups[group];
+
+    return std::vector<std::string>(0);
 }
 
 bool Communicator::shout(const std::string& header, const void* data,
@@ -177,9 +164,14 @@ bool Communicator::whisper(const std::vector<const void*>& data,
     const std::vector<size_t>& sizes, const std::vector<std::string>& peers) {
     zmsg_t* msg = pack(data, sizes);
     for (int i=0; i<peers.size(); i++) {
-        if (zyre_whisper(_node, peers[i].c_str(), &msg) != 0) {
-            zmsg_destroy(&msg);
-            return false;
+        auto p = _peers.find(peers[i]);
+        if (p != _peers.end()) {
+            if (zyre_whisper(_node, p->second.c_str(), &msg) != 0) {
+                zmsg_destroy(&msg);
+                return false;
+            }
+        } else {
+            std::cout << "No uuid found for " << peers[i];
         }
     }
     zmsg_destroy(&msg);
@@ -203,9 +195,29 @@ bool Communicator::receive(std::string& peer) {
             peer = std::string(zyre_event_peer_name(_event));
         }
         return true;
+    } else if (streq(cmd, "ENTER")) {
+        std::string uuid = std::string(zyre_event_peer_uuid(_event));
+        std::string name = std::string(zyre_event_peer_name(_event));
+        _peers[name] = uuid;
+    } else if (streq(cmd, "JOIN")) {
+        std::string name = std::string(zyre_event_peer_name(_event));
+        std::string group = std::string(zyre_event_group(_event));
+        _groups[group].push_back(name);
+    } else if (streq(cmd, "EXIT")) {
+        std::string name = std::string(zyre_event_peer_name(_event));
+        _peers.erase(name);
+    } else if (streq(cmd, "LEAVE")) {
+        std::string name = std::string(zyre_event_peer_name(_event));
+        std::string group = std::string(zyre_event_group(_event));
+        
+        auto loc = std::find(_groups[group].begin(), _groups[group].end(), name);
+        if (loc != _groups[group].end()) {
+            _groups[group].erase(loc);
+        }
+        if (_groups[group].empty()) {
+            _groups.erase(group);
+        }
     }
-
-    //add ENTER/JOIN to fill out unused _groups map
 
     return false;
 }

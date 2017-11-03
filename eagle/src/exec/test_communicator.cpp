@@ -5,16 +5,28 @@
 
 using namespace eagle;
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    std::string iface = (argc > 1) ? argv[1] : "wlan0";
+    int port = (argc > 2) ? std::stoi(argv[2]) : 5670;
+    int wait_time = (argc > 3) ? std::stoi(argv[3]) : 10;
+
     std::srand(std::time(NULL));
     // read config file
-    cv::FileStorage fs(CONFIG_PATH, cv::FileStorage::READ);
-
     int nr = std::rand()%10;
-    Communicator com("host" + std::to_string(nr), CONFIG_PATH);
+    Communicator com("host" + std::to_string(nr), iface, port);
     com.debug();
-    com.start(fs["communicator"]["zyre_wait_time"]);
+    com.start(wait_time);
     com.join("EAGLE");
+    com.join("EXTRA");
+    
+    std::cout << "here?" << std::endl;
+
+    Communicator com1("host-extra", iface, port);
+    com1.debug();
+    com1.start(wait_time);
+    com1.join("EAGLE");
+
+    std::cout << "here? ..." << std::endl;
 
     char* data_snd;
     char data_rcv[1024];
@@ -39,27 +51,50 @@ int main(void) {
         " from " << peer << "." << std::endl;
     }
 
+    for (uint k=0; k<10; k++) {
+        com.listen(peer, 1);
+        com1.listen(peer, 1);
+    }
+
     std::vector<std::string> groups = com.mygroups();
-    std::cout << "my groups: " << std::endl;
-    for (auto &group : groups) {
-        std::cout << "* " << group << std::endl;
+    std::cout << "COM0 groups" << std::endl;
+    for (uint k=0; k<groups.size(); k++) {
+        std::cout << groups[k] << std::endl;
     }
-    groups = com.allgroups();
-    std::cout << "all groups: " << std::endl;
-    for (auto &group : groups) {
-        std::cout << "* " << group << std::endl;
+
+    groups = com1.mygroups();
+    std::cout << "COM1 groups" << std::endl;
+    for (uint k=0; k<groups.size(); k++) {
+        std::cout << "* " << groups[k] << std::endl;
     }
+
+    groups = com1.allgroups();
+    std::cout << "COM all groups" << std::endl;
+    for (uint k=0; k<groups.size(); k++) {
+        std::cout << "* " << groups[k] << std::endl;
+    }
+
     std::vector<std::string> peers = com.peers();
-    std::cout << "peers: " << std::endl;
-    for (auto &peer : peers) {
-        std::cout << "* " << peer << std::endl;
+    std::cout << "COM all peers" << std::endl;
+    for (uint k=0; k<peers.size(); k++) {
+        std::cout << "* " << peers[k] << std::endl;
     }
-    peers = com.peers("EAGLE");
-    std::cout << "peers in EAGLE: " << std::endl;
-    for (auto &peer : peers) {
-        std::cout << "* " << peer << std::endl;
+
+    peers = com1.peers();
+    std::cout << "COM all peers" << std::endl;
+    for (uint k=0; k<peers.size(); k++) {
+        std::cout << "* " << peers[k] << std::endl;
+    }
+
+    data_snd = "from_com";
+    com.whisper("test", data_snd, sizeof(data_snd), com1.name());
+    if (!com1.listen(peer, 10)) {
+        std::cout << "from_com not received" << std::endl;
     }
 
     com.leave("EAGLE");
+    com.leave("EXTRA");
     com.stop();
+    com1.leave("EAGLE");
+    com1.stop();
 }

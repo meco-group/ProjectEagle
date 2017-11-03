@@ -19,6 +19,7 @@ namespace eagle {
             zyre_event_t *_event;
             std::string _name;
             std::map<std::string, std::vector<std::string> > _groups;
+            std::map<std::string, std::string> _peers;
             void *_rcv_buffer;
             size_t _rcv_buffer_size;
             unsigned int _rcv_buffer_index;
