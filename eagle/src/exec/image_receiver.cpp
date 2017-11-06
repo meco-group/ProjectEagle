@@ -15,12 +15,6 @@ int main(int argc, char* argv[]) {
     com.start(100.);
     com.join(group);
 
-    // wait for peers
-    std::cout << "waiting for peers" << std::endl;
-    while(com.peers().size() <= 0) {
-        sleep(1);
-    }
-
     // video stream setup
     cv::namedWindow("Stream");
     eagle::header_t header;
@@ -33,23 +27,25 @@ int main(int argc, char* argv[]) {
     auto begin = std::chrono::system_clock::now();
     while( !kbhit() ) {
         if (com.listen(pr, 1)) {
-            while (com.available()) {
-                // 1. read the header
-                com.read(&header);
-                // 2. read data based on the header
-                if (header.id == eagle::IMAGE) {
-                    size_t size = com.framesize();
-                    uchar buffer[size];
-                    com.read(buffer);
-                    if (pr == peer) {
-                        cv::Mat rawData = cv::Mat( 1, size, CV_8UC1, buffer);
-                        cv::Mat im = cv::imdecode(rawData, 1);
-                        imshow("Stream", im);
-                        cv::waitKey(1);
-                        img_cnt++;
+            if(pr.compare(peer) == 0) {
+                while (com.available()) {
+                    // 1. read the header
+                    com.read(&header);
+                    // 2. read data based on the header
+                    if (header.id == eagle::IMAGE) {
+                        size_t size = com.framesize();
+                        uchar buffer[size];
+                        com.read(buffer);
+                        if (pr == peer) {
+                            cv::Mat rawData = cv::Mat( 1, size, CV_8UC1, buffer);
+                            cv::Mat im = cv::imdecode(rawData, 1);
+                            imshow("Stream", im);
+                            cv::waitKey(1);
+                            img_cnt++;
+                        }
+                        break;
+    
                     }
-                    break;
-
                 }
             }
         }
