@@ -252,8 +252,12 @@ int main(int argc, char* argv[]) {
             // send detected robots/obstacles
             TIMING(transmit_detected(com, robots, obstacles, group, capture_time););
             t_com = DURATION;
-            if ((settings.image_viewer_on || settings.image_stream_on) && settings.detection_on) {
+            if (settings.image_viewer_on || settings.image_stream_on) {
                 im = detector.draw(im, robots, obstacles);
+            }
+        } else {
+            if (settings.image_viewer_on || settings.image_stream_on) {
+                detector.projection()->remap(im, im);
             }
         }
 

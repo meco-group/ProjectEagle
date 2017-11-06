@@ -43,6 +43,8 @@ namespace eagle {
             cv::Mat draw(cv::Mat& frame, const std::vector<Robot*>& robots, const std::vector<Obstacle*>& obstacles);
             void set_background(const cv::Mat& bg);
 
+            Projection *projection() { return &_projection; }
+
     };
 
 };
