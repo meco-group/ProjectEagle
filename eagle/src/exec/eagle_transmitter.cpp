@@ -1,8 +1,4 @@
-#include "communicator.h"
-#include "camera.h"
-#include "detector.h"
-#include "protocol.h"
-#include "utils.h"
+#include <eagle.h>
 #include <string>
 #include <chrono>
 

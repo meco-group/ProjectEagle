@@ -1,4 +1,4 @@
-#include <pattern_extractor3.h>
+#include "pattern_extractor3.h"
 
 using namespace eagle;
 
@@ -26,7 +26,7 @@ std::vector<cloud3_t> PatternExtractor3::extract(const std::vector<cv::Mat>& lis
             std::cout << "Pattern not found in image " << k << std::endl;
         }
     }
-    
+
     return patterns;
 }
 

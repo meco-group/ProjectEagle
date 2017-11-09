@@ -7,7 +7,7 @@
 #include <map>
 #include <algorithm>
 #include <ctime>
-#include "opencv2/opencv.hpp"
+#include <opencv2/opencv.hpp>
 
 namespace eagle {
 

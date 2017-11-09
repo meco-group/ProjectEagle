@@ -1,7 +1,7 @@
 #ifndef PNP_PATTERN_EXTRACTOR3_H
 #define PNP_PATTERN_EXTRACTOR3_H
 
-#include <pattern_extractor3.h>
+#include "pattern_extractor3.h"
 #include <opencv/cv.hpp>
 
 namespace eagle {
@@ -15,9 +15,9 @@ namespace eagle {
         public:
             PnpPatternExtractor3(const cv::String& config);
             PnpPatternExtractor3(const Pattern& pattern, const cv::Mat& camera_matrix, const cv::Mat& distortion_vector);
-    
+
             virtual cloud3_t extract(const cv::Mat& img, bool display = false);
-    
+
     };
 };
 

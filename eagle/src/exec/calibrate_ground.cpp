@@ -1,17 +1,13 @@
+#include <eagle.h>
 #include <iostream>
 #include <fstream>
 #include <map>
 #include <opencv/cv.hpp>
 
-#include <pnp_pattern_extractor3.h>
-#include <planar_pattern_extractor3.h>
-#include <utils.h>
-#include <config_helper.h>
-
 using namespace eagle;
 
 /*
- * Estimate the ground plane based on a RANSAC algorithm. There should be at least 
+ * Estimate the ground plane based on a RANSAC algorithm. There should be at least
  * 70% inliers for the algorithm to be effective.
  */
 
@@ -59,7 +55,7 @@ int main(int argc, char* argv[]) {
             cv::Mat(cv::Mat(points[cloud][element]).t()).copyTo(A.row(j));
         }
         cv::solve(A,b,plane);
-        
+
         // compute number of inliers
         int noi = 0;
         cv::Mat Ain(0,3,CV_32F);
@@ -105,7 +101,7 @@ int main(int argc, char* argv[]) {
     matrices["ground_plane"] = optimal_plane;
     dump_matrices(config_path, matrices);
     std::cout << "Saved ground plane information succesfully." << std::endl;
-    
+
     // compute reprojection to ground
     //compute_reprojection_ground(config_path, images_path, false);
 }
@@ -115,7 +111,7 @@ std::vector<double> model_cost(const std::vector<cloud3_t>& points, const cv::Ma
     for (uint j=0; j<points.size(); j++) {
         double distance = 0.0;
         for (uint i=0; i<points[j].size(); i++) {
-            cv::Mat p = cv::Mat(points[j][i]); 
+            cv::Mat p = cv::Mat(points[j][i]);
             p.convertTo(p,CV_64F);
             cv::Mat num = plane.t()*p;
             cv::Mat den = plane.t()*plane;

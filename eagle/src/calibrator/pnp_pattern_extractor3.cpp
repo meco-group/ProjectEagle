@@ -1,4 +1,4 @@
-#include <pnp_pattern_extractor3.h>
+#include "pnp_pattern_extractor3.h"
 
 using namespace eagle;
 
@@ -34,7 +34,7 @@ cloud3_t PnpPatternExtractor3::extract(const cv::Mat& img, bool display) {
         cv::Mat temp;
         R.convertTo(R, CV_32F);
         tvec.convertTo(tvec, CV_32F);
-        
+
         world_points.reserve(image_points.size());
         for (uint k=0; k<object_points.size(); k++) {
             //do the transformation

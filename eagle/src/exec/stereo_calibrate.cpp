@@ -1,11 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include <camera.h>
-
-#include <pnp_pattern_extractor3.h>
-#include <planar_pattern_extractor3.h>
-#include <utils.h>
-#include <config_helper.h>
+#include <eagle.h>
 
 using namespace eagle;
 
@@ -58,12 +53,12 @@ int main(int argc, char* argv[]) {
     // shift point clouds w.r.t. centroids
     P1 = P1 - repeat(centroid1,1,P1.cols);
     P2 = P2 - repeat(centroid2,1,P2.cols);
-    
+
     // compute svd of P1*P2'
     cv::Mat H = P2*(P1.t());
     cv::Mat U,S,Vt;
     cv::SVD::compute(H,S,U,Vt);
-    
+
     // compute translation and rotation
     cv::Mat R, t;
     R = (U*Vt).t();
@@ -104,7 +99,7 @@ int main(int argc, char* argv[]) {
     cv::FileStorage fs = cv::FileStorage(config_path1, cv::FileStorage::READ);
     fs["camera"]["external_transformation"] >> T10;
     fs.release();
-    
+
 
     cv::Mat T20 = T10*T21;
     std::cout << "Total external transformation matrix" << std::endl << T20 << std::endl;

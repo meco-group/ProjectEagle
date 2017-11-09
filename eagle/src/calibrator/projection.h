@@ -14,17 +14,17 @@ namespace eagle {
             cv::Mat _intrinsic_map2; //y
             //cv::Mat _extrinsic_map;
             cv::Mat _camera_matrix;
-    
+
             void init(const cv::Mat& camera_matrix, const cv::Mat& distortion_vector, const cv::Size& size);
-    
+
         public:
             Projection(const cv::Mat& camera_matrix, const cv::Mat& distortion_vector, const cv::Size& size);
             Projection(const cv::Mat& camera_matrix, const cv::Mat& distortion_vector, const cv::Mat& sample);
             Projection(const cv::String& config);
-    
+
             // remap ground plane to image plane
             void remap(const cv::Mat& origin, cv::Mat& destination);
-    
+
             // Projections to a world reference plane
             cv::Point3f project_to_plane(const cv::Point3f& i, const cv::Mat& plane);
             cv::Point3f project_to_plane(const cv::Point2f& i, const cv::Mat& plane);
@@ -32,7 +32,7 @@ namespace eagle {
             std::vector<cv::Point3f> project_to_plane(const std::vector<cv::Point2f> i, const cv::Mat& plane);
             std::vector<std::vector<cv::Point3f>> project_to_plane(const std::vector<std::vector<cv::Point3f>> i, const cv::Mat& plane);
             std::vector<std::vector<cv::Point3f>> project_to_plane(const std::vector<std::vector<cv::Point2f>> i, const cv::Mat& plane);
-    
+
             // Projection to the image plane
             cv::Point3f project_to_image3(const cv::Point3f& w);
             cv::Point2f project_to_image(const cv::Point3f& w);

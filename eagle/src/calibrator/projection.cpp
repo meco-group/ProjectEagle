@@ -1,10 +1,10 @@
-#include <projection.h>
+#include "projection.h"
 
 using namespace eagle;
 
 void Projection::init(const cv::Mat& camera_matrix, const cv::Mat& distortion_vector, const cv::Size& size) {
     _camera_matrix = cv::getOptimalNewCameraMatrix(camera_matrix, distortion_vector, size, 1);
-    cv::initUndistortRectifyMap(camera_matrix, distortion_vector, cv::Mat::eye(3,3,CV_32F), 
+    cv::initUndistortRectifyMap(camera_matrix, distortion_vector, cv::Mat::eye(3,3,CV_32F),
         _camera_matrix, size, CV_16SC2, _intrinsic_map1, _intrinsic_map2);
 }
 

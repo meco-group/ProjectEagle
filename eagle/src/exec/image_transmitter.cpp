@@ -1,7 +1,4 @@
-#include "communicator.h"
-#include "camera.h"
-#include "protocol.h"
-#include "utils.h"
+#include <eagle.h>
 
 using namespace eagle;
 
@@ -61,7 +58,7 @@ int main(int argc, char* argv[]) {
     while(com.peers().size() > 0 ) {
         cam->read(img);
         header.time = timestamp();
-        
+
         if (snap_cmd) {
             std::string pr;
             eagle::header_t header;
@@ -85,7 +82,7 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-        
+
         if (detect_chb) {
             // look for chessboard
             std::vector<cv::Point2f> pnt_buf;

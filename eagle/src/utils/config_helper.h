@@ -4,8 +4,8 @@
 #include <opencv/cv.hpp>
 #include <iostream>
 #include <map>
-#include <rapidxml.hpp>
-#include <rapidxml_print.hpp>
+#include "rapidxml.hpp"
+#include "rapidxml_print.hpp"
 
 namespace eagle {
     void dump_matrices(const std::string& xml_path, std::map<std::string, cv::Mat>& matrices) {
@@ -39,7 +39,7 @@ namespace eagle {
         ofile << doc;
         ofile.close();
     }
-    
+
     void set_calibrated(const std::string& xml_path, bool value) {
         using namespace rapidxml;
         std::ifstream ifile(xml_path);
@@ -56,7 +56,7 @@ namespace eagle {
         ofile << doc;
         ofile.close();
     }
-    
+
     void set_integrated(const std::string& xml_path, bool value) {
         using namespace rapidxml;
         std::ifstream ifile(xml_path);
