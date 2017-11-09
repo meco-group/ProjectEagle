@@ -16,15 +16,24 @@ Install the following packages:
     - `make` and `sudo make install`
 * `zyre`, `zmq`, `czmq` and `libsodium`, see [this](https://github.com/zeromq/zyre) for installation instructions.
 
-### Building the project
+### Building and installing the project
 Starting from the root of the repository:
 ```
 mkdir build
 cd build
 cmake ..
 make
+sudo make install
 ```
 Built examples are in `build/bin/`
+
+### Linking Project Eagle with your application
+When using `cmake`, add the following to your `CMakeLists.txt`:
+```
+find_package(eagle REQUIRED)
+include_directories(${eagle_INCLUDE_DIRS})
+target_link_libraries(MyTarget ${eagle_LIBRARIES})
+```
 
 ## Detector
 

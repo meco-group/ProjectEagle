@@ -23,7 +23,7 @@ set(LIBRARIES   ${OpenCV_LIBRARIES}
     )
 
 include_directories(src/utils
-                    ${ZMQ_INCLUDE_DIRS}
+                    ${OpenCV_INCLUDE_DIRS}
                     ${ZMQ_INCLUDE_DIRS}
                     ${CZMQ_INCLUDE_DIRS}
                     ${ZYRE_INCLUDE_DIRS}
