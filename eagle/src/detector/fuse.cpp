@@ -13,7 +13,7 @@ void eagle::remapinf(std::string config, const cv::Mat& img, cv::Mat& warped, ui
     cv::Mat H = S*projection.get_homography(z0);
     
     // Warp image
-    cv::warpPerspective(remapped, warped, H, rsiz);
+    cv::warpPerspective(img, warped, H, rsiz);
 }
 
 void eagle::overlay(const cv::Mat& in1, const cv::Mat& in2, cv::Mat& out) {
@@ -28,6 +28,9 @@ void eagle::overlay(const cv::Mat& in1, const cv::Mat& in2, cv::Mat& out) {
 }
 
 void eagle::replace(const cv::Mat& in, cv::Mat& out, double weight) {
-    cv::addWeighted(in, weight, out, 1.0-weight, 0.0, out);
+    cv::Mat c;
+    out.copyTo(c);
+    in.copyTo(c,in);
+    cv::addWeighted(c, weight, out, 1.0-weight, 0.0, out);
 }
 
