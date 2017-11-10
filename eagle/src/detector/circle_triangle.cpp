@@ -78,7 +78,9 @@ std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img, int& id, bool draw) 
                     k++;
                 }
             }
-            if (check(roi, points)) {
+            if (check(points)) {
+                std::cout << "Standard detection method found marker" << std::endl;
+                check(roi, points);
                 id = decode(roi, points);
                 for (uint i=0; i<points.size(); i++) {
                     points[i] /= scale;
@@ -190,6 +192,7 @@ bool CircleTriangle::check(const cv::Mat& img, std::vector<cv::Point2f>& points)
     cv::findContours(bin, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
     if (contours.empty()) {
+        std::cout << "Check failed because no contours were found" << std::endl;
         return false;
     }
 
@@ -217,6 +220,7 @@ bool CircleTriangle::check(const cv::Mat& img, std::vector<cv::Point2f>& points)
     }
 
     if (corners.size() !=4) {
+        std::cout << "Biggest contour rejected because the number of corners > 4" << std::cout;
         return false;
     }
         
@@ -274,6 +278,7 @@ bool CircleTriangle::check(const cv::Mat& img, std::vector<cv::Point2f>& points)
     }
 
     if (start_idx.size() != 1) {
+        std::cout << "Multiple corners identified as corner 1" << std::endl;
         return false;
     }
     std::rotate(corners.begin(), corners.begin()+start_idx[0], corners.end());
