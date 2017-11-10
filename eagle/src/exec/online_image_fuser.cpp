@@ -5,6 +5,7 @@
 #include <communicator.h>
 #include <protocol.h>
 #include <utils.h>
+#include <unistd.h>
 
 using namespace eagle;
 
@@ -21,6 +22,7 @@ int main(int argc, char* argv[]) {
     // read main config
     std::ifstream fs(config_path);
     if(!fs.is_open()){
+        std::cout << "could not open configuration file" << std::endl;
         return 0;
     }
 
@@ -38,17 +40,27 @@ int main(int argc, char* argv[]) {
     }
 
     // start communication node
+    std::string group = "EAGLE";
     Communicator com("Fuser",iface,port);
     com.start(100);
-    com.join("EAGLE");
+    com.join(group);
+
+    // sleep before sending
+    usleep(500000); //half a second
+
+    // send streaming command to all devices in eagle
+    header_t header = {CMD, 0}; //set time
+    cmd_t cmd = IMAGE_STREAM_ON;
+    if(!com.shout(&header, &cmd, sizeof(header), sizeof(cmd), group)) {
+        std::cout << "communicator was not able to shout to " << group << std::endl;
+        return -1;
+    }
 
     cv::namedWindow("Stream");
     cv::imshow("Stream",img);
     cv::waitKey(30);
 
     std::cout << "passed waitkey" << std::endl;
-
-    eagle::header_t header;
     std::string pr;
 
     while( !kbhit() ) {
@@ -67,7 +79,7 @@ int main(int argc, char* argv[]) {
                         cv::Mat in = cv::imdecode(rawData, 1);
                         cv::Mat remapped;
                         remapinf(config_map[pr], in, remapped, pixels_per_meter, img_size, height);
-                        replace(remapped, img);
+                        replace(remapped, img, 0.3);
                         cv::imshow("Stream",img);
                         cv::waitKey(30);
                         break;
@@ -80,6 +92,15 @@ int main(int argc, char* argv[]) {
             std::cout << "no message.. :(" << std::endl;
         }
     }
+
+    // send streaming command to all devices in eagle
+    header = {CMD, 0}; //set time
+    cmd = IMAGE_STREAM_OFF;
+    if(!com.shout(&header, &cmd, sizeof(header), sizeof(cmd), group)) {
+        std::cout << "communicator was not able to shout to " << group << std::endl;
+        return -1;
+    }
+    usleep(500000); //half a second
 
     com.leave("EAGLE");
     com.stop();

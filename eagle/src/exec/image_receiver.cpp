@@ -15,9 +15,16 @@ int main(int argc, char* argv[]) {
     com.start(100.);
     com.join(group);
 
+    // send streaming command to all devices in eagle
+    header_t header = {CMD, 0}; //set time
+    cmd_t cmd = IMAGE_STREAM_ON;
+    if(!com.shout(&header, &cmd, sizeof(header), sizeof(cmd), group)) {
+        std::cout << "communicator was not able to shout to " << group << std::endl;
+        return -1;
+    }
+
     // video stream setup
     cv::namedWindow("Stream");
-    eagle::header_t header;
     std::string pr;
 
     std::cout << "Start receiving video stream." << std::endl;
