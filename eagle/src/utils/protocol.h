@@ -63,6 +63,9 @@ namespace eagle {
         CALIBRATION_ON = 40,
         CALIBRATION_OFF = 41,
         CALIBRATION_TOGGLE = 42,
+        RECORD_ON = 50,
+        RECORD_OFF = 51,
+        RECORD_TOGGLE = 52
     } cmd_t;
 
 }

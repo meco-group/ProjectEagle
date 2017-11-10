@@ -5,6 +5,7 @@
 #include "utils.h"
 #include <string>
 #include <chrono>
+#include <ctime>
 
 using namespace eagle;
 
@@ -16,6 +17,7 @@ struct settings_t {
     bool debug_mode_on;
     bool calibration_on;
     bool image_viewer_on;
+    bool recording_on;
 };
 
 void transmit_detected(Communicator& com, const std::vector<Robot*>& robots, const std::vector<Obstacle*>& obstacles, std::string group, unsigned long capture_time) {
@@ -120,6 +122,15 @@ void process_communication(Communicator& com, settings_t& settings) {
                     case CALIBRATION_TOGGLE: {
                         settings.calibration_on = !settings.calibration_on;
                         break; }
+                    case RECORD_ON: {
+                        settings.recording_on = true;
+                        break; }
+                    case RECORD_OFF: {
+                        settings.recording_on = false;
+                        break; }
+                    case RECORD_TOGGLE: {
+                        settings.recording_on = !settings.recording_on;
+                        break; }
                     default: { std::cout << "unknown command." << std::endl; }
                 }
             }
@@ -142,6 +153,7 @@ int main(int argc, char* argv[]) {
     settings.debug_mode_on = false;
     settings.snapshot = false;
     settings.background = false;
+    settings.recording_on = false;
 
     /******************/
     /* INITIALIZATION */
@@ -175,6 +187,9 @@ int main(int argc, char* argv[]) {
 
     // setup pattern extractor
     PatternExtractor extractor(CONFIG_PATH);
+
+    // setup video recording
+    cv::VideoWriter recorder;
 
     // robots and obstacles that the detector should search for
     Robot dave(0, 0.55, 0.4, cv::Scalar(138, 110, 17));
@@ -226,6 +241,19 @@ int main(int argc, char* argv[]) {
             settings.snapshot = false;
             cv::imwrite("../config/snapshot.png", im);
             std::cout << "Snapshot taken." << std::endl;
+        }
+
+        if (settings.recording_on) {
+            if (!recorder.isOpened()) {
+                char filename[100];
+                std::time_t t = std::time(NULL);
+                std::strftime(filename, sizeof(filename), "%Y_%m_%d_%H_%M_%S.avi", std::localtime(&t));
+                recorder.open(cv::String(filename),CV_FOURCC('M','J','P','G'),update_frequency, cv::Size(cam->getWidth(),cam->getHeight()),true);
+            }
+            recorder.write(im);
+        } else {
+            if (recorder.isOpened())
+                recorder.release();
         }
 
         if (settings.background) {

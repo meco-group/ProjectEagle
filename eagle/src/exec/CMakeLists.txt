@@ -21,6 +21,7 @@ add_executable(ImageStreamCmd image_stream_cmd.cpp)
 add_executable(DetectionCmd detection_cmd.cpp)
 add_executable(DebugModeCmd debug_mode_cmd.cpp)
 add_executable(CalibrationCmd calibration_cmd.cpp)
+add_executable(RecordCmd record_cmd.cpp)
 
 set(LIBS ${LIBRARIES} Communicator Camera Detector)
 
@@ -44,3 +45,4 @@ target_link_libraries(ImageStreamCmd ${LIBS})
 target_link_libraries(DetectionCmd ${LIBS})
 target_link_libraries(DebugModeCmd ${LIBS})
 target_link_libraries(CalibrationCmd ${LIBS})
+target_link_libraries(RecordCmd ${LIBS})
