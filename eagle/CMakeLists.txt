@@ -7,6 +7,7 @@ include(GNUInstallDirs)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_definitions(-DSWM_ZYRE_CONFIG_DIR="${CMAKE_HOME_DIRECTORY}")
 add_definitions(-std=c++11)
@@ -56,7 +57,7 @@ file(WRITE src/eagle.h ${incls})
 install(FILES src/eagle.h DESTINATION include/${PROJECT_NAME})
 
 # Generate and install main project library
-add_library(${PROJECT_NAME} $<TARGET_OBJECTS:camera>
+add_library(${PROJECT_NAME} SHARED $<TARGET_OBJECTS:camera>
                             $<TARGET_OBJECTS:communicator>
                             $<TARGET_OBJECTS:calibrator>
                             $<TARGET_OBJECTS:detector>
