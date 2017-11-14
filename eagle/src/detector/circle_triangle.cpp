@@ -213,7 +213,7 @@ bool CircleTriangle::check(const cv::Mat& img, std::vector<cv::Point2f>& points)
     }
 
     if (corners.size() != 4) {
-        std::cout << "Biggest contour rejected because the number of corners > 4" << std::cout;
+        std::cout << "Biggest contour rejected because the number of corners > 4" << std::endl;
         return false;
     }
 
