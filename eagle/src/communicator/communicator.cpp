@@ -2,17 +2,17 @@
 
 using namespace eagle;
 
-Communicator::Communicator(const std::string& name, const std::string& iface, int port) : _name(name) {
+Communicator::Communicator(const std::string& name, const std::string& iface, int port) : _name(name), _verbose(0) {
     _node = zyre_new(name.c_str());
     zyre_set_port(_node, port);
     zyre_set_interface(_node, iface.c_str());
 }
 
-Communicator::Communicator(const std::string& name) : _name(name) {
+Communicator::Communicator(const std::string& name) : _name(name), _verbose(0) {
     _node = zyre_new(name.c_str());
 }
 
-Communicator::Communicator(const std::string& name, const std::string& config_path) : _name(name) {
+Communicator::Communicator(const std::string& name, const std::string& config_path) : _name(name), _verbose(0) {
     cv::FileStorage fs(config_path, cv::FileStorage::READ);
     _node = zyre_new(name.c_str());
     zyre_set_port(_node, (int)fs["communicator"]["zyre_port"]);
@@ -55,6 +55,10 @@ bool Communicator::leave(const std::string& group) {
 
 std::string Communicator::name() {
     return std::string(zyre_name(_node));
+}
+
+void Communicator::verbose(int verbose) {
+    _verbose = verbose;
 }
 
 void Communicator::debug() {
@@ -125,6 +129,9 @@ bool Communicator::shout(const std::vector<const void*>& data,
                          const std::vector<size_t>& sizes, const std::vector<std::string>& groups) {
     zmsg_t* msg = pack(data, sizes);
     for (int i = 0; i < groups.size(); i++) {
+        if (_verbose >= 1) {
+            std::cout << "[" << _name << "] shouting to " << groups[i] << "." << std::endl;
+        }
         if (zyre_shout(_node, groups[i].c_str(), &msg) != 0) {
             zmsg_destroy(&msg);
             return false;
@@ -166,6 +173,9 @@ bool Communicator::whisper(const std::vector<const void*>& data,
     for (int i = 0; i < peers.size(); i++) {
         auto p = _peers.find(peers[i]);
         if (p != _peers.end()) {
+            if (_verbose >= 1) {
+                std::cout << "[" << _name << "] whispering to " << peers[i] << "." << std::endl;
+            }
             if (zyre_whisper(_node, p->second.c_str(), &msg) != 0) {
                 zmsg_destroy(&msg);
                 return false;
@@ -193,6 +203,9 @@ bool Communicator::receive(std::string& peer) {
             _rcv_buffer_size = zframe_size(frame);
             _rcv_buffer_index = 0;
             peer = std::string(zyre_event_peer_name(_event));
+            if (_verbose >= 1) {
+                std::cout << "[" << _name << "] receiving from " << peer << "." << std::endl;
+            }
         }
         return true;
     } else if (streq(cmd, "ENTER")) {

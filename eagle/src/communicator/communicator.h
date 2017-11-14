@@ -23,7 +23,7 @@ class Communicator {
     void *_rcv_buffer;
     size_t _rcv_buffer_size;
     unsigned int _rcv_buffer_index;
-
+    int _verbose;
     zmsg_t *pack(const std::vector<const void *> &frames, const std::vector<size_t> &sizes);
 
   public:
@@ -37,6 +37,7 @@ class Communicator {
     bool join(const std::string &group);
     bool leave(const std::string &group);
     void debug();
+    void verbose(int verbose);
     std::vector<std::string> mygroups();
     std::vector<std::string> allgroups();
     std::vector<std::string> peers();
