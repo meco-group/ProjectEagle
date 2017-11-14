@@ -8,18 +8,18 @@
 
 namespace eagle {
 
-    class LatitudeCamera : public V4L2Camera {
+class LatitudeCamera : public V4L2Camera {
 
-        private:
-            int process_buffer(cv::Mat &img);
-            bool readYUYV(cv::Mat &img);
+  private:
+    int process_buffer(cv::Mat &img);
+    bool readYUYV(cv::Mat &img);
 
-        public:
-            LatitudeCamera(int device = 0);
-            bool setBrightness(int brightness);
-            bool setResolution(const std::vector<int> &resolution);
+  public:
+    LatitudeCamera(int device = 0);
+    bool setBrightness(int brightness);
+    bool setResolution(const std::vector<int> &resolution);
 
-    };
+};
 
 };
 

@@ -15,8 +15,8 @@ int See3Camera::process_buffer(cv::Mat &img) {
 }
 
 bool See3Camera::readBayerIR(cv::Mat &img) {
-    img.create(getHeight()/2, getWidth()/2, CV_8UC3);
-    cv::Mat IR = cv::Mat(getHeight()/2, getWidth()/2, CV_8UC1);
+    img.create(getHeight() / 2, getWidth() / 2, CV_8UC3);
+    cv::Mat IR = cv::Mat(getHeight() / 2, getWidth() / 2, CV_8UC1);
 
     int n_rows = img.rows;
     int n_cols = img.cols;
@@ -32,9 +32,9 @@ bool See3Camera::readBayerIR(cv::Mat &img) {
     uint16_t ir_16;
 #endif //SEE3CAMERA_IR
 
-    for( i = 0; i < n_rows; ++i) {
+    for ( i = 0; i < n_rows; ++i) {
         p_row_bgr = img.ptr<uint8_t>(i);
-        p_row_bayer1 = (uint16_t*)getBuffer() + i*2*getWidth();
+        p_row_bayer1 = (uint16_t*)getBuffer() + i * 2 * getWidth();
         p_row_bayer2 = p_row_bayer1 + getWidth();
 
 #ifndef SEE3CAMERA_IR
@@ -46,13 +46,13 @@ bool See3Camera::readBayerIR(cv::Mat &img) {
             green_16 = p_row_bayer1[1];
             red_16 = p_row_bayer2[1];
 
-            p_row_bgr[0] = (uint8_t)((blue_16>0xff)?0xff:blue_16);
-            p_row_bgr[1] = (uint8_t)((green_16>0xff)?0xff:green_16);
-            p_row_bgr[2] = (uint8_t)((red_16>0xff)?0xff:red_16);
+            p_row_bgr[0] = (uint8_t)((blue_16 > 0xff) ? 0xff : blue_16);
+            p_row_bgr[1] = (uint8_t)((green_16 > 0xff) ? 0xff : green_16);
+            p_row_bgr[2] = (uint8_t)((red_16 > 0xff) ? 0xff : red_16);
 
 #ifndef SEE3CAMERA_IR
             ir_16 = p_row_bayer2[0];
-            p_row_ir[0] = (uint8_t)((ir_16>0xff)?0xff:ir_16);
+            p_row_ir[0] = (uint8_t)((ir_16 > 0xff) ? 0xff : ir_16);
             p_row_ir++;
 #endif //SEE3CAMERA_IR
 
@@ -69,9 +69,9 @@ bool See3Camera::setResolution(const std::vector<int>& resolution) {
     std::vector<std::vector<int> > possible_resolutions =
     {{672, 380}, {1280, 720}, {1920, 1080}, {2688, 1520}};
     bool check;
-    for (int k=0; k<possible_resolutions.size(); k++) {
+    for (int k = 0; k < possible_resolutions.size(); k++) {
         check = true;
-        for (int i=0; i<2; i++) {
+        for (int i = 0; i < 2; i++) {
             check &= (possible_resolutions[k][i] == resolution[i]);
         }
         if (check) {

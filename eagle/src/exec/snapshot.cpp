@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 
     // take snapshot
     cv::Mat im;
-    for (int i=0; i<10; i++) {
+    for (int i = 0; i < 10; i++) {
         cam->read(im);
         cv::waitKey(1); // give camera time to reload
     }

@@ -13,26 +13,26 @@ int main(int argc, char* argv[]) {
 
     // start camera
     Camera* cam = getCamera(CONFIG_PATH);
-    cam->undistort(camera_matrix, distortion_vector);
+    //cam->undistort(camera_matrix, distortion_vector);
     cam->start();
 
     // capture and save background
     cv::Mat frame, background;
     cam->read(frame);
     background = cv::Mat(frame.size(), CV_32FC3, cv::Scalar(0, 0, 0));
-    for (int i=0; i<10; i++) {
+    for (int i = 0; i < 10; i++) {
         cam->read(frame);
         cv::waitKey(1); // give camera time to reload
     }
-    for (int i=0; i<50; i++) {
+    for (int i = 0; i < 50; i++) {
         cam->read(frame);
         cv::accumulate(frame, background);
     }
     background /= 50;
     background.convertTo(background, CV_8UC3);
     cv::imwrite(background_path, background);
-    imshow("Background", background);
-    cv::waitKey(2000);
+    //imshow("Background", background);
+    //cv::waitKey(2000);
 
     cam->stop();
     delete cam;

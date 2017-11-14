@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
 
     // extract pattern from images
     PatternExtractor extractor(config_path);
-    std::vector<cloud2_t> image_pnts = extractor.extract(images_path, false);
+    std::vector<cloud2_t> image_pnts = extractor.extract(images_path);
     std::vector<std::vector<cv::Point3f>> pattern_pnts = extractor.pattern().reference(image_pnts.size());
 
     // Read config file
@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
     if (((int)fs["calibrator"]["calib_fix_aspect_ratio"] == 1)) flag |= CV_CALIB_FIX_ASPECT_RATIO;
     int width = fs["camera"]["resolution"]["width"];
     int height = fs["camera"]["resolution"]["height"];
-    cv::Size size(width,height);
+    cv::Size size(width, height);
     fs.release();
 
     // initialize camera_matrix & distortion_vector
@@ -41,13 +41,13 @@ int main(int argc, char* argv[]) {
     // find intrinsic and extrinsic camera parameters
     cv::Mat rvecs, tvecs;
     double reproj_error = cv::calibrateCamera(pattern_pnts, image_pnts, size, camera_matrix,
-        distortion_vector, rvecs, tvecs, flag|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
+                          distortion_vector, rvecs, tvecs, flag | CV_CALIB_FIX_K4 | CV_CALIB_FIX_K5);
     std::cout << "Calibration rms error: " << reproj_error << std::endl;
-    if(reproj_error > 2) {
+    if (reproj_error > 2) {
         std::cout << "Reprojection error is too high to consider the camera calibration succesful.." << std::endl << "Calibration failed." << std::endl;
         return -1;
     }
-    if(!(cv::checkRange(camera_matrix) && cv::checkRange(distortion_vector))){
+    if (!(cv::checkRange(camera_matrix) && cv::checkRange(distortion_vector))) {
         std::cout << "The camera_matrix or distortion vector were out of range." << std::endl << "Calibration failed." << std::endl;
         return -1;
     }

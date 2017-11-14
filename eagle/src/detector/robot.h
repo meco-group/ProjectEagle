@@ -1,14 +1,13 @@
 #ifndef ROBOT_H
 #define ROBOT_H
 
-
 #include <iostream>
 #include <stdint.h>
 #include <math.h>
 #include <string>
 #include <vector>
 #include "../utils/protocol.h"
-
+#include "projection.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -18,81 +17,38 @@ namespace eagle {
     class Robot {
 
         private:
-            uint _code;
-            double _width;
-            double _height;
-            cv::Point2f _position;
-            double _orientation;
-            std::vector<cv::Point2f> _markers;
-            std::vector<cv::Point2f> _vertices;
+            uint _id;
+            double _dx;
+            double _dy;
             bool _detected;
+            std::vector<cv::Point3f> _markers;
             cv::Scalar _color;
 
-            void markers2pose(const std::vector<cv::Point2f>& markers,
-                cv::Point2f& position, double& orientation) const {
-                // markers: left - right - top
-                position = (1./3.)*(markers[0]+markers[1]+markers[2]);
-                orientation = atan2((markers[2].y-position.y), (markers[2].x-position.x));
-            }
-
-            void pose2vertices(const cv::Point2f& position, double orientation,
-                std::vector<cv::Point2f>& vertices) const {
-                cv::Point2f vert[4];
-                cv::RotatedRect box(_position, cv::Size2f(_width, _height), (180./M_PI)*_orientation);
-                box.points(vert);
-                vertices = std::vector<cv::Point2f>(vert, vert+4);
-            }
+            cv::Point3f ex() const;
+            cv::Point3f ey() const;
+            cv::Point3f ez() const;
 
         public:
-            Robot(uint code, double width, double height) {
-                Robot(code, width, height, cv::Scalar(17, 110, 138));
-            }
+            Robot(uint id, double dx = 1.0, double dy = 1.0, const cv::Scalar& color = cv::Scalar(17, 110, 138));
 
-            Robot(uint code, double width, double height, const cv::Scalar& color) :
-                    _code(code), _width(width), _height(height), _color(color), _detected(false) {}
+            // setters
+            void update(const std::vector<cv::Point3f>& markers);
+            void reset() { _detected = false; }
+            void draw(cv::Mat& frame, Projection& projection) const;
+            void draw_markers(cv::Mat& frame, Projection& projection) const;
+            void draw_id(cv::Mat& frame, Projection& projection) const;
+            void draw_box(cv::Mat& frame, Projection& projection) const;
 
-            void update(const std::vector<cv::Point2f>& markers) {
-                _markers = markers;
-                _detected = true;
-                markers2pose(markers, _position, _orientation);
-                pose2vertices(_position, _orientation, _vertices);
-            }
+            // getters
+            uint id() const { return _id; }
+            uint code() const { return id(); }
+            std::vector<cv::Point3f> markers() const { return _markers; }
+            bool detected() const { return _detected; }
 
-            bool detected() const {
-                return _detected;
-            }
-
-            uint code() const {
-                return _code;
-            }
-
-            void reset() {
-                _detected = false;
-            }
-
-            std::vector<cv::Point2f> vertices() const {
-                return _vertices;
-            }
-
-            void draw(cv::Mat& frame, const cv::Matx23f& world2cam_tf) const {
-                std::vector<cv::Point2f> markers_cam;
-                cv::transform(_markers, markers_cam, world2cam_tf);
-                // markers
-                cv::circle(frame, markers_cam[0], 3, _color, -1);
-                cv::circle(frame, markers_cam[1], 3, _color, -1);
-                cv::circle(frame, markers_cam[2], 3, cv::Scalar(0, 0, 255), -1);
-                // box
-                std::vector<cv::Point2f> vertices_cam;
-                cv::transform(_vertices, vertices_cam, world2cam_tf);
-                int n = vertices_cam.size();
-                for (uint i=0; i<n; i++) {
-                    cv::line(frame, vertices_cam[i], vertices_cam[(i+1)%n], _color, 2);
-                }
-            }
-
-            eagle::marker_t serialize() const {
-                return {static_cast<int>(_code), _position.x, _position.y, _orientation};
-            }
+            cv::Point3f translation() const;
+            cv::Point3f rotation() const;
+            std::vector<cv::Point3f> vertices() const;
+            eagle::marker_t serialize() const;
     };
 
 };

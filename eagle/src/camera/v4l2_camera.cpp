@@ -41,11 +41,11 @@ int V4L2Camera::xioctl(int fd, int request, void *arg) {
 }
 
 int V4L2Camera::v4l2_set_input() {
-	/*
-	 * define video input
-	 * vfe_v4l2 the driver is forced to input = -1
-	 * set as the input = 0, works fine.
-	 */
+    /*
+     * define video input
+     * vfe_v4l2 the driver is forced to input = -1
+     * set as the input = 0, works fine.
+     */
     struct v4l2_input input;
     int count = 0;
     CLEAR(input);
@@ -63,13 +63,13 @@ int V4L2Camera::v4l2_set_input() {
 }
 
 int V4L2Camera::v4l2_set_pixfmt() {
-	/*
-	 * define pixel format
-	 * in gc2035 driver, tested with:
-	 * -- 422P/YU12/YV12/NV16/NV12/NV61/NV21/UYVY
-	 * others will be ignored
-	 *
-	 */
+    /*
+     * define pixel format
+     * in gc2035 driver, tested with:
+     * -- 422P/YU12/YV12/NV16/NV12/NV61/NV21/UYVY
+     * others will be ignored
+     *
+     */
     struct v4l2_format fmt;
     CLEAR(fmt);
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -84,12 +84,12 @@ int V4L2Camera::v4l2_set_pixfmt() {
     char pixfmt[sizeof(fmt.fmt.pix.pixelformat)];
     memcpy(&pixfmt, &fmt.fmt.pix.pixelformat, sizeof(fmt.fmt.pix.pixelformat));
     printf("Selected Camera Mode:\n"
-            "  Width: %d\n"
-            "  Height: %d\n"
-            "  PixFmt: %s\n",
-            fmt.fmt.pix.width,
-            fmt.fmt.pix.height,
-            pixfmt);
+           "  Width: %d\n"
+           "  Height: %d\n"
+           "  PixFmt: %s\n",
+           fmt.fmt.pix.width,
+           fmt.fmt.pix.height,
+           pixfmt);
     if (_pixelformat != fmt.fmt.pix.pixelformat) {
         _pixelformat = fmt.fmt.pix.pixelformat;
         perror("Pixel format not accepted");
@@ -217,7 +217,7 @@ int V4L2Camera::v4l2_dequeue_buffer() {
     _bufferinfo.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     _bufferinfo.memory = V4L2_MEMORY_MMAP;
     // The buffer's waiting in the outgoing queue.
-    if (xioctl(_fd, VIDIOC_DQBUF, &_bufferinfo) < 0){
+    if (xioctl(_fd, VIDIOC_DQBUF, &_bufferinfo) < 0) {
         perror("VIDIOC_DQBUF");
         return 1;
     }
@@ -291,5 +291,5 @@ int V4L2Camera::getBufferLength() {
 }
 
 double V4L2Camera::getV4L2CaptureTime() {
-    return (double)_capture_time.tv_sec + _capture_time.tv_usec*1e-6;
+    return (double)_capture_time.tv_sec + _capture_time.tv_usec * 1e-6;
 }

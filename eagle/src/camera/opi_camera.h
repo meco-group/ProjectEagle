@@ -7,17 +7,17 @@
 
 namespace eagle {
 
-    class OPICamera : public V4L2Camera {
+class OPICamera : public V4L2Camera {
 
-        private:
-            int process_buffer(cv::Mat &img);
-            bool readUYVY(cv::Mat &img);
+  private:
+    int process_buffer(cv::Mat &img);
+    bool readUYVY(cv::Mat &img);
 
-        public:
-            OPICamera(int device = 0);
-            bool setResolution(const std::vector<int> &resolution);
+  public:
+    OPICamera(int device = 0);
+    bool setResolution(const std::vector<int> &resolution);
 
-    };
+};
 
 };
 

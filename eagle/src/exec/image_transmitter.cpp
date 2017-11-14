@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
 
     // wait for peers
     std::cout << "Waiting for peers ... ";
-    while(com.peers().size() <= 0) {
+    while (com.peers().size() <= 0) {
         sleep(1);
     }
     std::cout << "done." << std::endl;
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
     cv::Mat img;
     uint img_cnt = 0;
     auto begin = std::chrono::system_clock::now();
-    while(com.peers().size() > 0 ) {
+    while (com.peers().size() > 0 ) {
         cam->read(img);
         header.time = timestamp();
 
@@ -67,11 +67,11 @@ int main(int argc, char* argv[]) {
                 while (com.available()) {
                     // 1. read the header
                     com.read(&header);
+                    size_t size = com.framesize();
+                    uchar buffer2[size];
+                    com.read(buffer2);
                     // 2. read data based on the header
                     if (header.id == eagle::CMD) {
-                        size_t size = com.framesize();
-                        uchar buffer2[size];
-                        com.read(buffer2);
                         cmd = *((eagle::cmd_t*)(buffer2));
                         if (cmd == SNAPSHOT) {
                             cv::imwrite(snapshot_path, img);
@@ -94,7 +94,7 @@ int main(int argc, char* argv[]) {
             }
         }
         // compress image
-    	  cv::imencode(".jpg", img, buffer, compression_params);
+        cv::imencode(".jpg", img, buffer, compression_params);
         // transmit image
         if (com.shout(&header, buffer.data(), sizeof(header), buffer.size(), group)) {
             // std::cout << "Sending image " << img_cnt << ", size: " << buffer.size() << " - ";
@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
 
     // Stop the loop: no peers connected
     auto end = std::chrono::system_clock::now();
-    double fps = img_cnt/(std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()*1e-6);
+    double fps = img_cnt / (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() * 1e-6);
     std::cout << "Stopped image transmission (average framerate: " << fps << ")." << std::endl;
 
     // stop the program

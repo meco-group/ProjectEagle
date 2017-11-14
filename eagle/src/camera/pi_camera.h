@@ -8,18 +8,18 @@
 
 namespace eagle {
 
-    class PiCamera : public V4L2Camera {
+class PiCamera : public V4L2Camera {
 
-        private:
-            int process_buffer(cv::Mat &img);
-            bool readYUYV(cv::Mat &img);
+  private:
+    int process_buffer(cv::Mat &img);
+    bool readYUYV(cv::Mat &img);
 
-    	public:
-            PiCamera(int device = 0);
-            bool setBrightness(int brightness);
-            bool setResolution(const std::vector<int> &resolution);
+  public:
+    PiCamera(int device = 0);
+    bool setBrightness(int brightness);
+    bool setResolution(const std::vector<int> &resolution);
 
-    };
+};
 
 };
 

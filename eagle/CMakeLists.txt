@@ -37,7 +37,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # Targets that we develop here
 add_subdirectory(src/exec)
 add_subdirectory(src/camera)
-add_subdirectory(src/calibrator)
 add_subdirectory(src/communicator)
 add_subdirectory(src/detector)
 
@@ -59,7 +58,6 @@ install(FILES src/eagle.h DESTINATION include/${PROJECT_NAME})
 # Generate and install main project library
 add_library(${PROJECT_NAME} SHARED $<TARGET_OBJECTS:camera>
                             $<TARGET_OBJECTS:communicator>
-                            $<TARGET_OBJECTS:calibrator>
                             $<TARGET_OBJECTS:detector>
             )
 

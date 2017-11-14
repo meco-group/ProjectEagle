@@ -26,12 +26,12 @@ int main(int argc, char* argv[]) {
     std::cout << "Hit enter to stop the program." << std::endl;
 
     // main execution loop
-    int dt = int(1000./frequency);
+    int dt = int(1000. / frequency);
     auto t0 = std::chrono::high_resolution_clock::now();
     while ( !kbhit() ) {
         // check time
         auto t = std::chrono::high_resolution_clock::now();
-        if (std::chrono::duration_cast<std::chrono::milliseconds>(t-t0).count() < dt) {
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(t - t0).count() < dt) {
             continue;
         }
         t0 = t;
