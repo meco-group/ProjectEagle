@@ -18,7 +18,7 @@ class See3Camera : public V4L2Camera {
 
   public:
     See3Camera(int device = 0);
-    bool setResolution(const std::vector<int> &resolution);
+    void setResolution(int width, int height);
     bool setBrightness(int brightness);
     bool setExposure(int exposure);
     bool setISO(int iso);

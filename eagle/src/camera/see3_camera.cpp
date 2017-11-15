@@ -65,27 +65,24 @@ bool See3Camera::readBayerIR(cv::Mat &img) {
     return true;
 }
 
-bool See3Camera::setResolution(const std::vector<int>& resolution) {
-
+void See3Camera::setResolution(int width, int height) {
     std::vector<std::vector<int> > possible_resolutions =
     {{672, 380}, {1280, 720}, {1920, 1080}, {2688, 1520}};
     bool check;
     for (int k = 0; k < possible_resolutions.size(); k++) {
         check = true;
-        for (int i = 0; i < 2; i++) {
-            check &= (possible_resolutions[k][i] == 2*resolution[i]);
-        }
+        check &= (possible_resolutions[k][0] == 2*width);
+        check &= (possible_resolutions[k][1] == 2*height);
         if (check) {
             break;
         }
     }
     if (!check) {
         std::cout << "Wrong resolution set!" << std::endl;
-        return false;
+        return;
     }
     // x2 because of resolution loss in bayer
-    format(2*resolution[0], 2*resolution[1], V4L2_PIX_FMT_Y16);
-    return true;
+    format(2*width, 2*height, V4L2_PIX_FMT_Y16);
 }
 
 bool See3Camera::setBrightness(int brightness) {

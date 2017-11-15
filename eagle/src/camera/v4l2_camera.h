@@ -51,7 +51,7 @@ class V4L2Camera : public Camera {
     virtual bool read(cv::Mat &img);
     void buffers(int buffercount);
     void format(int width, int height, int pixelformat);
-    void setResolution(int width, int height);
+    virtual void setResolution(int width, int height);
     int getWidth();
     int getHeight();
     void *getBuffer();
