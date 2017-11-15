@@ -13,87 +13,54 @@ int main(int argc, char* argv[]) {
     // read config file
     int nr = std::rand() % 10;
     Communicator com("host" + std::to_string(nr), iface, port);
-    com.debug();
+    com.verbose(2);
     com.start(wait_time);
-    com.join("EAGLE");
-    com.join("EXTRA");
+    com.join("eagle");
+    com.join("group" + std::to_string(nr));
 
-    std::cout << "here?" << std::endl;
-
-    Communicator com1("host-extra", iface, port);
-    com1.debug();
-    com1.start(wait_time);
-    com1.join("EAGLE");
-
-    std::cout << "here? ..." << std::endl;
-
-    char* data_snd;
+    const char* data_snd;
     char data_rcv[1024];
     std::string header;
     std::string peer;
     size_t size_rcv;
 
     data_snd = "ping";
-    if (com.shout("cmd", data_snd, sizeof(data_snd), "EAGLE")) {
-        std::cout << "Sending " << "cmd:" << data_snd << " to EAGLE." << std::endl;
+    if (com.shout("cmd", data_snd, sizeof(data_snd), "eagle")) {
+        std::cout << "Sending " << "cmd:" << data_snd << " to eagle." << std::endl;
     }
     if (com.listen(header, data_rcv, size_rcv, peer, 10)) {
         std::cout << "Receiving " << header << ":" << data_rcv <<
                   " from " << peer << "." << std::endl;
     }
     data_snd = "pong";
-    if (com.shout("cmd", data_snd, sizeof(data_snd), "EAGLE")) {
-        std::cout << "Sending " << "cmd:" << data_snd << " to EAGLE." << std::endl;
+    if (com.whisper("cmd", data_snd, sizeof(data_snd), com.peers()[0])) {
+        std::cout << "Sending " << "cmd:" << data_snd << " to " << com.peers()[0] << "." << std::endl;
     }
     if (com.listen(header, data_rcv, size_rcv, peer, 10)) {
         std::cout << "Receiving " << header << ":" << data_rcv <<
                   " from " << peer << "." << std::endl;
     }
 
-    for (uint k = 0; k < 10; k++) {
-        com.listen(peer, 1);
-        com1.listen(peer, 1);
-    }
-
     std::vector<std::string> groups = com.mygroups();
-    std::cout << "COM0 groups" << std::endl;
-    for (uint k = 0; k < groups.size(); k++) {
-        std::cout << groups[k] << std::endl;
-    }
-
-    groups = com1.mygroups();
-    std::cout << "COM1 groups" << std::endl;
+    std::cout << "My groups" << std::endl;
     for (uint k = 0; k < groups.size(); k++) {
         std::cout << "* " << groups[k] << std::endl;
     }
 
-    groups = com1.allgroups();
-    std::cout << "COM all groups" << std::endl;
+    groups = com.allgroups();
+    std::cout << "All groups I know about" << std::endl;
     for (uint k = 0; k < groups.size(); k++) {
         std::cout << "* " << groups[k] << std::endl;
     }
 
     std::vector<std::string> peers = com.peers();
-    std::cout << "COM all peers" << std::endl;
+    std::cout << "My peers" << std::endl;
     for (uint k = 0; k < peers.size(); k++) {
         std::cout << "* " << peers[k] << std::endl;
     }
 
-    peers = com1.peers();
-    std::cout << "COM all peers" << std::endl;
-    for (uint k = 0; k < peers.size(); k++) {
-        std::cout << "* " << peers[k] << std::endl;
-    }
 
-    data_snd = "from_com";
-    com.whisper("test", data_snd, sizeof(data_snd), com1.name());
-    if (!com1.listen(peer, 10)) {
-        std::cout << "from_com not received" << std::endl;
-    }
-
-    com.leave("EAGLE");
-    com.leave("EXTRA");
+    com.leave("eagle");
+    com.leave("group"+std::to_string(nr));
     com.stop();
-    com1.leave("EAGLE");
-    com1.stop();
 }

@@ -57,94 +57,100 @@ void transmit_detected(Communicator& com, const std::vector<Robot*>& robots, con
     }
 
     // send everything
-    com.shout(data, sizes, group);
+    if (sizes.size() > 0) {
+        com.shout(data, sizes, group);
+    }
 }
 
 void process_communication(Communicator& com, settings_t& settings) {
     std::string pr;
     eagle::header_t header;
-    if (com.receive(pr)) {
-        while (com.available()) {
-            // 1. read the header
-            com.read(&header);
-            size_t size = com.framesize();
-            uchar buffer[size];
-            com.read(buffer);
-            // 2. read data based on the header
-            if (header.id == eagle::CMD) {
-                eagle::cmd_t cmd;
-                cmd = *((eagle::cmd_t*)(buffer));
-                std::cout << "CMD [" << cmd << "] received from " << pr << std::endl;
-                switch (cmd) {
-                case SNAPSHOT: {
-                    settings.snapshot = true;
-                    break;
-                }
-                case BACKGROUND: {
-                    settings.background = true;
-                    break;
-                }
-                case IMAGE_STREAM_ON: {
-                    settings.image_stream_on = true;
-                    break;
-                }
-                case IMAGE_STREAM_OFF: {
-                    settings.image_stream_on = false;
-                    break;
-                }
-                case IMAGE_STREAM_TOGGLE: {
-                    settings.image_stream_on = !settings.image_stream_on;
-                    break;
-                }
-                case DETECTION_ON: {
-                    settings.detection_on = true;
-                    break;
-                }
-                case DETECTION_OFF: {
-                    settings.detection_on = false;
-                    break;
-                }
-                case DETECTION_TOGGLE: {
-                    settings.detection_on = !settings.detection_on;
-                    break;
-                }
-                case DEBUG_MODE_ON: {
-                    settings.debug_mode_on = true;
-                    break;
-                }
-                case DEBUG_MODE_OFF: {
-                    settings.debug_mode_on = false;
-                    break;
-                }
-                case DEBUG_MODE_TOGGLE: {
-                    settings.debug_mode_on = !settings.debug_mode_on;
-                    break;
-                }
-                case CALIBRATION_ON: {
-                    settings.calibration_on = true;
-                    break;
-                }
-                case CALIBRATION_OFF: {
-                    settings.calibration_on = false;
-                    break;
-                }
-                case CALIBRATION_TOGGLE: {
-                    settings.calibration_on = !settings.calibration_on;
-                    break;
-                }
-                case RECORD_ON: {
-                    settings.recording_on = true;
-                    break;
-                }
-                case RECORD_OFF: {
-                    settings.recording_on = false;
-                    break;
-                }
-                case RECORD_TOGGLE: {
-                    settings.recording_on = !settings.recording_on;
-                    break;
-                }
-                default: { std::cout << "unknown command." << std::endl; }
+
+    eagle::Message msg;
+    if (com.receive()) {
+        while (com.pop_message(msg)) {
+            while (msg.available()) {
+                // 1. read the header
+                msg.read(&header);
+                size_t size = msg.framesize();
+                uchar buffer[size];
+                msg.read(buffer);
+                // 2. read data based on the header
+                if (header.id == eagle::CMD) {
+                    eagle::cmd_t cmd;
+                    cmd = *((eagle::cmd_t*)(buffer));
+                    std::cout << "CMD [" << cmd << "] received from " << pr << std::endl;
+                    switch (cmd) {
+                    case SNAPSHOT: {
+                        settings.snapshot = true;
+                        break;
+                    }
+                    case BACKGROUND: {
+                        settings.background = true;
+                        break;
+                    }
+                    case IMAGE_STREAM_ON: {
+                        settings.image_stream_on = true;
+                        break;
+                    }
+                    case IMAGE_STREAM_OFF: {
+                        settings.image_stream_on = false;
+                        break;
+                    }
+                    case IMAGE_STREAM_TOGGLE: {
+                        settings.image_stream_on = !settings.image_stream_on;
+                        break;
+                    }
+                    case DETECTION_ON: {
+                        settings.detection_on = true;
+                        break;
+                    }
+                    case DETECTION_OFF: {
+                        settings.detection_on = false;
+                        break;
+                    }
+                    case DETECTION_TOGGLE: {
+                        settings.detection_on = !settings.detection_on;
+                        break;
+                    }
+                    case DEBUG_MODE_ON: {
+                        settings.debug_mode_on = true;
+                        break;
+                    }
+                    case DEBUG_MODE_OFF: {
+                        settings.debug_mode_on = false;
+                        break;
+                    }
+                    case DEBUG_MODE_TOGGLE: {
+                        settings.debug_mode_on = !settings.debug_mode_on;
+                        break;
+                    }
+                    case CALIBRATION_ON: {
+                        settings.calibration_on = true;
+                        break;
+                    }
+                    case CALIBRATION_OFF: {
+                        settings.calibration_on = false;
+                        break;
+                    }
+                    case CALIBRATION_TOGGLE: {
+                        settings.calibration_on = !settings.calibration_on;
+                        break;
+                    }
+                    case RECORD_ON: {
+                        settings.recording_on = true;
+                        break;
+                    }
+                    case RECORD_OFF: {
+                        settings.recording_on = false;
+                        break;
+                    }
+                    case RECORD_TOGGLE: {
+                        settings.recording_on = !settings.recording_on;
+                        break;
+                    }
+                    default: { std::cout << "unknown command." << std::endl; }
+                    }
                 }
             }
         }

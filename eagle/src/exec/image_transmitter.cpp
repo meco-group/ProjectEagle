@@ -63,21 +63,26 @@ int main(int argc, char* argv[]) {
             std::string pr;
             eagle::header_t header;
             eagle::cmd_t cmd;
-            if (com.receive(pr)) {
-                while (com.available()) {
-                    // 1. read the header
-                    com.read(&header);
-                    size_t size = com.framesize();
-                    uchar buffer2[size];
-                    com.read(buffer2);
-                    // 2. read data based on the header
-                    if (header.id == eagle::CMD) {
-                        cmd = *((eagle::cmd_t*)(buffer2));
-                        if (cmd == SNAPSHOT) {
-                            cv::imwrite(snapshot_path, img);
-                            std::cout << "Took snapshot." << std::endl;
+            eagle::Message msg;
+            if (com.receive()) { // listen for messages
+                while(com.pop_message(msg)) { // read message queue
+                    while (msg.available()) { // read frames in message
+                        // 1. read the header
+                        msg.read(&header);
+                        size_t size = msg.framesize();
+                        uchar buffer2[size];
+                        msg.read(buffer2);
+                        // 2. read data based on the header
+                        if (header.id == eagle::CMD) {
+                            cmd = *((eagle::cmd_t*)(buffer2));
+                            if (cmd == SNAPSHOT) {
+                                cv::imwrite(snapshot_path, img);
+                                std::cout << "Took snapshot." << std::endl;
+                            }
+                            break;
+                        } else {
+                            msg.dump_frame();
                         }
-                        break;
                     }
                 }
             }

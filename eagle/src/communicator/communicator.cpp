@@ -43,6 +43,7 @@ bool Communicator::join(const std::string& group) {
     if (zyre_join(_node, group.c_str())) {
         return false;
     }
+    _groups[group].push_back(_name);
     return true;
 }
 
@@ -188,81 +189,78 @@ bool Communicator::whisper(const std::vector<const void*>& data,
     return true;
 }
 
-bool Communicator::receive(std::string& peer) {
-    void* which = zpoller_wait(_poller, 0);
-    if (which != zyre_socket(_node)) {
-        return false;
-    }
-    _event = zyre_event_new(_node);
-    const char* cmd = zyre_event_type(_event);
-    if (streq(cmd, "SHOUT") || streq(cmd, "WHISPER")) {
-        zmsg_t* msg = zyre_event_msg(_event);
-        if (msg != NULL) {
-            zframe_t* frame = zmsg_first(msg);
-            _rcv_buffer = zframe_data(frame);
-            _rcv_buffer_size = zframe_size(frame);
-            _rcv_buffer_index = 0;
-            peer = std::string(zyre_event_peer_name(_event));
-            if (_verbose >= 1) {
-                std::cout << "[" << _name << "] receiving from " << peer << "." << std::endl;
+bool Communicator::receive() {
+    void* which;
+    bool data_received = false;
+    while(true) {
+        which = zpoller_wait(_poller, 0);
+        if ((which != zyre_socket(_node)) || (which == NULL)) { // pipe is empty
+            break;
+        }
+        _event = zyre_event_new(_node);
+        const char* cmd = zyre_event_type(_event);
+        std::string peer = std::string(zyre_event_peer_name(_event));
+        if (streq(cmd, "SHOUT") || streq(cmd, "WHISPER")) {
+            zmsg_t* msg = zyre_event_msg(_event);
+            if (msg != NULL) {
+                push_message(msg, peer);
+                data_received = true;
+            }
+        } else if (streq(cmd, "ENTER")) {
+            std::string uuid = std::string(zyre_event_peer_uuid(_event));
+            _peers[peer] = uuid;
+            if (_verbose >= 2) {
+                std::cout << "[" << _name << "] peer " << peer << " entered the network." << std::endl;
+            }
+        } else if (streq(cmd, "JOIN")) {
+            std::string group = std::string(zyre_event_group(_event));
+            _groups[group].push_back(peer);
+            if (_verbose >= 2) {
+                std::cout << "[" << _name << "] peer " << peer << " joined group " << group << "." << std::endl;
+            }
+        } else if (streq(cmd, "EXIT")) {
+            _peers.erase(peer);
+            if (_verbose >= 2) {
+                std::cout << "[" << _name << "] peer " << peer << " left the network." << std::endl;
+            }
+        } else if (streq(cmd, "LEAVE")) {
+            std::string group = std::string(zyre_event_group(_event));
+            auto loc = std::find(_groups[group].begin(), _groups[group].end(), peer);
+            if (loc != _groups[group].end()) {
+                _groups[group].erase(loc);
+            }
+            if (_groups[group].empty()) {
+                _groups.erase(group);
+            }
+            if (_verbose >= 2) {
+                std::cout << "[" << _name << "] peer " << peer << " left group " << group << "." << std::endl;
             }
         }
-        return true;
-    } else if (streq(cmd, "ENTER")) {
-        std::string uuid = std::string(zyre_event_peer_uuid(_event));
-        std::string name = std::string(zyre_event_peer_name(_event));
-        _peers[name] = uuid;
-    } else if (streq(cmd, "JOIN")) {
-        std::string name = std::string(zyre_event_peer_name(_event));
-        std::string group = std::string(zyre_event_group(_event));
-        _groups[group].push_back(name);
-    } else if (streq(cmd, "EXIT")) {
-        std::string name = std::string(zyre_event_peer_name(_event));
-        _peers.erase(name);
-    } else if (streq(cmd, "LEAVE")) {
-        std::string name = std::string(zyre_event_peer_name(_event));
-        std::string group = std::string(zyre_event_group(_event));
-
-        auto loc = std::find(_groups[group].begin(), _groups[group].end(), name);
-        if (loc != _groups[group].end()) {
-            _groups[group].erase(loc);
-        }
-        if (_groups[group].empty()) {
-            _groups.erase(group);
-        }
     }
-
-    return false;
+    return data_received;
 }
 
-bool Communicator::receive(void* header, void* data,
-                           size_t& hsize, size_t& dsize, std::string& peer) {
-    if (!receive(peer)) {
+void Communicator::push_message(zmsg_t* msg, std::string& peer) {
+    Message m(msg, peer);
+    _messages.push(m);
+    if (_verbose >= 1) {
+        std::cout << "[" << _name << "] receiving from " << peer << "." << std::endl;
+    }
+}
+
+bool Communicator::pop_message(Message& msg) {
+    if (_messages.size() == 0) {
         return false;
     }
-    std::vector<void*> dat = {header, data};
-    std::vector<size_t> sizes;
-    read(2, dat, sizes);
-    hsize = sizes[0];
-    dsize = sizes[1];
+    msg = _messages.front();
+    _messages.pop();
     return true;
 }
 
-bool Communicator::receive(std::string& header, void* data,
-                           size_t& size, std::string& peer) {
-    char header_pntr[1028];
-    size_t hsize;
-    if (!receive(header_pntr, data, hsize, size, peer)) {
-        return false;
-    }
-    header = std::string(header_pntr);
-    return true;
-}
-
-bool Communicator::listen(std::string& peer, double timeout) {
+bool Communicator::listen(double timeout) {
     clock_t t0 = timeout * CLOCKS_PER_SEC;
     clock_t t = clock();
-    while (!receive(peer) && (t0 < 0 || (clock() - t) <= t0)) {};
+    while (!receive() && (t0 < 0 || (clock() - t) <= t0)) {};
     if (t0 >= 0 && (clock() - t) >= t0) {
         return false;
     }
@@ -273,28 +271,34 @@ bool Communicator::listen(void* header, void* data,
                           size_t& hsize, size_t& dsize, std::string& peer, double timeout) {
     clock_t t0 = timeout * CLOCKS_PER_SEC;
     clock_t t = clock();
-    while (!receive(header, data, hsize, dsize, peer) && (t0 < 0 || (clock() - t) <= t0)) {};
+    while (!receive() && (t0 < 0 || (clock() - t) <= t0)) {};
     if (t0 >= 0 && (clock() - t) >= t0) {
         return false;
     }
-    return true;
+    std::vector<void*> dat = {header, data};
+    std::vector<size_t> sizes;
+    Message msg;
+    if (pop_message(msg)) {
+        msg.read(2, dat, sizes);
+        peer = msg.peer();
+        hsize = sizes[0];
+        dsize = sizes[1];
+        return true;
+    } else {
+        return false;
+    }
 }
 
 bool Communicator::listen(std::string& header, void* data,
                           size_t& size, std::string& peer, double timeout) {
-    clock_t t0 = timeout * CLOCKS_PER_SEC;
-    clock_t t = clock();
-    while (!receive(header, data, size, peer) && (t0 < 0 || (clock() - t) <= t0)) {};
-    if (t0 >= 0 && (clock() - t) >= t0) {
+    char header_pntr[1028];
+    size_t hsize;
+    if (!listen(header_pntr, data, hsize, size, peer, timeout)) {
         return false;
     }
+    header = std::string(header_pntr);
     return true;
 }
-
-/* Low level packing and unpacking
- * Force 32 bit unsigned integer types for the packing as the size of size_t may differ depending on the architecture (32 vs 64 bit).
- */
-typedef uint32_t communicator_size_t;
 
 zmsg_t* Communicator::pack(const std::vector<const void*>& frames, const std::vector<size_t>& sizes) {
     size_t buffer_size = 0;
@@ -307,59 +311,13 @@ zmsg_t* Communicator::pack(const std::vector<const void*>& frames, const std::ve
     communicator_size_t size_caster;
     for (int i = 0; i < frames.size(); i++) {
         size_caster = sizes[i];
-        memcpy(buffer + offset, &size_caster, sizeof(communicator_size_t));
+        memcpy(((uint8_t*)buffer) + offset, &size_caster, sizeof(communicator_size_t));
         offset += sizeof(communicator_size_t);
-        memcpy(buffer + offset, frames[i], sizes[i]);
+        memcpy(((uint8_t*)buffer) + offset, frames[i], sizes[i]);
         offset += sizes[i];
     }
     zmsg_t* msg = zmsg_new();
     zmsg_pushmem(msg, buffer, buffer_size);
     free(buffer);
     return msg;
-}
-
-void Communicator::read(int n_frames, std::vector<void*>& frames, std::vector<size_t>& sizes) {
-    bool check_size = (sizes.size() == frames.size());
-    if (!check_size) {
-        sizes.resize(frames.size(), 0);
-    }
-    for (int k = 0; k < n_frames; k++) {
-        if (k >= frames.size()) {
-            break;
-        }
-        communicator_size_t size;
-        if (available()) {
-            memcpy(&size, _rcv_buffer + _rcv_buffer_index, sizeof(communicator_size_t));
-            if (check_size && sizes[k] != 0 && sizes[k] != size) {
-                std::cout << "Given size (" << sizes[k] <<
-                          ") does not match received frame size (" <<
-                          size << ")!" << std::endl;
-                sizes[k] = (sizes[k] < size) ? sizes[k] : size;
-            } else {
-                sizes[k] = size;
-            }
-            _rcv_buffer_index += sizeof(communicator_size_t);
-            memcpy(frames[k], _rcv_buffer + _rcv_buffer_index, sizes[k]);
-            _rcv_buffer_index += sizes[k];
-        } else {
-            sizes[k] = 0;
-        }
-    }
-}
-
-void Communicator::read(void* frame) {
-    int n_frames = 1;
-    std::vector<void*> frames = {frame};
-    std::vector<size_t> sizes = {0};
-    read(n_frames, frames, sizes);
-}
-
-size_t Communicator::framesize() {
-    communicator_size_t size;
-    memcpy(&size, _rcv_buffer + _rcv_buffer_index, sizeof(communicator_size_t));
-    return size;
-}
-
-bool Communicator::available() {
-    return (_rcv_buffer_index < _rcv_buffer_size);
 }

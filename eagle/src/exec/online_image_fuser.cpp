@@ -59,34 +59,40 @@ int main(int argc, char* argv[]) {
     std::cout << "passed waitkey" << std::endl;
     std::string pr;
 
-    while ( !kbhit() ) {
-        if (com.listen(pr, 1)) {
-            std::cout << pr << std::endl;
-            if (config_map.find(pr) != config_map.end()) {
-                while (com.available()) {
-                    // 1. read the header
-                    com.read(&header);
-                    // 2. read data based on the header
-                    if (header.id == eagle::IMAGE) {
-                        size_t size = com.framesize();
-                        uchar buffer[size];
-                        com.read(buffer);
-                        cv::Mat rawData = cv::Mat( 1, size, CV_8UC1, buffer);
-                        cv::Mat in = cv::imdecode(rawData, 1);
-                        cv::Mat remapped;
-                        remapinf(config_map[pr], in, remapped, pixels_per_meter, img_size, height);
-                        replace(remapped, img, 0.3);
-                        cv::imshow("Stream", img);
-                        cv::waitKey(30);
-                        break;
+    Message msg;
+    while (!kbhit()) {
+        if (com.listen(1)) {
+            while (com.pop_message(msg)) {
+                pr = msg.peer();
+                std::cout << msg.peer() << std::endl;
+                if (config_map.find(pr) != config_map.end()) {
+                    while (msg.available()) {
+                        // 1. read the header
+                        msg.read(&header);
+                        // 2. read data based on the header
+                        if (header.id == eagle::IMAGE) {
+                            size_t size = msg.framesize();
+                            uchar buffer[size];
+                            msg.read(buffer);
+                            cv::Mat rawData = cv::Mat( 1, size, CV_8UC1, buffer);
+                            cv::Mat in = cv::imdecode(rawData, 1);
+                            cv::Mat remapped;
+                            remapinf(config_map[pr], in, remapped, pixels_per_meter, img_size, height);
+                            replace(remapped, img, 0.3);
+                            break;
+                        } else {
+                            msg.dump_frame();
+                        }
                     }
+                } else {
+                    std::cout << pr << " not found in configured peers.." << std::endl;
                 }
-            } else {
-                std::cout << pr << " not found in configured peers.." << std::endl;
             }
         } else {
             std::cout << "no message.. :(" << std::endl;
         }
+        cv::imshow("Stream", img);
+        cv::waitKey(30);
     }
 
     // send streaming command to all devices in eagle

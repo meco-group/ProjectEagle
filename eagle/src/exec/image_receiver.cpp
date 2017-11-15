@@ -30,26 +30,30 @@ int main(int argc, char* argv[]) {
     // start acquiring video stream
     int img_cnt = 0;
     auto begin = std::chrono::system_clock::now();
+    Message msg;
     while ( !kbhit() ) {
-        if (com.listen(pr, 1)) {
-            if (pr.compare(peer) == 0) {
-                while (com.available()) {
-                    // 1. read the header
-                    com.read(&header);
-                    // 2. read data based on the header
-                    if (header.id == eagle::IMAGE) {
-                        size_t size = com.framesize();
-                        uchar buffer[size];
-                        com.read(buffer);
-                        if (pr == peer) {
-                            cv::Mat rawData = cv::Mat( 1, size, CV_8UC1, buffer);
-                            cv::Mat im = cv::imdecode(rawData, 1);
-                            imshow("Stream", im);
-                            cv::waitKey(1);
-                            img_cnt++;
+        if (com.listen(1)) { // listen for messages
+            while(com.pop_message(msg)) { // read message queue
+                if (msg.peer().compare(peer) == 0) {
+                    while (msg.available()) { // read frames in message
+                        // 1. read the header
+                        msg.read(&header);
+                        // 2. read data based on the header
+                        if (header.id == eagle::IMAGE) {
+                            size_t size = msg.framesize();
+                            uchar buffer[size];
+                            msg.read(buffer);
+                            if (pr == peer) {
+                                cv::Mat rawData = cv::Mat( 1, size, CV_8UC1, buffer);
+                                cv::Mat im = cv::imdecode(rawData, 1);
+                                imshow("Stream", im);
+                                cv::waitKey(1);
+                                img_cnt++;
+                            }
+                            break;
+                        } else {
+                            msg.dump_frame();
                         }
-                        break;
-
                     }
                 }
             }
