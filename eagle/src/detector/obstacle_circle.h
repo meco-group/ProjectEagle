@@ -12,6 +12,7 @@ class CircleObstacle : public Obstacle {
 
   public:
     CircleObstacle(const cv::Point2f& center, const float radius, const cv::Mat& T);
+    CircleObstacle(const eagle::obstacle_t& obst, const cv::Mat& T);
 
     virtual double area() const;
     virtual std::vector<cv::Point2f> points2(uint N = 100) const;
