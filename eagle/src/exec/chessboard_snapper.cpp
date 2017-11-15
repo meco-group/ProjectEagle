@@ -5,8 +5,8 @@ using namespace eagle;
 
 int main(int argc, char* argv[]) {
     // parse arguments
-    std::string output_folder = (argc > 1) ? argv[1] : "../config/";
-    double update_frequency = (argc > 2) ? std::stod(argv[2]) : 1;
+    std::string output_folder = (argc > 1) ? argv[1] : "../config/calibration/";
+    double update_frequency = (argc > 2) ? std::stod(argv[2]) : 0.2;
 
     // read config file
     cv::FileStorage fs(CONFIG_PATH, cv::FileStorage::READ);
@@ -31,25 +31,29 @@ int main(int argc, char* argv[]) {
     auto t0 = std::chrono::high_resolution_clock::now();
     std::vector<cv::Point2f> pnt_buf;
     while ( !kbhit() ) {
-        //  check time
-        auto t = std::chrono::high_resolution_clock::now();
-        if (std::chrono::duration_cast<std::chrono::milliseconds>(t-t0).count() < dt) {
-            continue;
-        }
-        t0 = t;
         // read camera
         cam->read(im);
         // look for chessboard
-        if (cv::findChessboardCorners(im, cv::Size(chb_h, chb_w), pnt_buf, 0)) {
-            std::string output_path = output_folder;
-            output_path.append("snapshot");
-            output_path.append(std::to_string(cnt));
-            output_path.append(".png");
-            cv::imwrite(output_path, im);
-            std::cout << "snapshot saved as " << output_path << std::endl;
-            cnt++;
+        auto t = std::chrono::high_resolution_clock::now();
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(t-t0).count() > dt) {
+            t0 = t;
+            if (cv::findChessboardCorners(im, cv::Size(chb_h, chb_w), pnt_buf, 0)) {
+                std::string output_path = output_folder;
+                output_path.append("snapshot");
+                output_path.append(std::to_string(cnt));
+                output_path.append(".png");
+                cv::imwrite(output_path, im);
+                std::cout << "snapshot saved as " << output_path << std::endl;
+                cnt++;
+                // draw chessboard
+                cv::drawChessboardCorners(im, cv::Size(chb_h, chb_w), cv::Mat(pnt_buf), true);
+                cv::imshow("Viewer", im);
+                cv::waitKey(500);
+            }
+        } else {
+            cv::imshow("Viewer", im);
+            cv::waitKey(1);
         }
-        cv::waitKey(1);
     }
     cam->stop();
     delete cam;
