@@ -7,9 +7,19 @@ Robot::Robot(uint id, double dx, double dy, const cv::Scalar& color) :
 
 void Robot::update(const std::vector<cv::Point3f>& markers) {
     _markers = markers;
+    compute_pose(markers);
     _detected = true;
 }
 
+void Robot::update(const eagle::marker_t& marker) {
+    if (marker.id != _id) {
+        return;
+    }
+    _markers.clear();
+    _translation = cv::Point3f(marker.x, marker.y, marker.z);
+    _rotation = cv::Point3f(marker.roll, marker.pitch, marker.yaw);
+    _detected = true;
+}
 
 eagle::marker_t Robot::serialize() const {
     cv::Point3f t = translation();
@@ -26,16 +36,20 @@ eagle::marker_t Robot::serialize() const {
     return m;
 }
 
-cv::Point3f Robot::translation() const {
-    return ((1. / 2.) * (_markers[0] + _markers[1]));
-}
-
-cv::Point3f Robot::rotation() const {
+void Robot::compute_pose(const std::vector<cv::Point3f>& markers) {
+    _translation = ((1. / 2.) * (_markers[0] + _markers[1]));
     std::vector<cv::Point3f> unitvectors {ex(), ey(), ez()};
     cv::Mat R(unitvectors.size(), 3, CV_32FC1, unitvectors.data());
     R = R.t();
+    _rotation = get_euler(R);
+}
 
-    return get_euler(R);
+cv::Point3f Robot::translation() const {
+    return _translation;
+}
+
+cv::Point3f Robot::rotation() const {
+    return _rotation;
 }
 
 std::vector<cv::Point3f> Robot::vertices() const {
@@ -60,10 +74,12 @@ std::vector<cv::Point3f> Robot::vertices() const {
 
 void Robot::draw_markers(cv::Mat& frame, Projection& projection) const {
     // markers
-    std::vector<cv::Point2f> markers_cam = projection.project_to_image(_markers);
-    cv::circle(frame, markers_cam[0], 3, _color, -1);
-    cv::circle(frame, markers_cam[1], 3, _color, -1);
-    cv::circle(frame, markers_cam[2], 3, cv::Scalar(0, 0, 255), -1);
+    if (_markers.size() == 3) {
+        std::vector<cv::Point2f> markers_cam = projection.project_to_image(_markers);
+        cv::circle(frame, markers_cam[0], 3, _color, -1);
+        cv::circle(frame, markers_cam[1], 3, _color, -1);
+        cv::circle(frame, markers_cam[2], 3, cv::Scalar(0, 0, 255), -1);
+    }
 
     // Draw robot axes
     //cv::arrowedLine(frame, projection.project_to_image(translation()), projection.project_to_image(translation()+ex()), _color, 2);

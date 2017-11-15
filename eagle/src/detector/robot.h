@@ -21,18 +21,22 @@ namespace eagle {
             double _dx;
             double _dy;
             bool _detected;
-            std::vector<cv::Point3f> _markers;
             cv::Scalar _color;
+            std::vector<cv::Point3f> _markers;
+            cv::Point3f _translation;
+            cv::Point3f _rotation;
 
             cv::Point3f ex() const;
             cv::Point3f ey() const;
             cv::Point3f ez() const;
+            void compute_pose(const std::vector<cv::Point3f>& markers);
 
         public:
             Robot(uint id, double dx = 1.0, double dy = 1.0, const cv::Scalar& color = cv::Scalar(17, 110, 138));
 
             // setters
             void update(const std::vector<cv::Point3f>& markers);
+            void update(const eagle::marker_t& marker);
             void reset() { _detected = false; }
             void draw(cv::Mat& frame, Projection& projection) const;
             void draw_markers(cv::Mat& frame, Projection& projection) const;
