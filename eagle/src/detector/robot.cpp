@@ -75,7 +75,7 @@ void Robot::draw_id(cv::Mat& frame, Projection& projection) const {
     std::vector<cv::Point2f> markers_cam = projection.project_to_image(_markers);
     markers_cam.push_back(markers_cam[3]);
     for (uint k = 4; k < markers_cam.size(); k++) {
-        cv::line(frame, markers_cam[k - 1], markers_cam[k], _color, 2);
+        cv::line(frame, markers_cam[k - 1], markers_cam[k], _color, 2, CV_AA);
     }
 }
 
@@ -84,7 +84,7 @@ void Robot::draw_box(cv::Mat& frame, Projection& projection) const {
     std::vector<cv::Point2f> vertices_cam = projection.project_to_image(vertices());
     vertices_cam.push_back(vertices_cam[0]);
     for (uint i = 1; i < vertices_cam.size(); i++) {
-        cv::line(frame, vertices_cam[i - 1], vertices_cam[i], _color, 2);
+        cv::line(frame, vertices_cam[i - 1], vertices_cam[i], _color, 2, CV_AA);
     }
 }
 

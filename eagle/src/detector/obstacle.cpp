@@ -16,6 +16,6 @@ void Obstacle::draw(cv::Mat& frame, Projection& projection) const {
 
     cv::Scalar gray(77, 76, 75);
     for (uint i = 1; i < p.size(); i++) {
-        cv::line(frame, p[i], p[i - 1], gray, 2);
+        cv::line(frame, p[i], p[i - 1], gray, 2, CV_AA);
     }
 }

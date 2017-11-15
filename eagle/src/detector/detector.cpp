@@ -39,7 +39,6 @@ void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, s
     for (uint k = 0; k < robots.size(); k++) {
         robots[k]->reset();
     }
-
     // undistort frame
     cv::Mat undist;
     _projection.remap(frame, undist);
@@ -104,7 +103,6 @@ cv::Mat Detector::get_mask(const cv::Mat& frame) {
     cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7), cv::Point(3, 3));
     cv::dilate(mask, mask, element);
     cv::erode(mask, mask, element);
-
     return mask;
 }
 
