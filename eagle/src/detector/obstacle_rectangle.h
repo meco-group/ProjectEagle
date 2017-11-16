@@ -10,8 +10,8 @@ class RectangleObstacle : public Obstacle {
     cv::RotatedRect _rect;
 
   public:
-    RectangleObstacle(const cv::RotatedRect& rect, const cv::Mat& T);
-    RectangleObstacle(const eagle::obstacle_t& obst, const cv::Mat& T);
+    RectangleObstacle(const cv::RotatedRect& rect);
+    RectangleObstacle(const eagle::obstacle_t& obst);
 
     virtual double area() const;
     virtual std::vector<cv::Point2f> points2(uint N = 100) const;

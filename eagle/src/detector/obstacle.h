@@ -11,10 +11,9 @@ namespace eagle {
 
 class Obstacle {
   private:
-    cv::Mat _T;
 
   public:
-    Obstacle(const cv::Mat& T);
+    Obstacle();
 
     std::vector<cv::Point3f> points(uint N = 100) const;
     void draw(cv::Mat& frame, Projection& projection) const;
@@ -22,7 +21,7 @@ class Obstacle {
     virtual double area() const = 0;
     virtual std::vector<cv::Point2f> points2(uint N = 100) const = 0;
     virtual eagle::obstacle_t serialize() const = 0;
-    static Obstacle* deserialize(const eagle::obstacle_t& obst, const cv::Mat& T);
+    static Obstacle* deserialize(const eagle::obstacle_t& obst);
 };
 };
 

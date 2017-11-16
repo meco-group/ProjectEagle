@@ -2,13 +2,12 @@
 
 using namespace eagle;
 
-RectangleObstacle::RectangleObstacle(const cv::RotatedRect& rect, const cv::Mat& T) :
-    Obstacle(T), _rect(rect) {
+RectangleObstacle::RectangleObstacle(const cv::RotatedRect& rect) : _rect(rect) {
     //do nothing
 }
 
-RectangleObstacle::RectangleObstacle(const eagle::obstacle_t& obst, const cv::Mat& T) :
-    RectangleObstacle(cv::RotatedRect(cv::Point2f(obst.p1.x, obst.p1.y), cv::Point2f(obst.p2.x, obst.p2.y), cv::Point2f(obst.p3.x, obst.p3.y)), T) {
+RectangleObstacle::RectangleObstacle(const eagle::obstacle_t& obst) :
+    RectangleObstacle(cv::RotatedRect(cv::Point2f(obst.p1.x, obst.p1.y), cv::Point2f(obst.p2.x, obst.p2.y), cv::Point2f(obst.p3.x, obst.p3.y))) {
 
 }
 

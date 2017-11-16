@@ -20,9 +20,9 @@ Detector::Detector(const std::string& config_path, const cv::Mat& background):
     _th_bg_subtraction = (double)fs["detector"]["thresholds"]["bg_subtraction"];
     fs.release();
 
-    // set fixed ground/marker plane at z = 0.1 wrt the world plane
-    _ground = (cv::Mat_<float>(1, 4) << 0, 0, 1, -0.07);
-
+    // set fixed marker plane at z = 0.77 wrt the world plane for all robots
+    // in the future this should be configurable for each robot
+    _marker_plane = (cv::Mat_<float>(1, 4) << 0, 0, 1, -0.07);
 
     // pnp pattern extraction test
     fs = cv::FileStorage(config_path, cv::FileStorage::READ);
@@ -73,10 +73,6 @@ cv::Mat Detector::draw(cv::Mat& frame, const std::vector<Robot*>& robots, const 
     for (uint i = 0; i < obstacles.size(); i++) {
         obstacles[i]->draw(img, _projection);
         cloud3_t p = obstacles[i]->points();
-        for (uint j = 0; j < p.size(); j++) {
-//            std::cout << p[j] << std::endl;
-//            std::cout << obstacles[i]->area() << std::endl;
-        }
     }
 
     // robots
@@ -135,9 +131,7 @@ void Detector::detect_robots(const cv::Mat& frame, const std::vector<std::vector
         marker_points2 = pat.find(roi, id, false);
         for (uint i = 0; i < marker_points2.size(); i++)
             marker_points2[i] += roi_location;
-
-        marker_points3 = _projection.project_to_plane(marker_points2, _ground);
-
+        marker_points3 = _projection.project_to_plane(marker_points2, _marker_plane);
         // test with pnp extractor
         //cloud3_t pnppoints;
         //pnppoints = _extr->extract(roi, roi_location, id, false);
@@ -146,7 +140,6 @@ void Detector::detect_robots(const cv::Mat& frame, const std::vector<std::vector
             if (id == robots[i]->code()) {
                 //robots[i]->update(pnppoints);
                 robots[i]->update(marker_points3);
-                //std::cout << "Marker [" << id << "] at " << robots[i]->translation() << robots[i]->rotation() << std::endl;
             }
         }
     }
@@ -186,24 +179,18 @@ void Detector::filter_obstacles(const std::vector<std::vector<cv::Point>>& conto
     cv::Point2f center;
     float radius;
     bool add = true;
-
-    // Construct transform - ground refers to local, projection to global so times inv!
-    cv::Mat T_inplane = compute_inplane_transform(transform_plane(_projection.get_transform().inv(), _ground));
-
     // Compute robot vertices in 2d
     std::vector<cloud2_t> robot_points2(robots.size());
     for (uint i = 0; i < robots.size(); i++) {
         if (robots[i]->detected()) {
-            robot_points2[i] = transform2(T_inplane, robots[i]->vertices());
+            robot_points2[i] = dropz(robots[i]->vertices()); // project to ground
         }
     }
-
     // Compute contour vertices in 2d (and 3d.)
-    std::vector<cloud2_t> obstacle_points2 = transform2(T_inplane, _projection.project_to_plane(contours, _ground));
-
-    //cloud3_t obstacle_points3 = transform(T, _projection.project_to_plane(contours[i], _ground));
-
+    cv::Mat ground_plane = (cv::Mat_<float>(1, 4) << 0, 0, 1, 0);
+    std::vector<cloud2_t> obstacle_points2 = dropz(_projection.project_to_plane(contours, ground_plane)); // project pixels to ground
     for (uint i = 0; i < obstacle_points2.size(); i++) {
+        std::cout << obstacle_points2[0] << std::endl;
         if (contourArea(obstacle_points2[i]) > 0.01) {
             rect = cv::minAreaRect(obstacle_points2[i]);
             add = true;
@@ -218,55 +205,33 @@ void Detector::filter_obstacles(const std::vector<std::vector<cv::Point>>& conto
                     add = cv::pointPolygonTest(obstacle_points2[j], rect.center, false) < 0;
                 }
             }
-
             if (add) {
                 cv::minEnclosingCircle(obstacle_points2[i], center, radius);
                 if (rect.size.area() < (M_PI * radius * radius)) {
-                    obstacles.push_back(new RectangleObstacle(rect, cv::Mat(T_inplane.inv())));
+                    obstacles.push_back(new RectangleObstacle(rect));
                 } else {
-                    obstacles.push_back(new CircleObstacle(center, radius, cv::Mat(T_inplane.inv())));
+                    obstacles.push_back(new CircleObstacle(center, radius));
                 }
             }
         }
     }
-
     // sort obstacles according to area
-
-//    sort_obstacles(obstacles);
+    // sort_obstacles(obstacles);
 }
-//
-//void Detector::sort_obstacles(std::vector<Obstacle*>& obstacles) {
-//    int j;
-//    Obstacle* obstacle;
-//    // insertion sort
-//    for (int i=1; i<obstacles.size(); i++) {
-//        j = i;
-//        while (j > 0 && obstacles[j-1]->area() < obstacles[j]->area()) {
-//            // swap obstacles
-//            obstacle = obstacles[j];
-//            obstacles[j] = obstacles[j-1];
-//            obstacles[j-1] = obstacle;
-//        }
-//        j--;
-//    }
-//}
-//
-//cv::Point2f Detector::cam2worldframe(const cv::Point2f& point) {
-//    return cam2worldframe(std::vector<cv::Point2f>{point})[0];
-//}
-//
-//std::vector<cv::Point2f> Detector::cam2worldframe(const std::vector<cv::Point2f>& points) {
-//    std::vector<cv::Point2f> ret;
-//    cv::transform(points, ret, _cam2world_tf);
-//    return ret;
-//}
-//
-//cv::Point2f Detector::world2camframe(const cv::Point2f& point) {
-//    return world2camframe(std::vector<cv::Point2f>{point})[0];
-//}
-//
-//std::vector<cv::Point2f> Detector::world2camframe(const std::vector<cv::Point2f>& points) {
-//    std::vector<cv::Point2f> ret;
-//    cv::transform(points, ret, _world2cam_tf);
-//    return ret;
-//}
+
+void Detector::sort_obstacles(std::vector<Obstacle*>& obstacles) {
+   int j;
+   Obstacle* obstacle;
+   // insertion sort
+   for (int i=1; i<obstacles.size(); i++) {
+       j = i;
+       while (j > 0 && obstacles[j-1]->area() < obstacles[j]->area()) {
+           // swap obstacles
+           obstacle = obstacles[j];
+           obstacles[j] = obstacles[j-1];
+           obstacles[j-1] = obstacle;
+       }
+       j--;
+   }
+}
+

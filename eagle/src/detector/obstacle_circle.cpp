@@ -2,13 +2,13 @@
 
 using namespace eagle;
 
-CircleObstacle::CircleObstacle(const cv::Point2f& center, const float radius, const cv::Mat& T) :
-    Obstacle(T), _center(center), _radius(radius) {
+CircleObstacle::CircleObstacle(const cv::Point2f& center, const float radius) :
+    _center(center), _radius(radius) {
     //do nothing
 }
 
-CircleObstacle::CircleObstacle(const eagle::obstacle_t& obst, const cv::Mat& T) :
-    CircleObstacle(cv::Point2f(obst.p1.x, obst.p1.y), obst.p2.x-obst.p2.y, T) {
+CircleObstacle::CircleObstacle(const eagle::obstacle_t& obst) :
+    CircleObstacle(cv::Point2f(obst.p1.x, obst.p1.y), obst.p2.x-obst.p2.y) {
 }
 
 double CircleObstacle::area() const {

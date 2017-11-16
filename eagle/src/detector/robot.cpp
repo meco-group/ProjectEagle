@@ -2,7 +2,7 @@
 
 using namespace eagle;
 
-Robot::Robot(uint id, double dx, double dy, const cv::Scalar& color) :
+Robot::Robot(unsigned int id, double dx, double dy, const cv::Scalar& color) :
     _id(id), _dx(dx), _dy(dy), _color(color), _detected(false) {}
 
 void Robot::update(const std::vector<cv::Point3f>& markers) {
@@ -65,7 +65,7 @@ std::vector<cv::Point3f> Robot::vertices() const {
     v.push_back((i * _dx - j * _dy) * 0.5);
 
     // move corners to global frame
-    for (uint k = 0; k < v.size(); k++) {
+    for (unsigned int k = 0; k < v.size(); k++) {
         v[k] += t;
     }
 
@@ -74,7 +74,7 @@ std::vector<cv::Point3f> Robot::vertices() const {
 
 void Robot::draw_markers(cv::Mat& frame, Projection& projection) const {
     // markers
-    if (_markers.size() == 3) {
+    if (_markers.size() >= 3) {
         std::vector<cv::Point2f> markers_cam = projection.project_to_image(_markers);
         cv::circle(frame, markers_cam[0], 3, _color, -1);
         cv::circle(frame, markers_cam[1], 3, _color, -1);
@@ -88,10 +88,12 @@ void Robot::draw_markers(cv::Mat& frame, Projection& projection) const {
 
 void Robot::draw_id(cv::Mat& frame, Projection& projection) const {
     // id
-    std::vector<cv::Point2f> markers_cam = projection.project_to_image(_markers);
-    markers_cam.push_back(markers_cam[3]);
-    for (uint k = 4; k < markers_cam.size(); k++) {
-        cv::line(frame, markers_cam[k - 1], markers_cam[k], _color, 2, CV_AA);
+     if (_markers.size() >= 7) {
+        std::vector<cv::Point2f> markers_cam = projection.project_to_image(_markers);
+        markers_cam.push_back(markers_cam[3]);
+        for (unsigned int k = 4; k < markers_cam.size(); k++) {
+            cv::line(frame, markers_cam[k - 1], markers_cam[k], _color, 2, CV_AA);
+        }
     }
 }
 
@@ -99,7 +101,7 @@ void Robot::draw_box(cv::Mat& frame, Projection& projection) const {
     // box
     std::vector<cv::Point2f> vertices_cam = projection.project_to_image(vertices());
     vertices_cam.push_back(vertices_cam[0]);
-    for (uint i = 1; i < vertices_cam.size(); i++) {
+    for (unsigned int i = 1; i < vertices_cam.size(); i++) {
         cv::line(frame, vertices_cam[i - 1], vertices_cam[i], _color, 2, CV_AA);
     }
 }

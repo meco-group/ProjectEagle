@@ -31,7 +31,7 @@ typedef struct header_t {
 } header_t;
 
 typedef struct marker_t {
-    int id;
+    unsigned  int id;
     double x;
     double y;
     double z;
@@ -41,7 +41,7 @@ typedef struct marker_t {
 } robot_t;
 
 typedef struct obstacle_t {
-    int id;
+    unsigned int id;
     shape_t shape;
     point_t p1;
     point_t p2;

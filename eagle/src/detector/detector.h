@@ -22,7 +22,7 @@ class Detector {
     cv::Mat _cont_mask;
 
     Projection _projection;
-    cv::Mat _ground;
+    cv::Mat _marker_plane;
 
     Pattern _pat;
     PnpPatternExtractor3* _extr;
@@ -33,9 +33,7 @@ class Detector {
     void subtract_robots(cv::Mat& mask, const std::vector<Robot*>& robots);
     void detect_obstacles(const cv::Mat& frame, const std::vector<std::vector<cv::Point> >& contours, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
     void filter_obstacles(const std::vector<std::vector<cv::Point>>& contours, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
-    //void sort_obstacles(std::vector<Obstacle*>& obstacles);
-    //void init_transformations(const cv::Matx33f& c2w);
-
+    void sort_obstacles(std::vector<Obstacle*>& obstacles);
 
   public:
     Detector(const std::string& config_path, const cv::Mat& background = cv::Mat(0, 0, CV_8UC3));

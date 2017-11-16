@@ -4,12 +4,11 @@
 
 using namespace eagle;
 
-Obstacle::Obstacle(const cv::Mat& T) {
-    T.convertTo(_T, CV_32F);
+Obstacle::Obstacle() {
 }
 
 std::vector<cv::Point3f> Obstacle::points(uint N) const {
-    return transform(_T, addz(points2(N), 0.0f));
+    return addz(points2(N), 0.0f);
 }
 
 void Obstacle::draw(cv::Mat& frame, Projection& projection) const {
@@ -22,13 +21,13 @@ void Obstacle::draw(cv::Mat& frame, Projection& projection) const {
     }
 }
 
-Obstacle* Obstacle::deserialize(const eagle::obstacle_t& obst, const cv::Mat& T) {
+Obstacle* Obstacle::deserialize(const eagle::obstacle_t& obst) {
     switch(obst.shape) {
         case RECTANGLE:
-            return new RectangleObstacle(obst, T);
+            return new RectangleObstacle(obst);
             break;
         case CIRCLE:
-            return new CircleObstacle(obst, T);
+            return new CircleObstacle(obst);
             break;
         default:
             std::cout << "Obstacle shape not understood." << std::endl;
