@@ -63,7 +63,6 @@ void transmit_detected(Communicator& com, const std::vector<Robot*>& robots, con
 }
 
 void process_communication(Communicator& com, settings_t& settings) {
-    std::string pr;
     eagle::header_t header;
 
     eagle::Message msg;
@@ -79,7 +78,7 @@ void process_communication(Communicator& com, settings_t& settings) {
                 if (header.id == eagle::CMD) {
                     eagle::cmd_t cmd;
                     cmd = *((eagle::cmd_t*)(buffer));
-                    std::cout << "CMD [" << cmd << "] received from " << pr << std::endl;
+                    std::cout << "CMD [" << cmd << "] received from " << msg.peer() << std::endl;
                     switch (cmd) {
                     case SNAPSHOT: {
                         settings.snapshot = true;
@@ -184,6 +183,7 @@ int main(int argc, char* argv[]) {
     cv::FileStorage fs(CONFIG_PATH, cv::FileStorage::READ);
     std::string group = fs["communicator"]["group"];
     int zyre_wait_time = fs["communicator"]["zyre_wait_time"];
+    std::string background_path = fs["detector"]["background_path"];
     fs.release();
 
     // setup video compression
@@ -282,12 +282,12 @@ int main(int argc, char* argv[]) {
                 background /= bg_counter;
                 background.convertTo(background, CV_8UC3);
                 detector.set_background(background);
-                cv::imwrite("../config/background.png", im);
+                cv::imwrite(background_path, im);
                 std::cout << "New background ready." << std::endl;
 
                 //re-init
                 settings.background = false;
-                cv::Mat background = cv::Mat(cam->getHeight(), cam->getWidth(), CV_32FC3, cv::Scalar(0, 0, 0));
+                background = cv::Mat(cam->getHeight(), cam->getWidth(), CV_32FC3, cv::Scalar(0, 0, 0));
                 bg_counter = 0;
             }
         }
