@@ -8,11 +8,19 @@ CircleObstacle::CircleObstacle(const cv::Point2f& center, const float radius) :
 }
 
 CircleObstacle::CircleObstacle(const eagle::obstacle_t& obst) :
-    CircleObstacle(cv::Point2f(obst.p1.x, obst.p1.y), obst.p2.x-obst.p2.y) {
+    CircleObstacle(cv::Point2f(obst.p1.x, obst.p1.y), obst.p2.x - obst.p2.y) {
 }
 
 double CircleObstacle::area() const {
     return M_PI * _radius * _radius;
+}
+
+cv::Point2f CircleObstacle::center() const {
+    return _center;
+}
+
+double CircleObstacle::radius() const {
+    return _radius;
 }
 
 std::vector<cv::Point2f> CircleObstacle::points2(uint N) const {

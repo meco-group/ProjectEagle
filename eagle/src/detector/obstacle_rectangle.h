@@ -14,6 +14,10 @@ class RectangleObstacle : public Obstacle {
     RectangleObstacle(const eagle::obstacle_t& obst);
 
     virtual double area() const;
+    virtual cv::Point2f center() const;
+    virtual double angle() const;
+    virtual double width() const;
+    virtual double height() const;
     virtual std::vector<cv::Point2f> points2(uint N = 100) const;
 
     virtual eagle::obstacle_t serialize() const;

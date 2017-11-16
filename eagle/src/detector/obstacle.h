@@ -16,7 +16,7 @@ class Obstacle {
     Obstacle();
 
     std::vector<cv::Point3f> points(uint N = 100) const;
-    void draw(cv::Mat& frame, Projection& projection) const;
+    virtual void draw(cv::Mat& frame, Projection& projection) const;
 
     virtual double area() const = 0;
     virtual std::vector<cv::Point2f> points2(uint N = 100) const = 0;

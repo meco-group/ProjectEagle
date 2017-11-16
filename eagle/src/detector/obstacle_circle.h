@@ -15,6 +15,8 @@ class CircleObstacle : public Obstacle {
     CircleObstacle(const eagle::obstacle_t& obst);
 
     virtual double area() const;
+    virtual cv::Point2f center() const;
+    virtual double radius() const;
     virtual std::vector<cv::Point2f> points2(uint N = 100) const;
 
     virtual eagle::obstacle_t serialize() const;
