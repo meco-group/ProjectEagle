@@ -75,6 +75,7 @@ class Communicator {
     bool listen(std::string &header, void *data,
                 size_t &size, std::string &peer, double timeout = -1);
     bool pop_message(Message& msg);
+    int n_messages() { return _messages.size();}
 };
 
 

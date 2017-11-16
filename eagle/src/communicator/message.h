@@ -94,6 +94,14 @@ class Message {
     return (_buffer_index < _buffer_size);
   }
 
+  unsigned int buffer_index() {
+    return _buffer_index;
+  }
+
+  size_t buffer_size() {
+    return _buffer_size;
+  }
+
 };
 
 };
