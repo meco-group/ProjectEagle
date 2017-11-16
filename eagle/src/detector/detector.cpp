@@ -190,7 +190,6 @@ void Detector::filter_obstacles(const std::vector<std::vector<cv::Point>>& conto
     cv::Mat ground_plane = (cv::Mat_<float>(1, 4) << 0, 0, 1, 0);
     std::vector<cloud2_t> obstacle_points2 = dropz(_projection.project_to_plane(contours, ground_plane)); // project pixels to ground
     for (uint i = 0; i < obstacle_points2.size(); i++) {
-        std::cout << obstacle_points2[0] << std::endl;
         if (contourArea(obstacle_points2[i]) > 0.01) {
             rect = cv::minAreaRect(obstacle_points2[i]);
             add = true;
