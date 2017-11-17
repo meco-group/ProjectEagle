@@ -16,10 +16,9 @@ RectangleObstacle::RectangleObstacle(const eagle::obstacle_t& obst) {
 
 std::string RectangleObstacle::to_string() const {
     cv::Point2f c = center();
-    std::string s = "Rectangle obstacle at (" + std::to_string(c.x) + "," +
-    std::to_string(c.y) + ") and orientation " + std::to_string(angle() * 180 / M_PI) +
-    " deg and with size (" + std::to_string(width()) + " x " + std::to_string(height()) + ").";
-    return s;
+    char s[50];
+    sprintf(s, "Rectangular obstacle at (%.1f,%.1f) and orientation %.1f with size (%.1f,%.1f).", c.x, c.y, angle(), width(), height());
+    return std::string(s);
 }
 
 
