@@ -37,8 +37,8 @@ eagle::marker_t Robot::serialize() const {
 }
 
 void Robot::compute_pose(const std::vector<cv::Point3f>& markers) {
-    _translation = ((1. / 2.) * (_markers[0] + _markers[1]));
-    std::vector<cv::Point3f> unitvectors {ex(), ey(), ez()};
+    _translation = ((1. / 2.) * (markers[0] + markers[1]));
+    std::vector<cv::Point3f> unitvectors {ex(markers), ey(markers), ez(markers)};
     cv::Mat R(unitvectors.size(), 3, CV_32FC1, unitvectors.data());
     R = R.t();
     _rotation = get_euler(R);
@@ -62,10 +62,10 @@ cv::Point3f Robot::rotation() const {
 
 std::vector<cv::Point3f> Robot::vertices() const {
     std::vector<cv::Point3f> v; v.reserve(4);
-    cv::Point3f i = ex();
-    cv::Point3f j = ey();
+    cv::Mat R = euler_to_R(_rotation);
+    cv::Point3f i = cv::Point3f(R.col(0));
+    cv::Point3f j = cv::Point3f(R.col(1));
     cv::Point3f t = translation();
-
     // make corners in local frame
     v.push_back((i * _dx + j * _dy) * 0.5);
     v.push_back((-i * _dx + j * _dy) * 0.5);
@@ -76,7 +76,6 @@ std::vector<cv::Point3f> Robot::vertices() const {
     for (unsigned int k = 0; k < v.size(); k++) {
         v[k] += t;
     }
-
     return v;
 }
 
@@ -120,22 +119,22 @@ void Robot::draw(cv::Mat& frame, Projection& projection) const {
     draw_box(frame, projection);
 }
 
-cv::Point3f Robot::ex() const {
-    cv::Point3f ex = _markers[2] - 0.5 * (_markers[0] + _markers[1]);
+cv::Point3f Robot::ex(const std::vector<cv::Point3f>& markers) const {
+    cv::Point3f ex = markers[2] - 0.5 * (markers[0] + markers[1]);
     ex /= cv::norm(ex);
 
     return ex;
 }
 
-cv::Point3f Robot::ey() const {
-    cv::Point3f ey = ez().cross(ex());
+cv::Point3f Robot::ey(const std::vector<cv::Point3f>& markers) const {
+    cv::Point3f ey = ez(markers).cross(ex(markers));
     ey /= cv::norm(ey);
     return ey;
 }
 
-cv::Point3f Robot::ez() const {
-    cv::Point3f ey_approx = _markers[0] - _markers[1];
-    cv::Point3f ez = ex().cross(ey_approx);
+cv::Point3f Robot::ez(const std::vector<cv::Point3f>& markers) const {
+    cv::Point3f ey_approx = markers[0] - markers[1];
+    cv::Point3f ez = ex(markers).cross(ey_approx);
     ez /= cv::norm(ez);
 
     return ez;

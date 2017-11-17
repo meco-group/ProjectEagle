@@ -26,9 +26,9 @@ class Robot {
     cv::Point3f _translation;
     cv::Point3f _rotation;
 
-    cv::Point3f ex() const;
-    cv::Point3f ey() const;
-    cv::Point3f ez() const;
+    cv::Point3f ex(const std::vector<cv::Point3f>& markers) const;
+    cv::Point3f ey(const std::vector<cv::Point3f>& markers) const;
+    cv::Point3f ez(const std::vector<cv::Point3f>& markers) const;
     void compute_pose(const std::vector<cv::Point3f>& markers);
 
   public:
