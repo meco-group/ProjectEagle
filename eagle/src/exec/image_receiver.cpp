@@ -23,7 +23,6 @@ int main(int argc, char* argv[]) {
 
     // video stream setup
     cv::namedWindow("Stream");
-    std::string pr;
 
     std::cout << "Start receiving video stream." << std::endl;
 
@@ -43,13 +42,11 @@ int main(int argc, char* argv[]) {
                             size_t size = msg.framesize();
                             uchar buffer[size];
                             msg.read(buffer);
-                            if (pr == peer) {
-                                cv::Mat rawData = cv::Mat( 1, size, CV_8UC1, buffer);
-                                cv::Mat im = cv::imdecode(rawData, 1);
-                                imshow("Stream", im);
-                                cv::waitKey(1);
-                                img_cnt++;
-                            }
+                            cv::Mat rawData = cv::Mat( 1, size, CV_8UC1, buffer);
+                            cv::Mat im = cv::imdecode(rawData, 1);
+                            imshow("Stream", im);
+                            cv::waitKey(1);
+                            img_cnt++;
                             break;
                         } else {
                             msg.dump_frame();
