@@ -13,7 +13,7 @@ CircleObstacle::CircleObstacle(const eagle::obstacle_t& obst) :
 
 std::string CircleObstacle::to_string() const {
     cv::Point2f c = center();
-    char s[50];
+    char s[100];
     sprintf(s, "Circular obstacle at (%.1f,%.1f) with radius %.1f.", c.x, c.y, radius());
     return std::string(s);
 }

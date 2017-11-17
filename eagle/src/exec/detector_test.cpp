@@ -13,20 +13,9 @@ int main(int argc, char* argv[]) {
     image = cv::imread(argv[1], CV_LOAD_IMAGE_COLOR);
     bg = cv::imread(argv[2], CV_LOAD_IMAGE_COLOR);
     Detector detector(argv[3], bg);
+    detector.verbose(2);
     detector.search(image, robots, obstacles);
     cv::Mat undist = detector.draw(image, robots, obstacles);
-
-    for (uint k = 0; k < robots.size(); k++) {
-        if (robots[k]->detected()) {
-            std::cout << "Robot: " << robots[k]->id() << std::endl;
-            std::cout << "Position: " << robots[k]->translation() << std::endl << "Roll-pitch-yaw: " << robots[k]->rotation() << std::endl;
-        }
-    }
-    for (uint k = 0; k < obstacles.size(); k++) {
-        cloud3_t p = obstacles[k]->points(4);
-        std::cout << "Obstacle: " << p[0] << p[1] << p[2] << p[3] << std::endl;
-    }
-
     cv::imshow("image", undist);
     cv::waitKey(0);
 }

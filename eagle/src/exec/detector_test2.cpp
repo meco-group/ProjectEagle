@@ -18,6 +18,7 @@ int main(int argc, char* argv[]) {
 
     background = cv::imread(background_path, CV_LOAD_IMAGE_COLOR);
     Detector detector(CONFIG_PATH, background);
+    detector.verbose(2);
 
     // start camera
     Camera* cam = getCamera(CONFIG_PATH);
@@ -27,17 +28,6 @@ int main(int argc, char* argv[]) {
         cam->read(image);
         detector.search(image, robots, obstacles);
         image2 = detector.draw(image, robots, obstacles);
-
-        for (uint k = 0; k < robots.size(); k++) {
-            if (robots[k]->detected()) {
-                std::cout << "Robot: " << robots[k]->id() << std::endl;
-                std::cout << "Position: " << robots[k]->translation() << std::endl << "Roll-pitch-yaw: " << robots[k]->rotation() << std::endl;
-            }
-        }
-        for (uint k = 0; k < obstacles.size(); k++) {
-            cloud3_t p = obstacles[k]->points(4);
-            std::cout << "Obstacle: " << p[0] << p[1] << p[2] << p[3] << std::endl;
-        }
         // show image
         imshow("Viewer", image2);
         cv::waitKey(1);

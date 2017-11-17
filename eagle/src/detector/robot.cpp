@@ -47,8 +47,8 @@ void Robot::compute_pose(const std::vector<cv::Point3f>& markers) {
 std::string Robot::to_string() const {
     cv::Point3f t = translation();
     cv::Point3f r = rotation();
-    char s[50];
-    sprintf(s, "Robot with position (%.1f,%.1f,%.1f) and rotation (%.1f,%.1f,%.1f).", t.x, t.y, t.z, r.x, r.y, r.z);
+    char s[100];
+    sprintf(s, "Robot [%d] with position (%.1f,%.1f,%.1f) and rotation (%.1f,%.1f,%.1f).", id(), t.x, t.y, t.z, r.x, r.y, r.z);
     return std::string(s);
 }
 
