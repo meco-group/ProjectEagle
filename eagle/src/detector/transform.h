@@ -16,6 +16,8 @@ cv::Mat compute_inplane_transform(const cv::Mat& plane);
 
 cv::Mat get_rotation(const cv::Mat& T);
 cv::Point3f get_euler(const cv::Mat& T);
+cv::Point3f R_to_euler(const cv::Mat& R);
+cv::Mat euler_to_R(const cv::Point3f& euler);
 cv::Mat get_translation(const cv::Mat& T);
 
 cv::Point3f transform(const cv::Mat& T, const cv::Point3f& p);

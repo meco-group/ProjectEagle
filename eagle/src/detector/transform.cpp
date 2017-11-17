@@ -101,10 +101,14 @@ cv::Mat eagle::get_rotation(const cv::Mat& T) {
 /*
  * taken from: https://www.learnopencv.com/rotation-matrix-to-euler-angles/
  */
-cv::Point3f eagle::get_euler(const cv::Mat& T) {
-    cv::Mat R = get_rotation(T); //get part of T or R immediately
-    R.convertTo(R, CV_64F);
 
+cv::Point3f eagle::get_euler(const cv::Mat& T) {
+    cv::Mat R = get_rotation(T);
+    R.convertTo(R, CV_64F);
+    return R_to_euler(R);
+}
+
+cv::Point3f eagle::R_to_euler(const cv::Mat& R) {
     float sy = sqrt(R.at<double>(0, 0) * R.at<double>(0, 0) +  R.at<double>(1, 0) * R.at<double>(1, 0) );
     bool singular = sy < 1e-6; // If
 
@@ -120,6 +124,29 @@ cv::Point3f eagle::get_euler(const cv::Mat& T) {
     }
 
     return cv::Point3f(x, y, z);
+}
+
+cv::Mat eagle::euler_to_R(const cv::Point3f& euler) {
+    // rotation about x axis
+    cv::Mat R_x = (cv::Mat_<double>(3,3) <<
+               1,       0,              0,
+               0,       cos(euler.x),   -sin(euler.x),
+               0,       sin(euler.x),   cos(euler.x)
+               );
+    // rotation about y axis
+    cv::Mat R_y = (cv::Mat_<double>(3,3) <<
+               cos(euler.y),    0,      sin(euler.y),
+               0,               1,      0,
+               -sin(euler.y),   0,      cos(euler.y)
+               );
+    // rotation about z axis
+    cv::Mat R_z = (cv::Mat_<double>(3,3) <<
+               cos(euler.z),    -sin(euler.z),      0,
+               sin(euler.z),    cos(euler.z),       0,
+               0,               0,                  1);
+    // combined rotation matrix
+    cv::Mat R = R_z * R_y * R_x;
+    return R;
 }
 
 cv::Mat eagle::get_translation(const cv::Mat& T) {
