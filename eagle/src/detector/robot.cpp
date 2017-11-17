@@ -44,6 +44,16 @@ void Robot::compute_pose(const std::vector<cv::Point3f>& markers) {
     _rotation = get_euler(R);
 }
 
+std::string Robot::to_string() const {
+    cv::Point3f t = translation();
+    cv::Point3f r = rotation();
+    std::string s = "Robot with position (" + std::to_string(t.x) +
+    "," + std::to_string(t.y) + "," + std::to_string(t.z) +
+    ") and rotation (" + std::to_string(r.x) + "," + std::to_string(r.y) + "," +
+    std::to_string(r.z) + ").";
+    return s;
+}
+
 cv::Point3f Robot::translation() const {
     return _translation;
 }

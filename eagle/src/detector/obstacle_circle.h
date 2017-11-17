@@ -14,6 +14,7 @@ class CircleObstacle : public Obstacle {
     CircleObstacle(const cv::Point2f& center, const float radius);
     CircleObstacle(const eagle::obstacle_t& obst);
 
+    virtual std::string to_string() const;
     virtual double area() const;
     virtual cv::Point2f center() const;
     virtual double radius() const;

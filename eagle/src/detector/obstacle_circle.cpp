@@ -11,6 +11,13 @@ CircleObstacle::CircleObstacle(const eagle::obstacle_t& obst) :
     CircleObstacle(cv::Point2f(obst.p1.x, obst.p1.y), obst.p2.x - obst.p2.y) {
 }
 
+std::string CircleObstacle::to_string() const {
+    cv::Point2f c = center();
+    std::string s = "Circular obstacle at (" + std::to_string(c.x) + "," +
+    std::to_string(c.y) + ") with radius " + std::to_string(radius()) + ".";
+    return s;
+}
+
 double CircleObstacle::area() const {
     return M_PI * _radius * _radius;
 }

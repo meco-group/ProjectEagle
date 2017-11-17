@@ -7,12 +7,21 @@ RectangleObstacle::RectangleObstacle(const cv::RotatedRect& rect) : _rect(rect) 
 }
 
 RectangleObstacle::RectangleObstacle(const eagle::obstacle_t& obst) {
-    cv::Point2f center = cv::Point2f(0.5*(obst.p1.x+obst.p3.x), 0.5*(obst.p1.y+obst.p3.y));
+    cv::Point2f center = cv::Point2f(0.5 * (obst.p1.x + obst.p3.x), 0.5 * (obst.p1.y + obst.p3.y));
     double width = sqrt(pow(obst.p2.x - obst.p3.x, 2) + pow(obst.p2.y - obst.p3.y, 2));
     double height = sqrt(pow(obst.p1.x - obst.p2.x, 2) + pow(obst.p1.y - obst.p2.y, 2));
-    double angle = atan2(obst.p2.x-obst.p1.x, obst.p1.y-obst.p2.y);
-    _rect = cv::RotatedRect(center, cv::Size2f(width, height), angle*180/M_PI);
+    double angle = atan2(obst.p2.x - obst.p1.x, obst.p1.y - obst.p2.y);
+    _rect = cv::RotatedRect(center, cv::Size2f(width, height), angle * 180 / M_PI);
 }
+
+std::string RectangleObstacle::to_string() const {
+    cv::Point2f c = center();
+    std::string s = "Rectangle obstacle at (" + std::to_string(c.x) + "," +
+    std::to_string(c.y) + ") and orientation " + std::to_string(angle() * 180 / M_PI) +
+    " deg and with size (" + std::to_string(width()) + " x " + std::to_string(height()) + ").";
+    return s;
+}
+
 
 double RectangleObstacle::area() const {
     return _rect.size.area();

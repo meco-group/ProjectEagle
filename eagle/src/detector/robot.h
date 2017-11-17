@@ -44,6 +44,7 @@ class Robot {
     void draw_box(cv::Mat& frame, Projection& projection) const;
 
     // getters
+    std::string to_string() const;
     unsigned int id() const { return _id; }
     unsigned int code() const { return id(); }
     cv::Scalar color() const { return _color; }
