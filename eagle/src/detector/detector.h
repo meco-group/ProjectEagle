@@ -26,6 +26,7 @@ class Detector {
 
     Pattern _pat;
     PnpPatternExtractor3* _extr;
+    int _verbose;
 
     cv::Mat get_mask(const cv::Mat& frame);
     std::vector<std::vector<cv::Point>> get_contours(const cv::Mat& frame);
@@ -40,6 +41,7 @@ class Detector {
     void search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
     cv::Mat draw(cv::Mat& frame, const std::vector<Robot*>& robots, const std::vector<Obstacle*>& obstacles);
     void set_background(const cv::Mat& bg);
+    void verbose(int verbose);
 
     Projection *projection() { return &_projection; }
 

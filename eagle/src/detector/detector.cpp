@@ -4,7 +4,7 @@
 using namespace eagle;
 
 Detector::Detector(const std::string& config_path, const cv::Mat& background):
-    _projection(config_path),
+    _projection(config_path), _verbose(0),
     _pat(new CircleTriangle(cv::Point2f(0.10, 0.16), cv::Point2f(0.8, 0.5))) {
     cv::FileStorage fs(config_path, cv::FileStorage::READ);
     if (background.empty()) {
@@ -49,8 +49,22 @@ void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, s
         subtract_robots(mask, robots);
         contours = get_contours(mask);
         detect_obstacles(frame, contours, robots, obstacles);
+        if (_verbose >= 2) {
+            std::cout << "* Detected robots:" << std::endl;
+            for (int k=0; k<robots.size(); k++) {
+                if (robots[k]->detected()) {
+                    std::cout << "\t- " << robots[k]->to_string() << std::endl;
+                }
+            }
+            std::cout << "* Detected obstacles:" << std::endl;
+            for (int k=0; k<obstacles.size(); k++) {
+                std::cout << "\t- " << obstacles[k]->to_string() << std::endl;
+            }
+        }
     } else {
-        std::cout << "No ROIs detected" << std::endl;
+        if (_verbose >= 1) {
+            std::cout << "No contours detected!" << std::endl;
+        }
     }
 }
 
@@ -83,6 +97,10 @@ cv::Mat Detector::draw(cv::Mat& frame, const std::vector<Robot*>& robots, const 
     }
 
     return img;
+}
+
+void Detector::verbose(int verbose) {
+    _verbose = verbose;
 }
 
 void Detector::set_background(const cv::Mat& bg) {
