@@ -75,7 +75,7 @@ std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img, int& id, bool draw) 
                 }
             }
             if (check(points)) {
-                std::cout << "Standard detection method found marker" << std::endl;
+                // std::cout << "Standard detection method found marker" << std::endl;
                 // check(roi, points);
                 id = decode(roi, points);
                 for (uint i = 0; i < points.size(); i++) {

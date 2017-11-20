@@ -5,3 +5,4 @@ config.bak/
 *.pyc
 todo
 .test
+*.sublime*
