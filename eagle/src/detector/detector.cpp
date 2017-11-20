@@ -48,7 +48,7 @@ void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, s
         detect_robots(undist, contours, robots);
         subtract_robots(mask, robots);
         contours = get_contours(mask);
-        detect_obstacles(frame, contours, robots, obstacles);
+        detect_obstacles(undist, contours, robots, obstacles);
         if (_verbose >= 2) {
             std::cout << "* Detected robots:" << std::endl;
             for (int k=0; k<robots.size(); k++) {
@@ -71,6 +71,7 @@ void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, s
 cv::Mat Detector::draw(cv::Mat& frame, const std::vector<Robot*>& robots, const std::vector<Obstacle*>& obstacles) {
     cv::Mat img;
     _projection.remap(frame, img);
+    // cv::drawContours(img, _contours, -1, cv::Scalar(255,0,0));
 
     // coordinate system
     cv::Scalar gray(77, 76, 75);
@@ -112,6 +113,8 @@ cv::Mat Detector::get_mask(const cv::Mat& frame) {
     // background subtraction
     cv::absdiff(_background, frame, mask);
     cv::cvtColor(mask, mask, CV_RGB2GRAY);
+    cv::GaussianBlur(mask, mask, cv::Size(0,0), 2.5, 0);
+
     cv::threshold(mask, mask, _th_bg_subtraction, 255, cv::THRESH_BINARY);
     // remove speckles by dilation-erosion
     cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7), cv::Point(3, 3));
@@ -125,7 +128,6 @@ std::vector<std::vector<cv::Point>> Detector::get_contours(const cv::Mat& mask) 
     std::vector<cv::Vec4i> hierarchy;
     std::vector<std::vector<cv::Point>> contours;
     cv::findContours(mask, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
     return contours;
 }
 

@@ -115,7 +115,7 @@ void Robot::draw_box(cv::Mat& frame, Projection& projection) const {
 
 void Robot::draw(cv::Mat& frame, Projection& projection) const {
     draw_markers(frame, projection);
-    draw_id(frame, projection);
+    // draw_id(frame, projection);
     draw_box(frame, projection);
 }
 

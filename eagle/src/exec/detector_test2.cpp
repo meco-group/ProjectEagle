@@ -3,6 +3,8 @@
 using namespace eagle;
 
 int main(int argc, char* argv[]) {
+    double frequency = (argc > 1) ? std::stod(argv[1]) : 1000;
+
     // read config file
     cv::FileStorage fs(CONFIG_PATH, cv::FileStorage::READ);
     std::string background_path = fs["detector"]["background_path"];
@@ -24,7 +26,14 @@ int main(int argc, char* argv[]) {
     Camera* cam = getCamera(CONFIG_PATH);
     cam->start();
 
+    int dt = int(1000. / frequency);
+    auto t0 = std::chrono::high_resolution_clock::now();
     while ( !kbhit() ) {
+        // check time
+        auto t = std::chrono::high_resolution_clock::now();
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(t - t0).count() < dt) {
+            continue;
+        }
         cam->read(image);
         detector.search(image, robots, obstacles);
         image2 = detector.draw(image, robots, obstacles);
