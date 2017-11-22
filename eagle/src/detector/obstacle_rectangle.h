@@ -10,6 +10,7 @@ class RectangleObstacle : public Obstacle {
     cv::RotatedRect _rect;
 
   public:
+    RectangleObstacle(const cv::Point2f& center, const cv::Point2f& size, double angle);
     RectangleObstacle(const cv::RotatedRect& rect);
     RectangleObstacle(const eagle::obstacle_t& obst);
 
@@ -22,7 +23,6 @@ class RectangleObstacle : public Obstacle {
     virtual std::vector<cv::Point2f> points2(uint N = 100) const;
 
     virtual eagle::obstacle_t serialize() const;
-
 };
 };
 

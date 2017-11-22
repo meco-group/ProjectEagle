@@ -11,14 +11,18 @@ void Robot::update(const std::vector<cv::Point3f>& markers) {
     _detected = true;
 }
 
+void Robot::update(const cv::Point3f& translation, const cv::Point3f& rotation) {
+    _markers.clear();
+    _translation = translation;
+    _rotation = rotation;
+    _detected = true;
+}
+
 void Robot::update(const eagle::marker_t& marker) {
     if (marker.id != _id) {
         return;
     }
-    _markers.clear();
-    _translation = cv::Point3f(marker.x, marker.y, marker.z);
-    _rotation = cv::Point3f(marker.roll, marker.pitch, marker.yaw);
-    _detected = true;
+    update(cv::Point3f(marker.x, marker.y, marker.z), cv::Point3f(marker.roll, marker.pitch, marker.yaw));
 }
 
 eagle::marker_t Robot::serialize() const {
@@ -95,7 +99,7 @@ void Robot::draw_markers(cv::Mat& frame, Projection& projection) const {
 
 void Robot::draw_id(cv::Mat& frame, Projection& projection) const {
     // id
-     if (_markers.size() >= 7) {
+    if (_markers.size() >= 7) {
         std::vector<cv::Point2f> markers_cam = projection.project_to_image(_markers);
         markers_cam.push_back(markers_cam[3]);
         for (unsigned int k = 4; k < markers_cam.size(); k++) {
@@ -139,4 +143,3 @@ cv::Point3f Robot::ez(const std::vector<cv::Point3f>& markers) const {
 
     return ez;
 }
-

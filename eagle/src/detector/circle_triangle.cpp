@@ -5,14 +5,14 @@ using namespace eagle;
 
 CircleTriangle::CircleTriangle(const cv::String& config) {
     cv::FileStorage fs(config, cv::FileStorage::READ);
-    double min_obstacle_area = (double)fs["detector"]["min_obstacle_area"];
-    double triangle_ratio = (double)fs["detector"]["markers"]["triangle_ratio"];
-    double qr_posx = (double)fs["detector"]["markers"]["qr_posx"];
-    double qr_posy = (double)fs["detector"]["markers"]["qr_posy"];
-    double qr_sizex = (double)fs["detector"]["markers"]["qr_sizex"];
-    double qr_sizey = (double)fs["detector"]["markers"]["qr_sizey"];
-    double qr_nbitx = (int)fs["detector"]["markers"]["qr_nbitx"];
-    double qr_nbity = (int)fs["detector"]["markers"]["qr_nbity"];
+    // double min_obstacle_area = (double)fs["detector"]["min_obstacle_area"];
+    // double triangle_ratio = (double)fs["detector"]["markers"]["triangle_ratio"];
+    // double qr_posx = (double)fs["detector"]["markers"]["qr_posx"];
+    // double qr_posy = (double)fs["detector"]["markers"]["qr_posy"];
+    // double qr_sizex = (double)fs["detector"]["markers"]["qr_sizex"];
+    // double qr_sizey = (double)fs["detector"]["markers"]["qr_sizey"];
+    // double qr_nbitx = (int)fs["detector"]["markers"]["qr_nbitx"];
+    // double qr_nbity = (int)fs["detector"]["markers"]["qr_nbity"];
     _th_triangle_ratio = (double)fs["detector"]["thresholds"]["triangle_ratio"];
     _th_top_marker = (double)fs["detector"]["thresholds"]["top_marker"];
     fs.release();
@@ -24,8 +24,8 @@ CircleTriangle::CircleTriangle(const cv::Point2f& dimension, const cv::Point2f& 
 }
 
 std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img) const {
-    int t;
-    return find(img, t, false);
+    int id;
+    return find(img, id, false);
 }
 
 std::vector<cv::Point2f> CircleTriangle::find(cv::Mat& img, int& id, bool draw) const {

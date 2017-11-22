@@ -35,6 +35,7 @@ class Robot {
     Robot(unsigned int id, double dx = 1.0, double dy = 1.0, const cv::Scalar& color = cv::Scalar(17, 110, 138));
 
     // setters
+    void update(const cv::Point3f& translation, const cv::Point3f& rotation);
     void update(const std::vector<cv::Point3f>& markers);
     void update(const eagle::marker_t& marker);
     void reset() { _detected = false; }

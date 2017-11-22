@@ -77,6 +77,10 @@ class Message {
     read(1, frames, sizes);
   }
 
+  bool empty() {
+    return _buffer_size == 0;
+  }
+
   void dump_frame() {
     communicator_size_t size;
     memcpy(&size, ((uint8_t*)_buffer) + _buffer_index, sizeof(communicator_size_t));

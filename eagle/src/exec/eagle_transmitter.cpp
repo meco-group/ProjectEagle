@@ -232,13 +232,14 @@ int main(int argc, char* argv[]) {
     eagle::header_t imheader;
     imheader.id = eagle::IMAGE;
     cv::Mat im;
+    cam->read(im);
 
     int dt = int(1000. / update_frequency); //in milliseconds
     auto t0 = std::chrono::high_resolution_clock::now();
     double t_cap, t_det, t_com;
     unsigned long capture_time;
 
-    cv::Mat background = cv::Mat(cam->getHeight(), cam->getWidth(), CV_32FC3, cv::Scalar(0, 0, 0));
+    cv::Mat background = cv::Mat(im.size().height, im.size().width, CV_32FC3, cv::Scalar(0, 0, 0));
     int bg_counter = 0;
 
     while ( !kbhit() ) {
@@ -287,7 +288,7 @@ int main(int argc, char* argv[]) {
 
                 //re-init
                 settings.background = false;
-                background = cv::Mat(cam->getHeight(), cam->getWidth(), CV_32FC3, cv::Scalar(0, 0, 0));
+                background = cv::Mat(im.size().height, im.size().width, CV_32FC3, cv::Scalar(0, 0, 0));
                 bg_counter = 0;
             }
         }
