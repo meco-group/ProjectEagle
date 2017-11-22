@@ -1,13 +1,5 @@
 #!/usr/bin/python
 
-"""
-This script deploys remote odroids and local pc.
-Run ./deploy.py --help for available options.
-
-Ruben Van Parys - 2016/2017
-Maarten Verbandt - 2017/2018
-"""
-
 import subprocess
 import optparse
 import os
@@ -20,7 +12,7 @@ import math
 import socket
 
 # parameters
-user = 'odroid' #os.getenv('USER') # default: user with same name as on emperor
+user = 'odroid'
 password = user
 remote_root = os.path.join('/home/' + user, 'ProjectEagle/eagle/build')
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -130,20 +122,11 @@ def deploy(hosts):
             bash -c '
             sshpass -p %s ssh %s@%s "
             killall -9 EagleTransmitter
-            cd %s
             echo I am %s
-            ./bin/EagleTransmitter %s
+            eagle_transmitter %s
             "'
-            ''' % (password, user, address, remote_root, host, host)
-        ])  
-    command.extend(['--tab', '-e', '''
-        bash -c '
-        cd %s
-        echo I am Penguin
-        bash
-        '
-        ''' % (local_root)
-    ])
+            ''' % (password, user, address, host, host)
+        ])
     subprocess.call(command)
 
 if __name__ == "__main__":
