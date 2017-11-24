@@ -9,6 +9,7 @@ Collector::Collector() {
 void Collector::add(const std::string& peer, const std::vector<marker_t>& robots, std::vector<uint32_t>& timestamps) {
     // only keep most recent robots
     _robot_map[peer].clear();
+    _robot_time_map[peer].clear();
     for (int i = 0; i < robots.size(); i++) {
         int j = 0;
         while (true) {
@@ -38,6 +39,7 @@ void Collector::add(const std::string& peer, const std::vector<obstacle_t>& obst
 void Collector::add(const std::string& peer, const std::vector<Obstacle*>& obstacles, std::vector<uint32_t>& timestamps) {
     // only keep most recent obstacles
     _obstacle_map[peer].clear();
+    _obstacle_time_map[peer].clear();
     for (int i = 0; i < obstacles.size(); i++) {
         int j = 0;
         while (true) {

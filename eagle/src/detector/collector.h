@@ -6,7 +6,7 @@
 #include "obstacle_rectangle.h"
 #include "obstacle_circle.h"
 #include <map>
-
+#include <stdint.h>
 
 namespace eagle {
 
