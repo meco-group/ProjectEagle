@@ -153,7 +153,6 @@ void Collector::merge_obstacles(std::vector<Obstacle*>& obstacles, std::vector<u
             }
         }
         if (robst_i != NULL) {
-            std::cout << "i am a rectangle" << std::endl;
             int n_sim = similars.size();
             cv::Point2f center = (1. / (n_sim + 1)) * robst_i->center();
             cv::Point2f size(robst_i->width(), robst_i->height());
@@ -168,11 +167,9 @@ void Collector::merge_obstacles(std::vector<Obstacle*>& obstacles, std::vector<u
                 time += sim_times[k] / (n_sim + 1);
             }
             obstacles.push_back(new RectangleObstacle(center, size, angle));
-            std::cout << "obst size: " << obstacles.size() << std::endl;
             timestamps.push_back(time);
         }
         if (cobst_i != NULL) {
-            std::cout << "i am a circle" << std::endl;
             int n_sim = similars.size();
             cv::Point2f center = (1. / (n_sim + 1)) * cobst_i->center();
             double radius = (1. / (n_sim + 1)) * cobst_i->radius();
@@ -186,6 +183,5 @@ void Collector::merge_obstacles(std::vector<Obstacle*>& obstacles, std::vector<u
             obstacles.push_back(new CircleObstacle(center, radius));
             timestamps.push_back(time);
         }
-        std::cout << "obst size 2: " << obstacles.size() << std::endl;
     }
 }
