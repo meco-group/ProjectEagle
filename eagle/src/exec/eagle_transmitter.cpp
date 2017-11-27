@@ -57,9 +57,7 @@ void transmit_detected(Communicator& com, const std::vector<Robot*>& robots, con
     }
 
     // send everything
-    if (sizes.size() > 0) {
-        com.shout(data, sizes, group);
-    }
+    com.shout(data, sizes, group);
 }
 
 void process_communication(Communicator& com, settings_t& settings) {
