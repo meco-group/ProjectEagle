@@ -29,7 +29,7 @@ int kbhit() {
     return FD_ISSET(STDIN_FILENO, &fds);
 }
 
-unsigned long timestamp() {
+uint32_t timestamp() {
     return std::chrono::duration_cast< std::chrono::milliseconds >(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 

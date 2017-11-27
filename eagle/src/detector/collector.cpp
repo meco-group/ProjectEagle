@@ -6,9 +6,10 @@ Collector::Collector() {
 
 }
 
-void Collector::add(const std::string& peer, const std::vector<marker_t>& robots, std::vector<unsigned long>& timestamps) {
+void Collector::add(const std::string& peer, const std::vector<marker_t>& robots, std::vector<uint32_t>& timestamps) {
     // only keep most recent robots
     _robot_map[peer].clear();
+    _robot_time_map[peer].clear();
     for (int i = 0; i < robots.size(); i++) {
         int j = 0;
         while (true) {
@@ -27,7 +28,7 @@ void Collector::add(const std::string& peer, const std::vector<marker_t>& robots
     }
 }
 
-void Collector::add(const std::string& peer, const std::vector<obstacle_t>& obstacles, std::vector<unsigned long>& timestamps) {
+void Collector::add(const std::string& peer, const std::vector<obstacle_t>& obstacles, std::vector<uint32_t>& timestamps) {
     std::vector<Obstacle*> obst;
     for (int k = 0; k < obstacles.size(); k++) {
         obst.push_back(Obstacle::deserialize(obstacles[k]));
@@ -35,9 +36,10 @@ void Collector::add(const std::string& peer, const std::vector<obstacle_t>& obst
     add(peer, obst, timestamps);
 }
 
-void Collector::add(const std::string& peer, const std::vector<Obstacle*>& obstacles, std::vector<unsigned long>& timestamps) {
+void Collector::add(const std::string& peer, const std::vector<Obstacle*>& obstacles, std::vector<uint32_t>& timestamps) {
     // only keep most recent obstacles
     _obstacle_map[peer].clear();
+    _obstacle_time_map[peer].clear();
     for (int i = 0; i < obstacles.size(); i++) {
         int j = 0;
         while (true) {
@@ -57,20 +59,20 @@ void Collector::add(const std::string& peer, const std::vector<Obstacle*>& obsta
 }
 
 
-void Collector::robots(std::vector<Robot*>& robots, std::vector<unsigned long>& timestamps) {
+void Collector::robots(std::vector<Robot*>& robots, std::vector<uint32_t>& timestamps) {
     merge_robots(robots, timestamps);
 
 }
 
-void Collector::obstacles(std::vector<Obstacle*>& obstacles, std::vector<unsigned long>& timestamps) {
+void Collector::obstacles(std::vector<Obstacle*>& obstacles, std::vector<uint32_t>& timestamps) {
     merge_obstacles(obstacles, timestamps);
 }
 
-void Collector::merge_robots(std::vector<Robot*>& robots, std::vector<unsigned long>& timestamps) {
+void Collector::merge_robots(std::vector<Robot*>& robots, std::vector<uint32_t>& timestamps) {
     timestamps.clear();
     timestamps.resize(robots.size());
     std::vector<marker_t> robs;
-    std::vector<unsigned long> tims;
+    std::vector<uint32_t> tims;
     for (std::map<std::string, std::vector<marker_t>>::iterator rob = _robot_map.begin(); rob != _robot_map.end(); ++rob) {
         for (uint k = 0; k < rob->second.size(); k++) {
             robs.push_back(rob->second[k]);
@@ -78,7 +80,7 @@ void Collector::merge_robots(std::vector<Robot*>& robots, std::vector<unsigned l
         }
     }
     std::vector<marker_t> similars;
-    std::vector<unsigned long> sim_times;
+    std::vector<uint32_t> sim_times;
     for (uint i = 0; i < robs.size(); i++) {
         similars.clear();
         for (uint j = i + 1; j < robs.size(); j++) {
@@ -95,7 +97,7 @@ void Collector::merge_robots(std::vector<Robot*>& robots, std::vector<unsigned l
         cv::Point3f rotation(robs[i].roll, robs[i].pitch, robs[i].yaw);
         translation *= (1. / (n_sim + 1));
         rotation *= (1. / (n_sim + 1));
-        unsigned long time = tims[i] / (n_sim + 1);
+        uint32_t time = tims[i] / (n_sim + 1);
         for (uint k = 0; k < n_sim; k++) {
             translation += (1. / (n_sim + 1)) * cv::Point3f(similars[k].x, similars[k].y, similars[k].z);
             rotation += (1. / (n_sim + 1)) * cv::Point3f(similars[k].roll, similars[k].pitch, similars[k].yaw);
@@ -111,11 +113,11 @@ void Collector::merge_robots(std::vector<Robot*>& robots, std::vector<unsigned l
 }
 
 
-void Collector::merge_obstacles(std::vector<Obstacle*>& obstacles, std::vector<unsigned long>& timestamps) {
+void Collector::merge_obstacles(std::vector<Obstacle*>& obstacles, std::vector<uint32_t>& timestamps) {
     timestamps.clear();
     obstacles.clear();
     std::vector<Obstacle*> obst;
-    std::vector<unsigned long> tims;
+    std::vector<uint32_t> tims;
     for (std::map<std::string, std::vector<Obstacle*>>::iterator obs = _obstacle_map.begin(); obs != _obstacle_map.end(); ++obs) {
         for (uint k = 0; k < obs->second.size(); k++) {
             obst.push_back(obs->second[k]);
@@ -123,7 +125,7 @@ void Collector::merge_obstacles(std::vector<Obstacle*>& obstacles, std::vector<u
         }
     }
     std::vector<eagle::Obstacle*> similars;
-    std::vector<unsigned long> sim_times;
+    std::vector<uint32_t> sim_times;
     for (uint i = 0; i < obst.size(); i++) {
         RectangleObstacle* robst_i = dynamic_cast<RectangleObstacle*>(obst[i]);
         CircleObstacle* cobst_i = dynamic_cast<CircleObstacle*>(obst[i]);
@@ -151,13 +153,12 @@ void Collector::merge_obstacles(std::vector<Obstacle*>& obstacles, std::vector<u
             }
         }
         if (robst_i != NULL) {
-            std::cout << "i am a rectangle" << std::endl;
             int n_sim = similars.size();
             cv::Point2f center = (1. / (n_sim + 1)) * robst_i->center();
             cv::Point2f size(robst_i->width(), robst_i->height());
             size *= (1. / (n_sim + 1));
             double angle = (1. / (n_sim + 1)) * robst_i->angle();
-            unsigned long time = tims[i] / (n_sim + 1);
+            uint32_t time = tims[i] / (n_sim + 1);
             for (uint k = 0; k < n_sim; k++) {
                 RectangleObstacle* robst_j = dynamic_cast<RectangleObstacle*>(similars[k]);
                 center += (1. / (n_sim + 1)) * robst_j->center();
@@ -166,15 +167,13 @@ void Collector::merge_obstacles(std::vector<Obstacle*>& obstacles, std::vector<u
                 time += sim_times[k] / (n_sim + 1);
             }
             obstacles.push_back(new RectangleObstacle(center, size, angle));
-            std::cout << "obst size: " << obstacles.size() << std::endl;
             timestamps.push_back(time);
         }
         if (cobst_i != NULL) {
-            std::cout << "i am a circle" << std::endl;
             int n_sim = similars.size();
             cv::Point2f center = (1. / (n_sim + 1)) * cobst_i->center();
             double radius = (1. / (n_sim + 1)) * cobst_i->radius();
-            unsigned long time = tims[i] / (n_sim + 1);
+            uint32_t time = tims[i] / (n_sim + 1);
             for (uint k = 0; k < n_sim; k++) {
                 CircleObstacle* cobst_j = dynamic_cast<CircleObstacle*>(similars[k]);
                 center += (1. / (n_sim + 1)) * cobst_j->center();
@@ -184,6 +183,5 @@ void Collector::merge_obstacles(std::vector<Obstacle*>& obstacles, std::vector<u
             obstacles.push_back(new CircleObstacle(center, radius));
             timestamps.push_back(time);
         }
-        std::cout << "obst size 2: " << obstacles.size() << std::endl;
     }
 }
