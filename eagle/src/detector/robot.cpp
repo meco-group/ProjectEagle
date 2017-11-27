@@ -3,7 +3,10 @@
 using namespace eagle;
 
 Robot::Robot(unsigned int id, double dx, double dy, const cv::Scalar& color) :
-    _id(id), _dx(dx), _dy(dy), _color(color), _detected(false) {}
+    Robot(id, dx, dy, cv::Point3f(0, 0, 0), color) {}
+
+Robot::Robot(unsigned int id, double dx, double dy, const cv::Point3f& marker_translation, const cv::Scalar& color) :
+    _id(id), _dx(dx), _dy(dy), _marker_translation(marker_translation), _color(color), _detected(false) {}
 
 void Robot::update(const std::vector<cv::Point3f>& markers) {
     _markers = markers;
@@ -41,11 +44,11 @@ eagle::marker_t Robot::serialize() const {
 }
 
 void Robot::compute_pose(const std::vector<cv::Point3f>& markers) {
-    _translation = ((1. / 2.) * (markers[0] + markers[1]));
     std::vector<cv::Point3f> unitvectors {ex(markers), ey(markers), ez(markers)};
     cv::Mat R(unitvectors.size(), 3, CV_32FC1, unitvectors.data());
     R = R.t();
     _rotation = get_euler(R);
+    _translation = ((1. / 2.) * (markers[0] + markers[1])) + cv::Point3f(cv::Mat(R*cv::Mat(_marker_translation)));
 }
 
 std::string Robot::to_string() const {

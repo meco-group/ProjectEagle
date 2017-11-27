@@ -20,6 +20,7 @@ class Robot {
     unsigned int _id;
     double _dx;
     double _dy;
+    cv::Point3f _marker_translation;
     bool _detected;
     cv::Scalar _color;
     std::vector<cv::Point3f> _markers;
@@ -33,6 +34,7 @@ class Robot {
 
   public:
     Robot(unsigned int id, double dx = 1.0, double dy = 1.0, const cv::Scalar& color = cv::Scalar(17, 110, 138));
+    Robot(unsigned int id, double dx = 1.0, double dy = 1.0, const cv::Point3f& _marker_translation = cv::Point3f(0, 0, 0), const cv::Scalar& color = cv::Scalar(17, 110, 138));
 
     // setters
     void update(const cv::Point3f& translation, const cv::Point3f& rotation);
