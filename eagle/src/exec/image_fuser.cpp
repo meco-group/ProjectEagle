@@ -18,11 +18,15 @@ int main(int argc, char* argv[]) {
     // read image 1 and remap
     img = cv::imread(images_path1);
     cv::Mat img1;
+    Projection projection1(config_path1);
+    projection1.remap(img,img);
     remapinf(config_path1, img, img1, pixels_per_meter, img_size, height);
 
     // read image 2 and remap
     img = cv::imread(images_path2);
     cv::Mat img2;
+    Projection projection2(config_path2);
+    projection2.remap(img,img);
     remapinf(config_path2, img, img2, pixels_per_meter, img_size, height);
 
     // blend images

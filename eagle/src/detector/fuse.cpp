@@ -1,19 +1,51 @@
 #include "fuse.h"
 
-void eagle::remapinf(std::string config, const cv::Mat& img, cv::Mat& warped, uint r, const cv::Size& siz, double z0) {
+using namespace eagle;
+
+void eagle::remapinf(std::string config, const cv::Mat& img, cv::Mat& warped, const float k, const cv::Size& siz, double z0) {
     // Init projection object
-    std::cout << config << std::endl;
     Projection projection(config);
-    cv::Size rsiz = cv::Size(siz.width * r, siz.height * r);
 
-    // Rectify image -> already done by eagle
+    cv::Size ksiz = cv::Size(siz.width * k, siz.height * k);
+    cv::Point2f offset(ksiz.height*0.5,ksiz.width*0.5);
 
+    // Do remapping
+    remapinf_canvas(projection, img, warped, k, offset, ksiz, z0);
+}
+
+void eagle::remapinf_cropped(std::string config, const cv::Mat& img, cv::Mat& warped, const float k, cv::Point2f& offset, double z0) {
+    // Init projection object
+    Projection projection(config);
+
+    std::vector<cv::Point2f> corners(4);
+    corners[0] = cv::Point2f(0,0);
+    corners[1] = cv::Point2f(img.rows,0);
+    corners[2] = cv::Point2f(0,img.cols);
+    corners[3] = cv::Point2f(img.rows,img.cols);
+
+    cv::Mat plane = (cv::Mat_<float>(1,4) << 0,0,1,-z0);
+    cv::Point3f t;
+    for (uint k=0; k<corners.size(); k++) {
+        t = projection.project_to_plane(corners[k], plane);
+        corners[k] = cv::Point2f(t.x,t.y);
+    }
+    cv::Rect rect = cv::boundingRect(corners);
+
+    cv::Size siz(rect.width, rect.height);
+    offset = cv::Point2f(rect.x*k,rect.y*k);
+
+    // Do remapping
+    remapinf_canvas(projection, img, warped, k, offset, siz, z0);
+}
+
+void eagle::remapinf_canvas(Projection& projection, const cv::Mat& img, cv::Mat& warped, const float k, cv::Point2f& offset, cv::Size& siz, double z0) {
     // Construct homography matrix
-    cv::Mat S = (cv::Mat_<float>(3, 3) << r, 0, rsiz.width * 0.5, 0, r, rsiz.height * 0.5, 0, 0, 1);
+    // offset and siz in px
+    cv::Mat S = (cv::Mat_<float>(3, 3) << k, 0, offset.x, 0, k, offset.y, 0, 0, 1);
     cv::Mat H = S * projection.get_homography(z0);
 
     // Warp image
-    cv::warpPerspective(img, warped, H, rsiz);
+    cv::warpPerspective(img, warped, H, siz);
 }
 
 void eagle::overlay(const cv::Mat& in1, const cv::Mat& in2, cv::Mat& out) {
