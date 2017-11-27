@@ -18,8 +18,13 @@ void eagle::remapinf(std::string config, const cv::Mat& img, cv::Mat& warped, ui
 
 void eagle::overlay(const cv::Mat& in1, const cv::Mat& in2, cv::Mat& out) {
     cv::Mat in1_grey, in2_grey, union_mask, union_im;
+    std::vector<std::vector<cv::Point2i>> contours;
     cv::cvtColor(in1, in1_grey, CV_BGR2GRAY);
+    cv::findContours(in1_grey, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+    cv::fillPoly(in1_grey, contours, cv::Scalar(127,127,127));
     cv::cvtColor(in2, in2_grey, CV_BGR2GRAY);
+    cv::findContours(in2_grey, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+    cv::fillPoly(in2_grey, contours, cv::Scalar(127,127,127));
     cv::bitwise_and(in1_grey, in2_grey, union_mask);
     cv::addWeighted(in1, 0.5, in2, 0.5, 0, union_im);
 
