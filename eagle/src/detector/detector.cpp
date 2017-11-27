@@ -147,19 +147,32 @@ void Detector::detect_robots(const cv::Mat& frame, const std::vector<std::vector
         roi_rectangle = cv::boundingRect(contour);
         roi_location = cv::Point2f(roi_rectangle.x, roi_rectangle.y);
         frame(roi_rectangle).copyTo(roi);
-
-        marker_points2 = pat.find(roi, id, false);
-        for (uint i = 0; i < marker_points2.size(); i++)
-            marker_points2[i] += roi_location;
-        marker_points3 = _projection.project_to_plane(marker_points2, _marker_plane);
-        // test with pnp extractor
-        //cloud3_t pnppoints;
-        //pnppoints = _extr->extract(roi, roi_location, id, false);
-
-        for (uint i = 0; i < robots.size(); i++) {
-            if (id == robots[i]->code()) {
-                //robots[i]->update(pnppoints);
-                robots[i]->update(marker_points3);
+        bool search = true;
+        while (search) {
+            marker_points2 = pat.find(roi, id, false);
+            for (uint i = 0; i < marker_points2.size(); i++)
+                marker_points2[i] += roi_location;
+            marker_points3 = _projection.project_to_plane(marker_points2, _marker_plane);
+            // test with pnp extractor
+            //cloud3_t pnppoints;
+            //pnppoints = _extr->extract(roi, roi_location, id, false);
+            for (uint i = 0; i < robots.size(); i++) {
+                if (id == robots[i]->code()) {
+                    search = true;
+                    //robots[i]->update(pnppoints);
+                    robots[i]->update(marker_points3);
+                }
+            }
+            if (marker_points3.size() > 0) {
+                // subtract markerpoints from roi
+                std::vector<cv::Point2f> pnts = _projection.project_to_image(marker_points3);
+                std::vector<cv::Point> pnts2(pnts.size());
+                for (uint l = 0; l < pnts.size(); l++) {
+                    pnts2[l] = pnts[l] - roi_location;
+                }
+                cv::drawContours(roi, std::vector<std::vector<cv::Point>>({pnts2}), -1, cv::Scalar(0, 0, 0), -1);
+            } else {
+                search = false;
             }
         }
     }
