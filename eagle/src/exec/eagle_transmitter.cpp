@@ -212,7 +212,8 @@ int main(int argc, char* argv[]) {
     Robot dave(0, 0.55, 0.4, cv::Scalar(138, 110, 17));
     Robot krist(1, 0.55, 0.4, cv::Scalar(17, 31, 138));
     Robot kurt(9, 0.55, 0.4, cv::Scalar(19, 138, 17));
-    std::vector< Robot* > robots = std::vector< Robot* > {&dave, &krist, &kurt};
+    Robot table(2, 0.55, 0.4, cv::Scalar(0, 255, 0));
+    std::vector< Robot* > robots = std::vector< Robot* > {&dave, &krist, &kurt, &table};
     std::vector< Obstacle* > obstacles;
 
     if (settings.image_viewer_on) {

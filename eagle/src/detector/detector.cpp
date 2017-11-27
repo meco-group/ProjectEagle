@@ -177,7 +177,6 @@ void Detector::detect_robots(const cv::Mat& frame, const std::vector<std::vector
                 }
                 cv::minEnclosingCircle(pnts2, circle_center, circle_radius);
                 cv::circle(roi, circle_center, 1.1*circle_radius, cv::Scalar(0, 0, 0), -1);
-                cv::imshow("roi", roi);
             } else {
                 search = false;
             }
