@@ -141,6 +141,8 @@ void Detector::detect_robots(const cv::Mat& frame, const std::vector<std::vector
     cv::Rect roi_rectangle; //region-of-interest rectangle
     cv::Point2f roi_location;
     cv::Mat roi;
+    cv::Point2f circle_center;
+    float circle_radius;
     int id;
     for (uint i = 0; i < contours.size(); i++) {
         cv::convexHull(contours[i], contour);
@@ -166,11 +168,16 @@ void Detector::detect_robots(const cv::Mat& frame, const std::vector<std::vector
             if (marker_points3.size() > 0) {
                 // subtract markerpoints from roi
                 std::vector<cv::Point2f> pnts = _projection.project_to_image(marker_points3);
-                std::vector<cv::Point> pnts2(pnts.size());
+                std::vector<cv::Point2f> pnts2;
                 for (uint l = 0; l < pnts.size(); l++) {
-                    pnts2[l] = pnts[l] - roi_location;
+                    cv::Point pnt2 = pnts[l] - roi_location;
+                    if (pnt2.x != 0 && pnt2.y != 0) {
+                        pnts2.push_back(pnt2);
+                    }
                 }
-                cv::drawContours(roi, std::vector<std::vector<cv::Point>>({pnts2}), -1, cv::Scalar(0, 0, 0), -1);
+                cv::minEnclosingCircle(pnts2, circle_center, circle_radius);
+                cv::circle(roi, circle_center, 1.1*circle_radius, cv::Scalar(0, 0, 0), -1);
+                cv::imshow("roi", roi);
             } else {
                 search = false;
             }
