@@ -11,9 +11,9 @@ int main(int argc, char* argv[]) {
     fs.release();
 
     // robots and obstacles that the detector should search for
-    Robot dave(0, 0.55, 0.4, cv::Scalar(138, 110, 17));
-    Robot krist(1, 0.55, 0.4, cv::Scalar(17, 31, 138));
-    Robot kurt(9, 0.55, 0.4, cv::Scalar(19, 138, 17));
+    Robot dave(0, 0.55, 0.4, cv::Point3f(0,0,0), cv::Scalar(138, 110, 17));
+    Robot krist(1, 0.55, 0.4, cv::Point3f(0,0,0), cv::Scalar(17, 31, 138));
+    Robot kurt(9, 0.55, 0.4, cv::Point3f(0. ,0.,0), cv::Scalar(19, 138, 17));
     std::vector< Robot* > robots = std::vector< Robot* > {&dave, &krist, &kurt};
     std::vector< Obstacle* > obstacles;
     cv::Mat image, image2, background;

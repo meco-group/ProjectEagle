@@ -1,6 +1,8 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
+#include <stdint.h>
+
 namespace eagle {
 
 /* helpers */
@@ -27,11 +29,11 @@ typedef struct point_t {
 /* protocol messages */
 typedef struct header_t {
     msg_t id;
-    unsigned long time;
+    uint32_t time;
 } header_t;
 
 typedef struct marker_t {
-    unsigned  int id;
+    uint16_t id;
     double x;
     double y;
     double z;
@@ -41,7 +43,7 @@ typedef struct marker_t {
 } robot_t;
 
 typedef struct obstacle_t {
-    unsigned int id;
+    uint16_t id;
     shape_t shape;
     point_t p1;
     point_t p2;

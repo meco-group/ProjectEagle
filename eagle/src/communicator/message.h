@@ -17,7 +17,7 @@ class Message {
  private:
   std::string _peer;
   void* _buffer;
-  size_t _buffer_size;
+  communicator_size_t _buffer_size;
   unsigned int _buffer_index;
 
  public:
@@ -38,7 +38,7 @@ class Message {
     return _peer;
   }
 
-  size_t size() {
+  communicator_size_t size() {
     return _buffer_size;
   }
 
@@ -75,6 +75,10 @@ class Message {
     std::vector<void*> frames = {frame};
     std::vector<size_t> sizes = {0};
     read(1, frames, sizes);
+  }
+
+  bool empty() {
+    return _buffer_size == 0;
   }
 
   void dump_frame() {

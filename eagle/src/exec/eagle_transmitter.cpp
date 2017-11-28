@@ -57,9 +57,7 @@ void transmit_detected(Communicator& com, const std::vector<Robot*>& robots, con
     }
 
     // send everything
-    if (sizes.size() > 0) {
-        com.shout(data, sizes, group);
-    }
+    com.shout(data, sizes, group);
 }
 
 void process_communication(Communicator& com, settings_t& settings) {
@@ -214,7 +212,8 @@ int main(int argc, char* argv[]) {
     Robot dave(0, 0.55, 0.4, cv::Scalar(138, 110, 17));
     Robot krist(1, 0.55, 0.4, cv::Scalar(17, 31, 138));
     Robot kurt(9, 0.55, 0.4, cv::Scalar(19, 138, 17));
-    std::vector< Robot* > robots = std::vector< Robot* > {&dave, &krist, &kurt};
+    Robot table(2, 1.1, 1.2, cv::Point3f(-0.4705, -0.4175, 0.), cv::Scalar(64, 64, 169));
+    std::vector< Robot* > robots = std::vector< Robot* > {&dave, &krist, &kurt, &table};
     std::vector< Obstacle* > obstacles;
 
     if (settings.image_viewer_on) {
@@ -232,13 +231,14 @@ int main(int argc, char* argv[]) {
     eagle::header_t imheader;
     imheader.id = eagle::IMAGE;
     cv::Mat im;
+    cam->read(im);
 
     int dt = int(1000. / update_frequency); //in milliseconds
     auto t0 = std::chrono::high_resolution_clock::now();
     double t_cap, t_det, t_com;
     unsigned long capture_time;
 
-    cv::Mat background = cv::Mat(cam->getHeight(), cam->getWidth(), CV_32FC3, cv::Scalar(0, 0, 0));
+    cv::Mat background = cv::Mat(im.size().height, im.size().width, CV_32FC3, cv::Scalar(0, 0, 0));
     int bg_counter = 0;
 
     while ( !kbhit() ) {
@@ -287,7 +287,7 @@ int main(int argc, char* argv[]) {
 
                 //re-init
                 settings.background = false;
-                background = cv::Mat(cam->getHeight(), cam->getWidth(), CV_32FC3, cv::Scalar(0, 0, 0));
+                background = cv::Mat(im.size().height, im.size().width, CV_32FC3, cv::Scalar(0, 0, 0));
                 bg_counter = 0;
             }
         }

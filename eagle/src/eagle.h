@@ -3,6 +3,7 @@
 #include "communicator/message.h"
 #include "communicator/communicator.h"
 #include "detector/pnp_pattern_extractor3.h"
+#include "detector/collector.h"
 #include "detector/transform.h"
 #include "detector/robot.h"
 #include "detector/obstacle_rectangle.h"

@@ -141,25 +141,44 @@ void Detector::detect_robots(const cv::Mat& frame, const std::vector<std::vector
     cv::Rect roi_rectangle; //region-of-interest rectangle
     cv::Point2f roi_location;
     cv::Mat roi;
+    cv::Point2f circle_center;
+    float circle_radius;
     int id;
     for (uint i = 0; i < contours.size(); i++) {
         cv::convexHull(contours[i], contour);
         roi_rectangle = cv::boundingRect(contour);
         roi_location = cv::Point2f(roi_rectangle.x, roi_rectangle.y);
         frame(roi_rectangle).copyTo(roi);
-
-        marker_points2 = pat.find(roi, id, false);
-        for (uint i = 0; i < marker_points2.size(); i++)
-            marker_points2[i] += roi_location;
-        marker_points3 = _projection.project_to_plane(marker_points2, _marker_plane);
-        // test with pnp extractor
-        //cloud3_t pnppoints;
-        //pnppoints = _extr->extract(roi, roi_location, id, false);
-
-        for (uint i = 0; i < robots.size(); i++) {
-            if (id == robots[i]->code()) {
-                //robots[i]->update(pnppoints);
-                robots[i]->update(marker_points3);
+        bool search = true;
+        while (search) {
+            marker_points2 = pat.find(roi, id, false);
+            for (uint i = 0; i < marker_points2.size(); i++)
+                marker_points2[i] += roi_location;
+            marker_points3 = _projection.project_to_plane(marker_points2, _marker_plane);
+            // test with pnp extractor
+            //cloud3_t pnppoints;
+            //pnppoints = _extr->extract(roi, roi_location, id, false);
+            for (uint i = 0; i < robots.size(); i++) {
+                if (id == robots[i]->code()) {
+                    search = true;
+                    //robots[i]->update(pnppoints);
+                    robots[i]->update(marker_points3);
+                }
+            }
+            if (marker_points3.size() > 0) {
+                // subtract markerpoints from roi
+                std::vector<cv::Point2f> pnts = _projection.project_to_image(marker_points3);
+                std::vector<cv::Point2f> pnts2;
+                for (uint l = 0; l < pnts.size(); l++) {
+                    cv::Point pnt2 = pnts[l] - roi_location;
+                    if (pnt2.x != 0 && pnt2.y != 0) {
+                        pnts2.push_back(pnt2);
+                    }
+                }
+                cv::minEnclosingCircle(pnts2, circle_center, circle_radius);
+                cv::circle(roi, circle_center, 1.1*circle_radius, cv::Scalar(0, 0, 0), -1);
+            } else {
+                search = false;
             }
         }
     }

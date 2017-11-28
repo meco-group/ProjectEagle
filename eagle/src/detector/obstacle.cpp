@@ -22,15 +22,15 @@ void Obstacle::draw(cv::Mat& frame, Projection& projection) const {
 }
 
 Obstacle* Obstacle::deserialize(const eagle::obstacle_t& obst) {
-    switch(obst.shape) {
-        case RECTANGLE:
-            return new RectangleObstacle(obst);
-            break;
-        case CIRCLE:
-            return new CircleObstacle(obst);
-            break;
-        default:
-            std::cout << "Obstacle shape not understood." << std::endl;
-            return NULL;
+    switch (obst.shape) {
+    case RECTANGLE:
+        return new RectangleObstacle(obst);
+        break;
+    case CIRCLE:
+        return new CircleObstacle(obst);
+        break;
+    default:
+        std::cout << "Obstacle shape not understood." << std::endl;
+        return NULL;
     }
 }

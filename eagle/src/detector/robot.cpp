@@ -3,7 +3,13 @@
 using namespace eagle;
 
 Robot::Robot(unsigned int id, double dx, double dy, const cv::Scalar& color) :
-    _id(id), _dx(dx), _dy(dy), _color(color), _detected(false) {}
+    Robot(id, dx, dy, cv::Point3f(0, 0, 0), color) {}
+
+Robot::Robot(unsigned int id, double dx, double dy, const cv::Point3f& marker_translation, const cv::Scalar& color) :
+    Robot(id, dx, dy, marker_translation, cv::Point3f(0, 0, 0), color) {}
+
+Robot::Robot(unsigned int id, double dx, double dy, const cv::Point3f& marker_translation, const cv::Point3f& marker_rotation, const cv::Scalar& color) :
+    _id(id), _dx(dx), _dy(dy), _marker_translation(marker_translation), _marker_rotation(marker_rotation), _color(color), _detected(false) {}
 
 void Robot::update(const std::vector<cv::Point3f>& markers) {
     _markers = markers;
@@ -11,14 +17,18 @@ void Robot::update(const std::vector<cv::Point3f>& markers) {
     _detected = true;
 }
 
+void Robot::update(const cv::Point3f& translation, const cv::Point3f& rotation) {
+    _markers.clear();
+    _translation = translation;
+    _rotation = rotation;
+    _detected = true;
+}
+
 void Robot::update(const eagle::marker_t& marker) {
     if (marker.id != _id) {
         return;
     }
-    _markers.clear();
-    _translation = cv::Point3f(marker.x, marker.y, marker.z);
-    _rotation = cv::Point3f(marker.roll, marker.pitch, marker.yaw);
-    _detected = true;
+    update(cv::Point3f(marker.x, marker.y, marker.z), cv::Point3f(marker.roll, marker.pitch, marker.yaw));
 }
 
 eagle::marker_t Robot::serialize() const {
@@ -37,11 +47,13 @@ eagle::marker_t Robot::serialize() const {
 }
 
 void Robot::compute_pose(const std::vector<cv::Point3f>& markers) {
-    _translation = ((1. / 2.) * (markers[0] + markers[1]));
     std::vector<cv::Point3f> unitvectors {ex(markers), ey(markers), ez(markers)};
     cv::Mat R(unitvectors.size(), 3, CV_32FC1, unitvectors.data());
-    R = R.t();
+    cv::Mat R2;
+    euler_to_R(_marker_rotation).convertTo(R2, CV_32F);
+    R = R.t()*R2.t();
     _rotation = get_euler(R);
+    _translation = ((1. / 2.) * (markers[0] + markers[1])) + cv::Point3f(cv::Mat(R*cv::Mat(-_marker_translation)));
 }
 
 std::string Robot::to_string() const {
@@ -95,7 +107,7 @@ void Robot::draw_markers(cv::Mat& frame, Projection& projection) const {
 
 void Robot::draw_id(cv::Mat& frame, Projection& projection) const {
     // id
-     if (_markers.size() >= 7) {
+    if (_markers.size() >= 7) {
         std::vector<cv::Point2f> markers_cam = projection.project_to_image(_markers);
         markers_cam.push_back(markers_cam[3]);
         for (unsigned int k = 4; k < markers_cam.size(); k++) {
@@ -139,4 +151,3 @@ cv::Point3f Robot::ez(const std::vector<cv::Point3f>& markers) const {
 
     return ez;
 }
-

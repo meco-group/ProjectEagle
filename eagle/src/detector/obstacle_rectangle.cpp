@@ -2,8 +2,33 @@
 
 using namespace eagle;
 
-RectangleObstacle::RectangleObstacle(const cv::RotatedRect& rect) : _rect(rect) {
-    //do nothing
+double map_angle(double angle) {
+    angle = fmod(angle + 180, 360);
+    if (angle < 0) {
+        angle += 360;
+    }
+    angle -= 180;
+    if (angle < -90) {
+        return angle + 180;
+    }
+    if (angle > 90) {
+        return angle - 180;
+    }
+    return angle;
+}
+
+RectangleObstacle::RectangleObstacle(const cv::Point2f& center, const cv::Point2f& size, double angle) :
+    RectangleObstacle(cv::RotatedRect(center, size, angle * 180 / M_PI)) {
+
+}
+
+RectangleObstacle::RectangleObstacle(const cv::RotatedRect& rect) {
+    // uniform rectangle description
+    if (rect.size.width > rect.size.height) {
+        _rect = rect;
+    } else {
+        _rect = cv::RotatedRect(rect.center, cv::Point2f(rect.size.height, rect.size.width), map_angle(rect.angle - 90));
+    }
 }
 
 RectangleObstacle::RectangleObstacle(const eagle::obstacle_t& obst) {
@@ -11,7 +36,11 @@ RectangleObstacle::RectangleObstacle(const eagle::obstacle_t& obst) {
     double width = sqrt(pow(obst.p2.x - obst.p3.x, 2) + pow(obst.p2.y - obst.p3.y, 2));
     double height = sqrt(pow(obst.p1.x - obst.p2.x, 2) + pow(obst.p1.y - obst.p2.y, 2));
     double angle = atan2(obst.p2.x - obst.p1.x, obst.p1.y - obst.p2.y);
-    _rect = cv::RotatedRect(center, cv::Size2f(width, height), angle * 180 / M_PI);
+    if (width > height) {
+        _rect = cv::RotatedRect(center, cv::Size2f(width, height), angle * 180 / M_PI);;
+    } else {
+        _rect = cv::RotatedRect(center, cv::Point2f(height, width), map_angle((angle * 180 / M_PI) - 90));
+    }
 }
 
 std::string RectangleObstacle::to_string() const {

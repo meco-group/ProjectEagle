@@ -26,6 +26,10 @@ class Pattern {
     std::vector<std::vector<cv::Point3f>> reference(uint N);
 
     PatternInterface* pattern() { return _pattern; }
+
+    std::vector<Pattern*> static get_pattern_list(const std::string& marker_config);
+
+
 };
 };
 

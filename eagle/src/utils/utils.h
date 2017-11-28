@@ -1,9 +1,12 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-// #define CONFIG_PATH "/home/odroid/ProjectEagle/eagle/config/config.xml"
-#define CONFIG_PATH "/home/ruben/Documents/Work/Repositories/ProjectEagle/eagle/config/config.xml"
+#define CONFIG_PATH "/home/odroid/ProjectEagle/eagle/config/config.xml"
 #define CAL_IMAGES_PATH "/home/odroid/ProjectEagle/eagle/config/calibration/"
+// #define CONFIG_PATH "/home/ruben/Documents/Work/Repositories/ProjectEagle/eagle/config/config.xml"
+// #define CAL_IMAGES_PATH "/home/odroid/ProjectEagle/eagle/config/calibration/"
+// #define CONFIG_PATH "/home/ourbot/Downloads/ProjectEagle/eagle/config/config.xml"
+
 
 #include <cstdio>
 #include <zconf.h>
@@ -29,7 +32,7 @@ int kbhit() {
     return FD_ISSET(STDIN_FILENO, &fds);
 }
 
-unsigned long timestamp() {
+uint32_t timestamp() {
     return std::chrono::duration_cast< std::chrono::milliseconds >(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
