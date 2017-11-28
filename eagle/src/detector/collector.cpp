@@ -71,6 +71,9 @@ void Collector::obstacles(std::vector<Obstacle*>& obstacles, std::vector<uint32_
 void Collector::merge_robots(std::vector<Robot*>& robots, std::vector<uint32_t>& timestamps) {
     timestamps.clear();
     timestamps.resize(robots.size());
+    for (int k=0; k<robots.size(); k++) {
+        robots[k]->reset();
+    }
     std::vector<marker_t> robs;
     std::vector<uint32_t> tims;
     for (std::map<std::string, std::vector<marker_t>>::iterator rob = _robot_map.begin(); rob != _robot_map.end(); ++rob) {
