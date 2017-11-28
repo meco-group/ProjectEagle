@@ -258,7 +258,10 @@ int main(int argc, char* argv[]) {
 
         if (settings.snapshot) {
             settings.snapshot = false;
-            cv::imwrite("../config/snapshot.png", im);
+            char filename[100];
+            std::time_t t = std::time(NULL);
+            std::strftime(filename, sizeof(filename), "/snapshot_%Y_%m_%d_%H_%M_%S.png", std::localtime(&t));
+            cv::imwrite(CONFIG_PATH + std::string(filename), im);
             std::cout << "Snapshot taken." << std::endl;
         }
 
