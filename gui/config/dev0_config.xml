@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <opencv_storage>
 	<camera>
-		<index>0</index>
+		<index>1</index>
 		<type>OCAM</type>
 		<resolution>
 			<width>640</width>
@@ -11,13 +11,13 @@
 			<rows>3</rows>
 			<cols>3</cols>
 			<dt>d</dt>
-			<data>656.005053 0.000000 339.992471 0.000000 656.005053 248.841676 0.000000 0.000000 1.000000 </data>
+			<data>515.731344 0.000000 338.012164 0.000000 515.731344 239.635881 0.000000 0.000000 1.000000 </data>
 		</camera_matrix>
 		<distortion_vector type_id="opencv-matrix">
 			<rows>5</rows>
 			<cols>1</cols>
 			<dt>d</dt>
-			<data>-0.428642 0.244308 0.003437 0.001416 -0.091139 </data>
+			<data>-0.368616 0.207559 -0.001614 0.000035 -0.083469 </data>
 		</distortion_vector>
 		<ground_plane type_id="opencv-matrix">
 			<rows>1</rows>
@@ -29,14 +29,14 @@
 			<rows>4</rows>
 			<cols>4</cols>
 			<dt>d</dt>
-			<data>0.999927 0.000000 -0.012052 0.036644 -0.000004 -1.000000 -0.000373 0.001135 -0.012052 0.000373 -0.999927 3.040158 0.000000 0.000000 0.000000 1.000000 </data>
+			<data>0.999935 0.000000 -0.011393 0.034598 0.000521 -0.998954 0.045724 -0.138856 -0.011381 -0.045727 -0.998889 3.033462 0.000000 0.000000 0.000000 1.000000 </data>
 		</external_transformation>
 	</camera>
 	<communicator>
 		<interface>wlan0</interface>
 		<group>EAGLE</group>
 		<zyre_port>5670</zyre_port>
-		<zyre_wait_time>0</zyre_wait_time>
+		<zyre_wait_time>100</zyre_wait_time>
 	</communicator>
 	<calibrator>
 		<pattern>CHESSBOARD</pattern>
@@ -72,7 +72,7 @@
 			<top_marker>0.1</top_marker>
 			<triangle_ratio>0.1</triangle_ratio>
 		</thresholds>
-		<background_path>/home/odroid/ProjectEagle/eagle/config/background.png</background_path>
+		<background_path>/home/ourbot/Downloads/ProjectEagle/eagle/config/background.png</background_path>
 	</detector>
 </opencv_storage>
 

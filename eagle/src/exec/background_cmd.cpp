@@ -15,7 +15,6 @@ int main(int argc, char* argv[]) {
     if (!send_command(cmd, iface, port, shout_or_whisper, group_or_peer)) {
         std::cout << "Transmission not succesful" << std::endl;
     }
-
     return 0;
 }
 

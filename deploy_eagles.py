@@ -66,11 +66,12 @@ def deploy(hosts):
         command.extend(['--tab', '-e', '''
             bash -c '
             sshpass -p %s ssh %s@%s "
-            killall -9 eagle_transmitter
+            killall -9 EagleTransmitter
+            cd %s
             echo I am %s
-            eagle_transmitter %s
+            ./bin/EagleTransmitter %s
             "'
-            ''' % (password, user, address, host, host)
+            ''' % (password, user, address, remote_root, host, host)
         ])
     subprocess.call(command)
 
