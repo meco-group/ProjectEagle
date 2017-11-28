@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
     cv::Mat img;
     uint img_cnt = 0;
     auto begin = std::chrono::system_clock::now();
-    while (com.peers().size() > 0 ) {
+    while ( !kbhit() ) {
         cam->read(img);
         header.time = timestamp();
 
