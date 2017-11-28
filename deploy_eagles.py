@@ -121,7 +121,7 @@ def deploy(hosts):
         command.extend(['--tab', '-e', '''
             bash -c '
             sshpass -p %s ssh %s@%s "
-            killall -9 EagleTransmitter
+            killall -9 eagle_transmitter
             echo I am %s
             eagle_transmitter %s
             "'
