@@ -5,10 +5,9 @@ using namespace eagle;
 int main(int argc, char* argv[]) {
     // parse arguments
     std::string node_name = (argc > 1) ? argv[1] : "eagle0";
-    bool undistort = (argc > 2) ? (strcmp(argv[2], "1") == 0) : true;
-    bool detect_chb = (argc > 3) ? (strcmp(argv[3], "1") == 0) : true;
-    bool snap_cmd = (argc > 4) ? (strcmp(argv[4], "1") == 0) : false;
-    std::string snapshot_path = (argc > 5) ? argv[5] : "../config/snapshot.png";
+    bool detect_chb = (argc > 2) ? (strcmp(argv[2], "1") == 0) : true;
+    bool snap_cmd = (argc > 3) ? (strcmp(argv[3], "1") == 0) : false;
+    std::string snapshot_path = (argc > 4) ? argv[4] : "../config/snapshot.png";
 
     // read config file
     cv::FileStorage fs(CONFIG_PATH, cv::FileStorage::READ);
@@ -29,22 +28,12 @@ int main(int argc, char* argv[]) {
 
     // start camera
     Camera* cam = getCamera(CONFIG_PATH);
-    if (undistort) {
-        cam->undistort(camera_matrix, distortion_vector);
-    }
     cam->start();
 
     // start communicator
     Communicator com(node_name, CONFIG_PATH);
     com.join(group);
     com.start(zyre_wait_time);
-
-    // wait for peers
-    std::cout << "Waiting for peers ... ";
-    while (com.peers().size() <= 0) {
-        sleep(1);
-    }
-    std::cout << "done." << std::endl;
 
     // start capturing
     std::cout << "Start transmitting video stream." << std::endl;
