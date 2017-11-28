@@ -261,8 +261,9 @@ int main(int argc, char* argv[]) {
             char filename[100];
             std::time_t t = std::time(NULL);
             std::strftime(filename, sizeof(filename), "/snapshot_%Y_%m_%d_%H_%M_%S.png", std::localtime(&t));
-            cv::imwrite(CONFIG_PATH + std::string(filename), im);
-            std::cout << "Snapshot taken." << std::endl;
+            cv::imwrite(CAL_IMAGES_PATH + std::string(filename), im);
+            
+		std::cout << "Snapshot taken. (" << CAL_IMAGES_PATH + std::string(filename) << ")" << std::endl;
         }
 
         if (settings.recording_on) {
