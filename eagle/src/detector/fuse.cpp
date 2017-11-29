@@ -19,9 +19,9 @@ void eagle::remapinf_cropped(std::string config, const cv::Mat& img, cv::Mat& wa
 
     std::vector<cv::Point2f> corners(4);
     corners[0] = cv::Point2f(0,0);
-    corners[1] = cv::Point2f(img.rows,0);
-    corners[2] = cv::Point2f(0,img.cols);
-    corners[3] = cv::Point2f(img.rows,img.cols);
+    corners[1] = cv::Point2f(img.cols,0);
+    corners[2] = cv::Point2f(0,img.rows);
+    corners[3] = cv::Point2f(img.cols,img.rows);
 
     cv::Mat plane = (cv::Mat_<float>(1,4) << 0,0,1,-z0);
     cv::Point3f t;
