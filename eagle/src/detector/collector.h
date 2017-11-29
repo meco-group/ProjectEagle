@@ -30,8 +30,6 @@ class Collector {
     void add(const std::string& peer, const std::vector<Obstacle*>& obstacle, std::vector<uint32_t>& timestamps);
 
     void verbose(int verbose);
-    void robots(std::vector<Robot*>& robots, std::vector<uint32_t>& timestamps);
-    void obstacles(std::vector<Obstacle*>& obstacles, std::vector<uint32_t>& timestamps);
     void get(std::vector<Robot*>& robots, std::vector<Obstacle*> obstacles, std::vector<uint32_t>& times_robot, std::vector<uint32_t>& times_obstacles);
 
 };
