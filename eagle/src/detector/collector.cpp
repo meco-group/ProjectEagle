@@ -62,7 +62,7 @@ void Collector::verbose(int verbose) {
     _verbose = verbose;
 }
 
-void Collector::get(std::vector<Robot*>& robots, std::vector<Obstacle*> obstacles, std::vector<uint32_t>& times_robot, std::vector<uint32_t>& times_obstacles) {
+void Collector::get(std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles, std::vector<uint32_t>& times_robot, std::vector<uint32_t>& times_obstacles) {
     merge_data(robots, obstacles, times_robot, times_obstacles);
 }
 
@@ -148,6 +148,24 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
                         t_obst.erase(t_obst.begin() + i);
                         i--;
                         proceed = false;
+                    }
+                }
+            }
+        }
+        if (proceed) {
+            cloud2_t obstacle_points2;
+            for (uint j = 0; j < obst.size(); j++) {
+                if (i != j) {
+                    double dst = cv::norm(obst[i]->center() - obst[j]->center());
+                    obstacle_points2 = dropz(obst[j]->points());
+                    if (dst >= 0.1 && cv::pointPolygonTest(obstacle_points2, obst[i]->center(), false) >= 0) {
+                        if (_verbose >= 1) {
+                            std::cout << "discarding obstacle in obstacle." << std::endl;
+                            obst.erase(obst.begin() + i);
+                            t_obst.erase(t_obst.begin() + i);
+                            i--;
+                            proceed = false;
+                        }
                     }
                 }
             }
