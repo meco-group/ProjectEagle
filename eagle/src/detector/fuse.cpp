@@ -63,6 +63,44 @@ void eagle::overlay(const cv::Mat& in1, const cv::Mat& in2, cv::Mat& out) {
     union_im.copyTo(out, union_mask);
 }
 
+void eagle::overlay(const cv::Mat& in1, const cv::Point2f& offset1, const cv::Mat& in2, const cv::Point2f& offset2, cv::Mat& out) {
+    // compute canvases
+    cv::Rect rect1(out.cols*0.5-offset1.x, out.rows*0.5-offset1.y, in1.cols, in1.rows);
+    cv::Rect rect2(out.cols*0.5-offset2.x, out.rows*0.5-offset2.y, in2.cols, in2.rows);
+
+    // check size of output image
+    cv::Rect c(0,0,out.cols,out.rows);
+    if (!(c.contains(rect1.tl()) && c.contains(rect1.br()) && c.contains(rect2.tl()) && c.contains(rect2.br()))) {
+        if ((c.width != 0) && (c.height != 0)) {
+            std::cout << "provided size insufficient: changing output size" << std::endl;
+        }
+        
+        // compute theoretical positions
+        float xmin = std::min(-offset1.x, -offset2.x);
+        float ymin = std::min(-offset1.y, -offset2.y);
+        float xmax = std::max(-offset1.x + in1.cols, -offset2.x + in2.cols);
+        float ymax = std::max(-offset1.y + in1.rows, -offset2.y + in2.rows);
+        
+        // change rect1 and 2 to available area
+        rect1 = cv::Rect(-xmin-offset1.x, -ymin-offset1.y, in1.cols, in1.rows);
+        rect2 = cv::Rect(-xmin-offset2.x, -ymin-offset2.y, in2.cols, in2.rows);
+
+        // change output image size
+        out = cv::Mat(ymax-ymin, xmax-xmin, CV_8UC3);
+    }
+
+    // copy the images to bigger versions
+    cv::Mat in1_ = cv::Mat::zeros(out.rows, out.cols, CV_8UC3);
+    cv::Mat roi(in1_,rect1);
+    in1.copyTo(roi);
+    cv::Mat in2_ = cv::Mat::zeros(out.rows, out.cols, CV_8UC3);
+    roi = cv::Mat(in2_,rect2);
+    in2.copyTo(roi);
+
+    // do the overlay of two images
+    overlay(in1_, in2_, out);
+}
+
 void eagle::replace(const cv::Mat& in, cv::Mat& out, double weight) {
     cv::Mat c;
     out.copyTo(c);
