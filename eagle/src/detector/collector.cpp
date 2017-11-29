@@ -108,9 +108,27 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
         }
         int n_sim = sim_robs.size();
         cv::Point3f translation(robs[i].x, robs[i].y, robs[i].z);
-        cv::Point3f rotation(robs[i].roll, robs[i].pitch, robs[i].yaw);
         translation *= (1. / (n_sim + 1));
-        rotation *= (1. / (n_sim + 1));
+        // rotation a bit more tricky
+        double roll = robs[i].roll;
+        int sgn_i = ((0 < roll) - (roll < 0));
+        if (fabs(fabs(robs[i].roll) - M_PI) < 0.1) {
+            roll -= sgn_i*M_PI;
+        }
+        roll /= (n_sim+1);
+        double pitch = robs[i].pitch;
+        sgn_i = ((0 < pitch) - (pitch < 0));
+        if (fabs(fabs(robs[i].pitch) - M_PI) < 0.1) {
+            pitch -= sgn_i*M_PI;
+        }
+        pitch /= (n_sim+1);
+        double yaw = robs[i].yaw;
+        sgn_i = ((0 < yaw) - (yaw < 0));
+        if (fabs(fabs(robs[i].yaw) - M_PI) < 0.1) {
+            yaw -= sgn_i*M_PI;
+        }
+        yaw /= (n_sim+1);
+
         uint32_t time = t_robs[i] / (n_sim + 1);
         if (_verbose >= 1 && n_sim > 0) {
             std::cout << "merging " << n_sim + 1 << " robots with id " << robs[i].id;
@@ -122,40 +140,38 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
         }
         for (uint k = 0; k < n_sim; k++) {
             translation += (1. / (n_sim + 1)) * cv::Point3f(sim_robs[k].x, sim_robs[k].y, sim_robs[k].z);
-            int sgn_i, sgn_sim, sgn;
-            double roll = rotation.x;
-            sgn_i = ((0 < roll) - (roll < 0));
-            sgn_sim = ((0 < sim_robs[k].roll) - (sim_robs[k].roll < 0));
-            if (sgn_i != sgn_sim && (abs(abs(roll) - M_PI) < 0.1)) {
-                roll = (roll + sgn_i*M_PI) + (sim_robs[k].roll + sgn_sim*M_PI)*(1./(n_sim+1));
-                sgn = ((0 < roll) - (roll < 0));
-                roll -= sgn*M_PI;
-            } else {
-                roll += sim_robs[k].roll*(1./(n_sim+1));
+
+            if (fabs(fabs(robs[i].roll) - M_PI) < 0.1) {
+                int sgn_sim = ((0 < sim_robs[k].roll) - (sim_robs[k].roll < 0));
+                roll += (sim_robs[k].roll - sgn_sim*M_PI)/(n_sim+1);
             }
-            double pitch = rotation.y;
-            sgn_i = ((0 < pitch) - (pitch < 0));
-            sgn_sim = ((0 < sim_robs[k].pitch) - (sim_robs[k].pitch < 0));
-            if (sgn_i != sgn_sim && (abs(abs(pitch) - M_PI) < 0.1)) {
-                pitch = (pitch + sgn_i*M_PI) + (sim_robs[k].pitch + sgn_sim*M_PI)*(1./(n_sim+1));
-                sgn = ((0 < pitch) - (pitch < 0));
-                pitch -= sgn*M_PI;
-            } else {
-                pitch += sim_robs[k].pitch*(1./(n_sim+1));
+            else {
+                roll += (sim_robs[k].roll)/(n_sim+1);
             }
-            double yaw = rotation.z;
-            sgn_i = ((0 < yaw) - (yaw < 0));
-            sgn_sim = ((0 < sim_robs[k].yaw) - (sim_robs[k].yaw < 0));
-            if (sgn_i != sgn_sim && (abs(abs(yaw) - M_PI) < 0.1)) {
-                yaw = (yaw + sgn_i*M_PI) + (sim_robs[k].yaw + sgn_sim*M_PI)*(1./(n_sim+1));
-                sgn = ((0 < yaw) - (yaw < 0));
-                yaw -= sgn*M_PI;
-            } else {
-                yaw += sim_robs[k].yaw*(1./(n_sim+1));
+            if (fabs(fabs(robs[i].pitch) - M_PI) < 0.1) {
+                int sgn_sim = ((0 < sim_robs[k].pitch) - (sim_robs[k].pitch < 0));
+                pitch += (sim_robs[k].pitch - sgn_sim*M_PI)/(n_sim+1);
             }
-            rotation = cv::Point3f(roll, pitch, yaw);
+            else {
+                pitch += (sim_robs[k].pitch)/(n_sim+1);
+            }
+            if (fabs(fabs(robs[i].yaw) - M_PI) < 0.1) {
+                int sgn_sim = ((0 < sim_robs[k].yaw) - (sim_robs[k].yaw < 0));
+                yaw += (sim_robs[k].yaw - sgn_sim*M_PI)/(n_sim+1);
+            }
+            else {
+                yaw += (sim_robs[k].yaw)/(n_sim+1);
+            }
+            std::cout << sim_robs[k].yaw;
             time += sim_t_robs[k] / (n_sim + 1);
         }
+        int sgn = ((0 < roll) - (roll < 0));
+        roll -= sgn*M_PI;
+        sgn = ((0 < pitch) - (pitch < 0));
+        pitch -= sgn*M_PI;
+        sgn = ((0 < yaw) - (yaw < 0));
+        yaw -= sgn*M_PI;
+        cv::Point3f rotation(roll, pitch, yaw);
         for (uint k = 0; k < robots.size(); k++) {
             if (robs[i].id == robots[k]->id()) {
                 robots[k]->update(translation, rotation);
