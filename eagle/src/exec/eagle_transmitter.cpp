@@ -261,9 +261,9 @@ int main(int argc, char* argv[]) {
             char filename[100];
             std::time_t t = std::time(NULL);
             std::strftime(filename, sizeof(filename), "/snapshot_%Y_%m_%d_%H_%M_%S.png", std::localtime(&t));
-            cv::imwrite(CAL_IMAGES_PATH + std::string(filename), im);
-            
-		std::cout << "Snapshot taken. (" << CAL_IMAGES_PATH + std::string(filename) << ")" << std::endl;
+            cv::imwrite(OUTPUT_PATH + std::string(filename), im);
+
+            std::cout << "Snapshot taken. (" << OUTPUT_PATH + std::string(filename) << ")" << std::endl;
         }
 
         if (settings.recording_on) {
@@ -271,12 +271,15 @@ int main(int argc, char* argv[]) {
                 char filename[100];
                 std::time_t t = std::time(NULL);
                 std::strftime(filename, sizeof(filename), "%Y_%m_%d_%H_%M_%S.avi", std::localtime(&t));
-                recorder.open(cv::String(filename), CV_FOURCC('M', 'J', 'P', 'G'), update_frequency, cv::Size(cam->getWidth(), cam->getHeight()), true);
+                recorder.open(OUTPUT_PATH + std::string(filename), CV_FOURCC('M', 'J', 'P', 'G'), update_frequency, cv::Size(cam->getWidth(), cam->getHeight()), true);
+                std::cout << "Recorder opened. (" << OUTPUT_PATH + std::string(filename) << ")" << std::endl;
             }
             recorder.write(im);
         } else {
-            if (recorder.isOpened())
+            if (recorder.isOpened()) {
                 recorder.release();
+                std::cout << "Recorder closed." << std::endl;
+            }
         }
 
         if (settings.background) {

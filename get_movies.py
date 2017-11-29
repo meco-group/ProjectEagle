@@ -15,10 +15,13 @@ import socket
 user = 'odroid'
 password = user
 remote_root = os.path.join('/home/' + user, 'ProjectEagle/eagle/build')
+output_dir = os.path.join('/home/' + user, 'ProjectEagle/eagle/output')
 
 hosts = ['eagle0', 'eagle1']
 addresses = col.OrderedDict([('eagle0', '192.168.11.139'), ('eagle1', '192.168.11.123')])
 
+def get_file(ftp, rem_file, loc_file):
+    ftp.get(rem_file, loc_file)
 
 def send_file(ftp, ssh, loc_file, rem_file):
     directory = os.path.dirname(rem_file)
@@ -76,4 +79,30 @@ def deploy(hosts):
 if __name__ == "__main__":
     usage = ("Usage: %prog [options]")
     op = optparse.OptionParser(usage=usage)
-    deploy(hosts)
+    op.add_option('-p', '--path', dest='local_path',
+                  defaul=os.get_cwd(), help='local path')
+    op.add_option('-rm', '--remove', dest='remove_file',
+                  default=False, help='remove remote file')
+
+    options, args = op.parse_args()
+
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    for host, address in addresses.items():
+        try:
+            ssh.connect(address, username=user, password=password, timeout=0.5)
+        except socket.error:
+            print 'Could not connect to %s' % host
+            continue
+        ftp = ssh.open_sftp()
+        latest = 0
+        for file in ftp.listdir_attr(output_dir):
+            if file.filename.endswith('.avi') and file.st_mtime > latest:
+                latest = file.st_mtime
+                movie_path = os.path.join(output_dir, file.filename)
+        ftp.get(movie_path, options.local_path)
+        if options.remove_file:
+            ftp.remove(movie_path)
+        ftp.close()
+        ssh.close()

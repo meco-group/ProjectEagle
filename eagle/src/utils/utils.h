@@ -3,6 +3,7 @@
 
 #define CONFIG_PATH "/home/odroid/ProjectEagle/eagle/config/config.xml"
 #define CAL_IMAGES_PATH "/home/odroid/ProjectEagle/eagle/config/calibration/"
+#define OUTPUT_PATH "/home/odroid/ProjectEagle/eagle/output/"
 // #define CONFIG_PATH "/home/ruben/Documents/Work/Repositories/ProjectEagle/eagle/config/config.xml"
 // #define CAL_IMAGES_PATH "/home/odroid/ProjectEagle/eagle/config/calibration/"
 // #define CONFIG_PATH "/home/ourbot/Downloads/ProjectEagle/eagle/config/config.xml"
