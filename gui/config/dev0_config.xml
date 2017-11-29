@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <opencv_storage>
 	<camera>
-		<index>1</index>
+		<index>0</index>
 		<type>OCAM</type>
 		<resolution>
 			<width>640</width>
@@ -36,7 +36,7 @@
 		<interface>wlan0</interface>
 		<group>EAGLE</group>
 		<zyre_port>5670</zyre_port>
-		<zyre_wait_time>100</zyre_wait_time>
+		<zyre_wait_time>0</zyre_wait_time>
 	</communicator>
 	<calibrator>
 		<pattern>CHESSBOARD</pattern>
@@ -72,7 +72,7 @@
 			<top_marker>0.1</top_marker>
 			<triangle_ratio>0.1</triangle_ratio>
 		</thresholds>
-		<background_path>/home/ourbot/Downloads/ProjectEagle/eagle/config/background.png</background_path>
+		<background_path>/home/odroid/ProjectEagle/eagle/config/background.png</background_path>
 	</detector>
 </opencv_storage>
 

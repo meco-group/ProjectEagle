@@ -113,7 +113,12 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
         rotation *= (1. / (n_sim + 1));
         uint32_t time = t_robs[i] / (n_sim + 1);
         if (_verbose >= 1 && n_sim > 0) {
-            std::cout << "merging " << n_sim + 1 << "robots." << std::endl;
+            std::cout << "merging " << n_sim + 1 << "robots with id " << robs[i].id;
+            std::cout << " (" << t_robs[i];
+            for (uint k = 0; k < n_sim; k++) {
+                std::cout << "," << sim_t_robs[k];
+            }
+            std::cout << ")" << std::endl;
         }
         for (uint k = 0; k < n_sim; k++) {
             translation += (1. / (n_sim + 1)) * cv::Point3f(sim_robs[k].x, sim_robs[k].y, sim_robs[k].z);
@@ -131,12 +136,12 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
     std::vector<eagle::Obstacle*> sim_obst;
     std::vector<uint32_t> sim_t_obst;
     for (uint i = 0; i < obst.size(); i++) {
-        std::vector<cloud2_t> robot_points2(robots.size());
+        cloud2_t robot_points2;
         bool proceed = true;
         for (uint j = 0; j < robots.size(); j++) {
             if (robots[j]->detected()) {
-                robot_points2[i] = dropz(robots[i]->vertices());
-                if (cv::pointPolygonTest(robot_points2[j], obst[i]->center(), false) >= 0) {
+                robot_points2 = dropz(robots[i]->vertices());
+                if (cv::pointPolygonTest(robot_points2, obst[i]->center(), false) >= 0) {
                     if (_verbose >= 1) {
                         std::cout << "discarding obstacle in robot." << std::endl;
                         obst.erase(obst.begin() + i);
@@ -179,7 +184,15 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
                 cv::Point2f size(robst_i->width(), robst_i->height());
                 size *= (1. / (n_sim + 1));
                 double angle = (1. / (n_sim + 1)) * robst_i->angle();
-                uint32_t time = sim_t_obst[i] / (n_sim + 1);
+                uint32_t time = t_obst[i] / (n_sim + 1);
+                if (_verbose >= 1 && n_sim > 0) {
+                    std::cout << "merging " << n_sim + 1 << "rectangular obstacles";
+                    std::cout << " (" << t_obst[i];
+                    for (uint k = 0; k < n_sim; k++) {
+                        std::cout << "," << sim_t_obst[k];
+                    }
+                    std::cout << ")" << std::endl;
+                }
                 for (uint k = 0; k < n_sim; k++) {
                     RectangleObstacle* robst_j = dynamic_cast<RectangleObstacle*>(sim_obst[k]);
                     center += (1. / (n_sim + 1)) * robst_j->center();
@@ -194,7 +207,15 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
                 int n_sim = sim_obst.size();
                 cv::Point2f center = (1. / (n_sim + 1)) * cobst_i->center();
                 double radius = (1. / (n_sim + 1)) * cobst_i->radius();
-                uint32_t time = sim_t_obst[i] / (n_sim + 1);
+                uint32_t time = t_obst[i] / (n_sim + 1);
+                if (_verbose >= 1 && n_sim > 0) {
+                    std::cout << "merging " << n_sim + 1 << "circular obstacles";
+                    std::cout << " (" << t_obst[i];
+                    for (uint k = 0; k < n_sim; k++) {
+                        std::cout << "," << sim_t_obst[k];
+                    }
+                    std::cout << ")" << std::endl;
+                }
                 for (uint k = 0; k < n_sim; k++) {
                     CircleObstacle* cobst_j = dynamic_cast<CircleObstacle*>(sim_obst[k]);
                     center += (1. / (n_sim + 1)) * cobst_j->center();
