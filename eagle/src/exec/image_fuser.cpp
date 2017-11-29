@@ -18,19 +18,29 @@ int main(int argc, char* argv[]) {
     // read image 1 and remap
     img = cv::imread(images_path1);
     cv::Mat img1;
+    cv::Point2f offset1;
     Projection projection1(config_path1);
     projection1.remap(img,img);
-    remapinf(config_path1, img, img1, pixels_per_meter, img_size, height);
+    cv::Point2f o = projection1.project_to_image(cv::Point3f(0,0,height));
+    cv::circle(img, o, 10, cv::Scalar(127,127,127), -1); //mark the origin
+    remapinf_cropped(config_path1, img, img1, pixels_per_meter, offset1, height);
+    //remapinf(config_path1, img, img1, pixels_per_meter, img_size, height);
 
     // read image 2 and remap
     img = cv::imread(images_path2);
     cv::Mat img2;
+    cv::Point2f offset2;
     Projection projection2(config_path2);
     projection2.remap(img,img);
-    remapinf(config_path2, img, img2, pixels_per_meter, img_size, height);
+    o = projection2.project_to_image(cv::Point3f(0,0,height));
+    cv::circle(img, o, 10, cv::Scalar(127,127,127), -1); //mark the origin
+    remapinf_cropped(config_path2, img, img2, pixels_per_meter, offset2, height);
+    //remapinf(config_path2, img, img2, pixels_per_meter, img_size, height);
 
     // blend images
-    overlay(img1, img2, img);
+    img = cv::Mat(img_size*pixels_per_meter, CV_8UC3);
+    overlay(img1, offset1, img2, offset2, img);
+    //overlay(img1, img2, img);
 
     // replace by update
     /*img1.copyTo(img);
