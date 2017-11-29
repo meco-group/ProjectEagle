@@ -201,6 +201,7 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
                     t_obst.erase(t_obst.begin() + i);
                     i--;
                     proceed = false;
+                    break;
                 }
             }
         }
@@ -218,6 +219,7 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
                         t_obst.erase(t_obst.begin() + i);
                         i--;
                         proceed = false;
+                        break;
                     }
                 }
             }
