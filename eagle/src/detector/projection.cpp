@@ -165,6 +165,8 @@ cv::Mat Projection::get_homography(float z0) const {
     cv::Mat Tp2 = (Tp.col(2) * z0 + Tp.col(3));
     cv::hconcat(Tp1 , Tp2 , Tp);
     cv::Mat Hinv = _camera_matrix * Tp;
+    cv::Mat H = Hinv.inv();
+    H /= H.at<float>(2,2);
 
-    return (Hinv.inv());
+    return H;
 }
