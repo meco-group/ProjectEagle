@@ -122,7 +122,38 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
         }
         for (uint k = 0; k < n_sim; k++) {
             translation += (1. / (n_sim + 1)) * cv::Point3f(sim_robs[k].x, sim_robs[k].y, sim_robs[k].z);
-            rotation += (1. / (n_sim + 1)) * cv::Point3f(sim_robs[k].roll, sim_robs[k].pitch, sim_robs[k].yaw);
+            int sgn_i, sgn_sim, sgn;
+            double roll = rotation.x;
+            sgn_i = ((0 < roll) - (roll < 0));
+            sgn_sim = ((0 < sim_robs[k].roll) - (sim_robs[k].roll < 0));
+            if (sgn_i != sgn_sim && (abs(abs(roll) - M_PI) < 0.1)) {
+                roll = (roll + sgn_i*M_PI) + (sim_robs[k].roll + sgn_sim*M_PI)*(1./(n_sim+1));
+                sgn = ((0 < roll) - (roll < 0));
+                roll -= sgn*M_PI;
+            } else {
+                roll += sim_robs[k].roll*(1./(n_sim+1));
+            }
+            double pitch = rotation.y;
+            sgn_i = ((0 < pitch) - (pitch < 0));
+            sgn_sim = ((0 < sim_robs[k].pitch) - (sim_robs[k].pitch < 0));
+            if (sgn_i != sgn_sim && (abs(abs(pitch) - M_PI) < 0.1)) {
+                pitch = (pitch + sgn_i*M_PI) + (sim_robs[k].pitch + sgn_sim*M_PI)*(1./(n_sim+1));
+                sgn = ((0 < pitch) - (pitch < 0));
+                pitch -= sgn*M_PI;
+            } else {
+                pitch += sim_robs[k].pitch*(1./(n_sim+1));
+            }
+            double yaw = rotation.z;
+            sgn_i = ((0 < yaw) - (yaw < 0));
+            sgn_sim = ((0 < sim_robs[k].yaw) - (sim_robs[k].yaw < 0));
+            if (sgn_i != sgn_sim && (abs(abs(yaw) - M_PI) < 0.1)) {
+                yaw = (yaw + sgn_i*M_PI) + (sim_robs[k].yaw + sgn_sim*M_PI)*(1./(n_sim+1));
+                sgn = ((0 < yaw) - (yaw < 0));
+                yaw -= sgn*M_PI;
+            } else {
+                yaw += sim_robs[k].yaw*(1./(n_sim+1));
+            }
+            rotation = cv::Point3f(roll, pitch, yaw);
             time += sim_t_robs[k] / (n_sim + 1);
         }
         for (uint k = 0; k < robots.size(); k++) {
@@ -144,11 +175,11 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
                 if (cv::pointPolygonTest(robot_points2, obst[i]->center(), false) >= 0) {
                     if (_verbose >= 1) {
                         std::cout << "discarding obstacle in robot." << std::endl;
-                        obst.erase(obst.begin() + i);
-                        t_obst.erase(t_obst.begin() + i);
-                        i--;
-                        proceed = false;
                     }
+                    obst.erase(obst.begin() + i);
+                    t_obst.erase(t_obst.begin() + i);
+                    i--;
+                    proceed = false;
                 }
             }
         }
@@ -161,11 +192,11 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
                     if (dst >= 0.1 && cv::pointPolygonTest(obstacle_points2, obst[i]->center(), false) >= 0) {
                         if (_verbose >= 1) {
                             std::cout << "discarding obstacle in obstacle." << std::endl;
-                            obst.erase(obst.begin() + i);
-                            t_obst.erase(t_obst.begin() + i);
-                            i--;
-                            proceed = false;
                         }
+                        obst.erase(obst.begin() + i);
+                        t_obst.erase(t_obst.begin() + i);
+                        i--;
+                        proceed = false;
                     }
                 }
             }
