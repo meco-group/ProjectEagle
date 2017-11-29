@@ -162,7 +162,6 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
             else {
                 yaw += (sim_robs[k].yaw)/(n_sim+1);
             }
-            std::cout << sim_robs[k].yaw;
             time += sim_t_robs[k] / (n_sim + 1);
         }
         int sgn = ((0 < roll) - (roll < 0));
@@ -174,6 +173,7 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
         cv::Point3f rotation(roll, pitch, yaw);
         for (uint k = 0; k < robots.size(); k++) {
             if (robs[i].id == robots[k]->id()) {
+                std::cout << rotation << std::endl;
                 robots[k]->update(translation, rotation);
                 times_robot[k] = time;
             }
