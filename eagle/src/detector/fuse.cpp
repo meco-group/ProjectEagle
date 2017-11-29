@@ -16,23 +16,22 @@ void eagle::remapinf(std::string config, const cv::Mat& img, cv::Mat& warped, co
 void eagle::remapinf_cropped(std::string config, const cv::Mat& img, cv::Mat& warped, const float k, cv::Point2f& offset, double z0) {
     // Init projection object
     Projection projection(config);
+    cv::Mat S = (cv::Mat_<float>(3, 3) << k, 0, 0, 0, k, 0, 0, 0, 1);
+    cv::Mat H = S * projection.get_homography(z0);
 
+    // Define corner points
     std::vector<cv::Point2f> corners(4);
     corners[0] = cv::Point2f(0,0);
     corners[1] = cv::Point2f(img.cols,0);
     corners[2] = cv::Point2f(0,img.rows);
     corners[3] = cv::Point2f(img.cols,img.rows);
+    
+    std::vector<cv::Point2f> transformed;
+    cv::perspectiveTransform(corners,transformed,H);
 
-    cv::Mat plane = (cv::Mat_<float>(1,4) << 0,0,1,-z0);
-    cv::Point3f t;
-    for (uint k=0; k<corners.size(); k++) {
-        t = projection.project_to_plane(corners[k], plane);
-        corners[k] = cv::Point2f(t.x,t.y);
-    }
-    cv::Rect rect = cv::boundingRect(corners);
-
-    cv::Size siz(rect.width, rect.height);
-    offset = cv::Point2f(rect.x*k,rect.y*k);
+    cv::Rect r = cv::boundingRect(transformed);
+    cv::Size siz(r.width, r.height);
+    offset = -cv::Point2f(r.x, r.y);
 
     // Do remapping
     remapinf_canvas(projection, img, warped, k, offset, siz, z0);
