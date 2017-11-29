@@ -113,7 +113,7 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
         rotation *= (1. / (n_sim + 1));
         uint32_t time = t_robs[i] / (n_sim + 1);
         if (_verbose >= 1 && n_sim > 0) {
-            std::cout << "merging " << n_sim + 1 << "robots with id " << robs[i].id;
+            std::cout << "merging " << n_sim + 1 << " robots with id " << robs[i].id;
             std::cout << " (" << t_robs[i];
             for (uint k = 0; k < n_sim; k++) {
                 std::cout << "," << sim_t_robs[k];
@@ -140,7 +140,7 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
         bool proceed = true;
         for (uint j = 0; j < robots.size(); j++) {
             if (robots[j]->detected()) {
-                robot_points2 = dropz(robots[i]->vertices());
+                robot_points2 = dropz(robots[j]->vertices());
                 if (cv::pointPolygonTest(robot_points2, obst[i]->center(), false) >= 0) {
                     if (_verbose >= 1) {
                         std::cout << "discarding obstacle in robot." << std::endl;
@@ -186,7 +186,7 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
                 double angle = (1. / (n_sim + 1)) * robst_i->angle();
                 uint32_t time = t_obst[i] / (n_sim + 1);
                 if (_verbose >= 1 && n_sim > 0) {
-                    std::cout << "merging " << n_sim + 1 << "rectangular obstacles";
+                    std::cout << "merging " << n_sim + 1 << " rectangular obstacles";
                     std::cout << " (" << t_obst[i];
                     for (uint k = 0; k < n_sim; k++) {
                         std::cout << "," << sim_t_obst[k];
@@ -209,7 +209,7 @@ void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& 
                 double radius = (1. / (n_sim + 1)) * cobst_i->radius();
                 uint32_t time = t_obst[i] / (n_sim + 1);
                 if (_verbose >= 1 && n_sim > 0) {
-                    std::cout << "merging " << n_sim + 1 << "circular obstacles";
+                    std::cout << "merging " << n_sim + 1 << " circular obstacles";
                     std::cout << " (" << t_obst[i];
                     for (uint k = 0; k < n_sim; k++) {
                         std::cout << "," << sim_t_obst[k];
