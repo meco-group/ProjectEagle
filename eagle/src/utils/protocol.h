@@ -50,6 +50,11 @@ typedef struct obstacle_t {
     point_t p3;
 } obstacle_t;
 
+typedef struct image_t {
+    point_t offset;
+    uint32_t px_per_meter;
+} image_t;
+
 typedef enum cmd_t {
     SNAPSHOT = 0,
     BACKGROUND = 1,

@@ -230,6 +230,8 @@ int main(int argc, char* argv[]) {
 
     eagle::header_t imheader;
     imheader.id = eagle::IMAGE;
+    image_t iminfo;
+    iminfo.px_per_meter = 100;
     cv::Mat im;
     cam->read(im);
 
@@ -303,7 +305,7 @@ int main(int argc, char* argv[]) {
             TIMING(transmit_detected(com, robots, obstacles, group, capture_time););
             t_com = DURATION;
             if (settings.image_viewer_on || settings.image_stream_on) {
-                im = detector.draw(im, robots, obstacles);
+                cv::Mat im2 = detector.draw(im, robots, obstacles);
             }
         } else {
             if (settings.image_viewer_on || settings.image_stream_on) {
@@ -317,9 +319,18 @@ int main(int argc, char* argv[]) {
         }
 
         if (settings.image_stream_on) {
-            // draw everything on img
             imheader.time = capture_time;
+            // temporary variables
+            cv::Point2f offset;
+            cv::Mat remapped;
+
+            // remapping to virtual camera
+            remapinf_cropped(*detector.projection(), im, remapped, iminfo.px_per_meter, offset, 0);
+            iminfo.offset.x = offset.x;
+            iminfo.offset.y = offset.y;
+
             cv::imencode(".jpg", im, buffer, compression_params);
+            buffer.insert(buffer.end(),(char*)(&iminfo),(char*)(&iminfo)+sizeof(iminfo));
             com.shout(&imheader, buffer.data(), sizeof(imheader), buffer.size(), group);
         }
         if (settings.image_viewer_on) {
