@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
     projection1.remap(img,img);
     cv::Point2f o = projection1.project_to_image(cv::Point3f(0,0,height));
     cv::circle(img, o, 10, cv::Scalar(127,127,127), -1); //mark the origin
-    remapinf_cropped(config_path1, img, img1, pixels_per_meter, offset1, height);
+    remapinf_cropped(projection1, img, img1, pixels_per_meter, offset1, height);
     //remapinf(config_path1, img, img1, pixels_per_meter, img_size, height);
 
     // read image 2 and remap
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     projection2.remap(img,img);
     o = projection2.project_to_image(cv::Point3f(0,0,height));
     cv::circle(img, o, 10, cv::Scalar(127,127,127), -1); //mark the origin
-    remapinf_cropped(config_path2, img, img2, pixels_per_meter, offset2, height);
+    remapinf_cropped(projection2, img, img2, pixels_per_meter, offset2, height);
     //remapinf(config_path2, img, img2, pixels_per_meter, img_size, height);
 
     // blend images
