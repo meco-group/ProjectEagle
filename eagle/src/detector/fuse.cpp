@@ -3,9 +3,12 @@
 using namespace eagle;
 
 void eagle::remapinf(std::string config, const cv::Mat& img, cv::Mat& warped, const float k, const cv::Size& siz, double z0) {
-    // Init projection object
     Projection projection(config);
+    remapinf(projection, img, warped, k, siz, z0);
+}
 
+void eagle::remapinf(const Projection& projection, const cv::Mat& img, cv::Mat& warped, const float k, const cv::Size& siz, double z0) {
+    // initialize parameters
     cv::Size ksiz = cv::Size(siz.width * k, siz.height * k);
     cv::Point2f offset(ksiz.height*0.5,ksiz.width*0.5);
 
@@ -14,8 +17,12 @@ void eagle::remapinf(std::string config, const cv::Mat& img, cv::Mat& warped, co
 }
 
 void eagle::remapinf_cropped(std::string config, const cv::Mat& img, cv::Mat& warped, const float k, cv::Point2f& offset, double z0) {
-    // Init projection object
     Projection projection(config);
+    remapinf_cropped(projection, img, warped, k, offset, z0);
+}
+
+void eagle::remapinf_cropped(const Projection& projection, const cv::Mat& img, cv::Mat& warped, const float k, cv::Point2f& offset, double z0) {
+    // Init projection object
     cv::Mat S = (cv::Mat_<float>(3, 3) << k, 0, 0, 0, k, 0, 0, 0, 1);
     cv::Mat H = S * projection.get_homography(z0);
 
@@ -37,7 +44,7 @@ void eagle::remapinf_cropped(std::string config, const cv::Mat& img, cv::Mat& wa
     remapinf_canvas(projection, img, warped, k, offset, siz, z0);
 }
 
-void eagle::remapinf_canvas(Projection& projection, const cv::Mat& img, cv::Mat& warped, const float k, cv::Point2f& offset, cv::Size& siz, double z0) {
+void eagle::remapinf_canvas(const Projection& projection, const cv::Mat& img, cv::Mat& warped, const float k, cv::Point2f& offset, cv::Size& siz, double z0) {
     // Construct homography matrix
     // offset and siz in px
     cv::Mat S = (cv::Mat_<float>(3, 3) << k, 0, offset.x, 0, k, offset.y, 0, 0, 1);
