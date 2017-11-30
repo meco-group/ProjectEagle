@@ -12,6 +12,7 @@ void remapinf_cropped(const Projection& projection, const cv::Mat& img, cv::Mat&
 void remapinf_canvas(const Projection& projection, const cv::Mat& img, cv::Mat& warped, const float k, cv::Point2f& offset, cv::Size& siz, double z0 = 0);
 void overlay(const cv::Mat& in1, const cv::Mat& in2, cv::Mat& out);
 void overlay(const cv::Mat& in1, const cv::Point2f& offset1, const cv::Mat& in2, const cv::Point2f& offset2, cv::Mat& out);
+void replace(const cv::Mat& in, const cv::Point2f& offset, cv::Mat& out, double weight = 0.5);
 void replace(const cv::Mat& in, cv::Mat& out, double weight = 0.5);
 
 };

@@ -108,6 +108,15 @@ void eagle::overlay(const cv::Mat& in1, const cv::Point2f& offset1, const cv::Ma
     overlay(in1_, in2_, out);
 }
 
+void eagle::replace(const cv::Mat& in, const cv::Point2f& offset, cv::Mat& out, double weight) {
+    cv::Rect rect(out.cols*0.5-offset.x, out.rows*0.5-offset.y, in.cols, in.rows);
+    cv::Mat big = cv::Mat::zeros(out.rows, out.cols, in.type());
+    cv::Mat roi(big,rect);
+    in.copyTo(roi);
+
+    replace(big,out,weight);
+}
+
 void eagle::replace(const cv::Mat& in, cv::Mat& out, double weight) {
     cv::Mat c;
     out.copyTo(c);
