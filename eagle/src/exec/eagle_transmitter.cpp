@@ -212,8 +212,9 @@ int main(int argc, char* argv[]) {
     Robot dave(0, 0.55, 0.4, cv::Scalar(138, 110, 17));
     Robot krist(1, 0.55, 0.4, cv::Scalar(17, 31, 138));
     Robot kurt(9, 0.55, 0.4, cv::Scalar(19, 138, 17));
-    Robot table(2, 1.1, 1.2, cv::Point3f(-0.4705, -0.4175, 0.), cv::Scalar(64, 64, 169));
-    std::vector< Robot* > robots = std::vector< Robot* > {&dave, &krist, &kurt, &table};
+    Robot table0(2, 1.1, 1.2, cv::Point3f(-0.52, -0.405, 0.), cv::Scalar(64, 64, 169));
+    Robot table1(8, 1.1, 1.8, cv::Point3f(-0.5, -0.7, 0.1), cv::Scalar(64, 64, 169));
+    std::vector< Robot* > robots = std::vector< Robot* > {&dave, &krist, &kurt, &table0, &table1};
     std::vector< Obstacle* > obstacles;
 
     if (settings.image_viewer_on) {
@@ -263,8 +264,9 @@ int main(int argc, char* argv[]) {
             char filename[100];
             std::time_t t = std::time(NULL);
             std::strftime(filename, sizeof(filename), "/snapshot_%Y_%m_%d_%H_%M_%S.png", std::localtime(&t));
-            cv::imwrite(CONFIG_PATH + std::string(filename), im);
-            std::cout << "Snapshot taken." << std::endl;
+            cv::imwrite(OUTPUT_PATH + std::string(filename), im);
+
+            std::cout << "Snapshot taken. (" << OUTPUT_PATH + std::string(filename) << ")" << std::endl;
         }
 
         if (settings.recording_on) {
@@ -272,12 +274,15 @@ int main(int argc, char* argv[]) {
                 char filename[100];
                 std::time_t t = std::time(NULL);
                 std::strftime(filename, sizeof(filename), "%Y_%m_%d_%H_%M_%S.avi", std::localtime(&t));
-                recorder.open(cv::String(filename), CV_FOURCC('M', 'J', 'P', 'G'), update_frequency, cv::Size(cam->getWidth(), cam->getHeight()), true);
+                recorder.open(OUTPUT_PATH + std::string(filename), CV_FOURCC('M', 'J', 'P', 'G'), update_frequency, cv::Size(cam->getWidth(), cam->getHeight()), true);
+                std::cout << "Recorder opened. (" << OUTPUT_PATH + std::string(filename) << ")" << std::endl;
             }
             recorder.write(im);
         } else {
-            if (recorder.isOpened())
+            if (recorder.isOpened()) {
                 recorder.release();
+                std::cout << "Recorder closed." << std::endl;
+            }
         }
 
         if (settings.background) {

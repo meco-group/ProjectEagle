@@ -20,8 +20,8 @@ bool send_command(cmd_t cmd, const std::string& iface, const int port, const std
     } else {
         perror("Input error: for shout, pass -g, for whisper, pass -p");
     }
+    for(int i=0; i<100000000; i++);
     com.stop();
-
     return succes;
 }
 

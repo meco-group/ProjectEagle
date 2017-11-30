@@ -86,7 +86,7 @@ class ImageTransmitter(QObject):
         if not self._isRunning:
             # start image transmitter
             cmd = os.path.join(paths.get_remote_bin_dir(self.device), 'ImageTransmitter')
-            if (not self.device.ssh_manager.start_process('image_transmitter', cmd, self.device.name, '0', '1', '1', os.path.join(paths.get_remote_config_dir(self.device), 'snapshot.png'))):
+            if (not self.device.ssh_manager.start_process('image_transmitter', cmd, self.device.name, '1', '1', os.path.join(paths.get_remote_config_dir(self.device), 'snapshot.png'))):
                 print 'Image transmission could not be started on ' + self.device.name + '.'
                 self.device.set_online(False)
                 return

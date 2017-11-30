@@ -194,9 +194,15 @@ bool Communicator::receive() {
     bool data_received = false;
     while(true) {
         which = zpoller_wait(_poller, 0);
-        if ((which != zyre_socket(_node)) || (which == NULL)) { // pipe is empty
+        if (which == NULL) {
             break;
         }
+        if (which != zyre_socket(_node)) {
+            continue;
+        }
+        // if ((which != zyre_socket(_node)) || (which == NULL)) { // pipe is empty
+        //     break;
+        // }
         _event = zyre_event_new(_node);
         const char* cmd = zyre_event_type(_event);
         std::string peer = std::string(zyre_event_peer_name(_event));

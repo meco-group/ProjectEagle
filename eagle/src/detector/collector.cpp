@@ -2,7 +2,7 @@
 
 using namespace eagle;
 
-Collector::Collector() {
+Collector::Collector() : _verbose(0) {
 
 }
 
@@ -58,133 +58,245 @@ void Collector::add(const std::string& peer, const std::vector<Obstacle*>& obsta
     }
 }
 
-
-void Collector::robots(std::vector<Robot*>& robots, std::vector<uint32_t>& timestamps) {
-    merge_robots(robots, timestamps);
-
+void Collector::verbose(int verbose) {
+    _verbose = verbose;
 }
 
-void Collector::obstacles(std::vector<Obstacle*>& obstacles, std::vector<uint32_t>& timestamps) {
-    merge_obstacles(obstacles, timestamps);
+void Collector::get(std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles, std::vector<uint32_t>& times_robot, std::vector<uint32_t>& times_obstacles) {
+    merge_data(robots, obstacles, times_robot, times_obstacles);
 }
 
-void Collector::merge_robots(std::vector<Robot*>& robots, std::vector<uint32_t>& timestamps) {
-    timestamps.clear();
-    timestamps.resize(robots.size());
-    for (int k=0; k<robots.size(); k++) {
+void Collector::merge_data(std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles, std::vector<uint32_t>& times_robot, std::vector<uint32_t>& times_obstacles) {
+    // reset
+    times_robot.clear();
+    times_robot.resize(robots.size());
+    for (uint k = 0; k < robots.size(); k++) {
         robots[k]->reset();
     }
+    times_obstacles.clear();
+    obstacles.clear();
+    // put everything together
     std::vector<marker_t> robs;
-    std::vector<uint32_t> tims;
+    std::vector<uint32_t> t_robs;
     for (std::map<std::string, std::vector<marker_t>>::iterator rob = _robot_map.begin(); rob != _robot_map.end(); ++rob) {
         for (uint k = 0; k < rob->second.size(); k++) {
             robs.push_back(rob->second[k]);
-            tims.push_back(_robot_time_map[rob->first][k]);
+            t_robs.push_back(_robot_time_map[rob->first][k]);
         }
     }
-    std::vector<marker_t> similars;
-    std::vector<uint32_t> sim_times;
-    for (uint i = 0; i < robs.size(); i++) {
-        similars.clear();
-        for (uint j = i + 1; j < robs.size(); j++) {
-            if (robs[i].id == robs[j].id) {
-                similars.push_back(robs[j]);
-                sim_times.push_back(tims[j]);
-                robs.erase(robs.begin() + j);
-                tims.erase(tims.begin() + j);
-                j--;
-            }
-        }
-        int n_sim = similars.size();
-        cv::Point3f translation(robs[i].x, robs[i].y, robs[i].z);
-        cv::Point3f rotation(robs[i].roll, robs[i].pitch, robs[i].yaw);
-        translation *= (1. / (n_sim + 1));
-        rotation *= (1. / (n_sim + 1));
-        uint32_t time = tims[i] / (n_sim + 1);
-        for (uint k = 0; k < n_sim; k++) {
-            translation += (1. / (n_sim + 1)) * cv::Point3f(similars[k].x, similars[k].y, similars[k].z);
-            rotation += (1. / (n_sim + 1)) * cv::Point3f(similars[k].roll, similars[k].pitch, similars[k].yaw);
-            time += sim_times[k] / (n_sim + 1);
-        }
-        for (uint k = 0; k < robots.size(); k++) {
-            if (robs[i].id == robots[k]->id()) {
-                robots[k]->update(translation, rotation);
-                timestamps[k] = time;
-            }
-        }
-    }
-}
-
-
-void Collector::merge_obstacles(std::vector<Obstacle*>& obstacles, std::vector<uint32_t>& timestamps) {
-    timestamps.clear();
-    obstacles.clear();
     std::vector<Obstacle*> obst;
-    std::vector<uint32_t> tims;
+    std::vector<uint32_t> t_obst;
     for (std::map<std::string, std::vector<Obstacle*>>::iterator obs = _obstacle_map.begin(); obs != _obstacle_map.end(); ++obs) {
         for (uint k = 0; k < obs->second.size(); k++) {
             obst.push_back(obs->second[k]);
-            tims.push_back(_obstacle_time_map[obs->first][k]);
+            t_obst.push_back(_obstacle_time_map[obs->first][k]);
         }
     }
-    std::vector<eagle::Obstacle*> similars;
-    std::vector<uint32_t> sim_times;
+    // find similar robots and average them
+    std::vector<marker_t> sim_robs;
+    std::vector<uint32_t> sim_t_robs;
+    for (uint i = 0; i < robs.size(); i++) {
+        sim_robs.clear();
+        for (uint j = i + 1; j < robs.size(); j++) {
+            if (robs[i].id == robs[j].id) {
+                sim_robs.push_back(robs[j]);
+                sim_t_robs.push_back(t_robs[j]);
+                robs.erase(robs.begin() + j);
+                t_robs.erase(t_robs.begin() + j);
+                j--;
+            }
+        }
+        int n_sim = sim_robs.size();
+        cv::Point3f translation(robs[i].x, robs[i].y, robs[i].z);
+        translation *= (1. / (n_sim + 1));
+        // rotation a bit more tricky
+        double roll = robs[i].roll;
+        int sgn_i = ((0 < roll) - (roll < 0));
+        if (fabs(fabs(robs[i].roll) - M_PI) < 0.1) {
+            roll -= sgn_i*M_PI;
+        }
+        roll /= (n_sim+1);
+        double pitch = robs[i].pitch;
+        sgn_i = ((0 < pitch) - (pitch < 0));
+        if (fabs(fabs(robs[i].pitch) - M_PI) < 0.1) {
+            pitch -= sgn_i*M_PI;
+        }
+        pitch /= (n_sim+1);
+        double yaw = robs[i].yaw;
+        sgn_i = ((0 < yaw) - (yaw < 0));
+        if (fabs(fabs(robs[i].yaw) - M_PI) < 0.1) {
+            yaw -= sgn_i*M_PI;
+        }
+        yaw /= (n_sim+1);
+
+        uint32_t time = t_robs[i] / (n_sim + 1);
+        if (_verbose >= 1 && n_sim > 0) {
+            std::cout << "merging " << n_sim + 1 << " robots with id " << robs[i].id;
+            std::cout << " (" << t_robs[i];
+            for (uint k = 0; k < n_sim; k++) {
+                std::cout << "," << sim_t_robs[k];
+            }
+            std::cout << ")" << std::endl;
+        }
+        for (uint k = 0; k < n_sim; k++) {
+            translation += (1. / (n_sim + 1)) * cv::Point3f(sim_robs[k].x, sim_robs[k].y, sim_robs[k].z);
+
+            if (fabs(fabs(robs[i].roll) - M_PI) < 0.1) {
+                int sgn_sim = ((0 < sim_robs[k].roll) - (sim_robs[k].roll < 0));
+                roll += (sim_robs[k].roll - sgn_sim*M_PI)/(n_sim+1);
+            }
+            else {
+                roll += (sim_robs[k].roll)/(n_sim+1);
+            }
+            if (fabs(fabs(robs[i].pitch) - M_PI) < 0.1) {
+                int sgn_sim = ((0 < sim_robs[k].pitch) - (sim_robs[k].pitch < 0));
+                pitch += (sim_robs[k].pitch - sgn_sim*M_PI)/(n_sim+1);
+            }
+            else {
+                pitch += (sim_robs[k].pitch)/(n_sim+1);
+            }
+            if (fabs(fabs(robs[i].yaw) - M_PI) < 0.1) {
+                int sgn_sim = ((0 < sim_robs[k].yaw) - (sim_robs[k].yaw < 0));
+                yaw += (sim_robs[k].yaw - sgn_sim*M_PI)/(n_sim+1);
+            }
+            else {
+                yaw += (sim_robs[k].yaw)/(n_sim+1);
+            }
+            time += sim_t_robs[k] / (n_sim + 1);
+        }
+        if (fabs(fabs(robs[i].roll) - M_PI) < 0.1) {
+            int sgn = ((0 < roll) - (roll < 0));
+            roll -= sgn*M_PI;
+        }
+        if (fabs(fabs(robs[i].pitch) - M_PI) < 0.1) {
+            int sgn = ((0 < pitch) - (pitch < 0));
+            pitch -= sgn*M_PI;
+        }
+        if (fabs(fabs(robs[i].yaw) - M_PI) < 0.1) {
+            int sgn = ((0 < yaw) - (yaw < 0));
+            yaw -= sgn*M_PI;
+        }
+        cv::Point3f rotation(roll, pitch, yaw);
+        for (uint k = 0; k < robots.size(); k++) {
+            if (robs[i].id == robots[k]->id()) {
+                robots[k]->update(translation, rotation);
+                times_robot[k] = time;
+            }
+        }
+    }
+    // find similar obstacles and average/discard them
+    std::vector<eagle::Obstacle*> sim_obst;
+    std::vector<uint32_t> sim_t_obst;
     for (uint i = 0; i < obst.size(); i++) {
-        RectangleObstacle* robst_i = dynamic_cast<RectangleObstacle*>(obst[i]);
-        CircleObstacle* cobst_i = dynamic_cast<CircleObstacle*>(obst[i]);
-        similars.clear();
-        for (uint j = i + 1; j < obst.size(); j++) {
-            double dst = cv::norm(obst[i]->center() - obst[j]->center());
-            if (dst < 0.1) {
-                RectangleObstacle* robst_j = dynamic_cast<RectangleObstacle*>(obst[j]);
-                if (robst_i != NULL && robst_j != NULL) {
-                    similars.push_back(obst[j]);
-                    sim_times.push_back(tims[j]);
-                    obst.erase(obst.begin() + j);
-                    tims.erase(tims.begin() + j);
-                    j--;
+        cloud2_t robot_points2;
+        bool proceed = true;
+        for (uint j = 0; j < robots.size(); j++) {
+            if (robots[j]->detected()) {
+                robot_points2 = dropz(robots[j]->vertices());
+                if (cv::pointPolygonTest(robot_points2, obst[i]->center(), false) >= 0) {
+                    if (_verbose >= 1) {
+                        std::cout << "discarding obstacle in robot." << std::endl;
+                    }
+                    obst.erase(obst.begin() + i);
+                    t_obst.erase(t_obst.begin() + i);
+                    i--;
+                    proceed = false;
+                    break;
                 }
-                CircleObstacle* cobst_j = dynamic_cast<CircleObstacle*>(obst[j]);
-                if (cobst_i != NULL && cobst_j != NULL) {
-                    similars.push_back(obst[j]);
-                    sim_times.push_back(tims[j]);
-                    obst.erase(obst.begin() + j);
-                    tims.erase(tims.begin() + j);
-                    j--;
-                }
-                // I don't know how to handle other cases ...
             }
         }
-        if (robst_i != NULL) {
-            int n_sim = similars.size();
-            cv::Point2f center = (1. / (n_sim + 1)) * robst_i->center();
-            cv::Point2f size(robst_i->width(), robst_i->height());
-            size *= (1. / (n_sim + 1));
-            double angle = (1. / (n_sim + 1)) * robst_i->angle();
-            uint32_t time = tims[i] / (n_sim + 1);
-            for (uint k = 0; k < n_sim; k++) {
-                RectangleObstacle* robst_j = dynamic_cast<RectangleObstacle*>(similars[k]);
-                center += (1. / (n_sim + 1)) * robst_j->center();
-                size += (1. / (n_sim + 1)) * cv::Point2f(robst_j->width(), robst_j->height());
-                angle += (1. / (n_sim + 1)) * robst_j->angle();
-                time += sim_times[k] / (n_sim + 1);
+        if (proceed) {
+            cloud2_t obstacle_points2;
+            for (uint j = 0; j < obst.size(); j++) {
+                if (i != j) {
+                    double dst = cv::norm(obst[i]->center() - obst[j]->center());
+                    obstacle_points2 = dropz(obst[j]->points());
+                    if (dst >= 0.1 && cv::pointPolygonTest(obstacle_points2, obst[i]->center(), false) >= 0) {
+                        if (_verbose >= 1) {
+                            std::cout << "discarding obstacle in obstacle." << std::endl;
+                        }
+                        obst.erase(obst.begin() + i);
+                        t_obst.erase(t_obst.begin() + i);
+                        i--;
+                        proceed = false;
+                        break;
+                    }
+                }
             }
-            obstacles.push_back(new RectangleObstacle(center, size, angle));
-            timestamps.push_back(time);
         }
-        if (cobst_i != NULL) {
-            int n_sim = similars.size();
-            cv::Point2f center = (1. / (n_sim + 1)) * cobst_i->center();
-            double radius = (1. / (n_sim + 1)) * cobst_i->radius();
-            uint32_t time = tims[i] / (n_sim + 1);
-            for (uint k = 0; k < n_sim; k++) {
-                CircleObstacle* cobst_j = dynamic_cast<CircleObstacle*>(similars[k]);
-                center += (1. / (n_sim + 1)) * cobst_j->center();
-                radius += (1. / (n_sim + 1)) * cobst_j->radius();
-                time += sim_times[k] / (n_sim + 1);
+        if (proceed) {
+            RectangleObstacle* robst_i = dynamic_cast<RectangleObstacle*>(obst[i]);
+            CircleObstacle* cobst_i = dynamic_cast<CircleObstacle*>(obst[i]);
+            sim_obst.clear();
+            for (uint j = i + 1; j < obst.size(); j++) {
+                double dst = cv::norm(obst[i]->center() - obst[j]->center());
+                if (dst < 0.1) {
+                    RectangleObstacle* robst_j = dynamic_cast<RectangleObstacle*>(obst[j]);
+                    if (robst_i != NULL && robst_j != NULL) {
+                        sim_obst.push_back(obst[j]);
+                        sim_t_obst.push_back(t_obst[j]);
+                        obst.erase(obst.begin() + j);
+                        t_obst.erase(t_obst.begin() + j);
+                        j--;
+                    }
+                    CircleObstacle* cobst_j = dynamic_cast<CircleObstacle*>(obst[j]);
+                    if (cobst_i != NULL && cobst_j != NULL) {
+                        sim_obst.push_back(obst[j]);
+                        sim_t_obst.push_back(t_obst[j]);
+                        obst.erase(obst.begin() + j);
+                        t_obst.erase(t_obst.begin() + j);
+                        j--;
+                    }
+                    // I don't know how to handle other cases ...
+                }
             }
-            obstacles.push_back(new CircleObstacle(center, radius));
-            timestamps.push_back(time);
+            if (robst_i != NULL) {
+                int n_sim = sim_obst.size();
+                cv::Point2f center = (1. / (n_sim + 1)) * robst_i->center();
+                cv::Point2f size(robst_i->width(), robst_i->height());
+                size *= (1. / (n_sim + 1));
+                double angle = (1. / (n_sim + 1)) * robst_i->angle();
+                uint32_t time = t_obst[i] / (n_sim + 1);
+                if (_verbose >= 1 && n_sim > 0) {
+                    std::cout << "merging " << n_sim + 1 << " rectangular obstacles";
+                    std::cout << " (" << t_obst[i];
+                    for (uint k = 0; k < n_sim; k++) {
+                        std::cout << "," << sim_t_obst[k];
+                    }
+                    std::cout << ")" << std::endl;
+                }
+                for (uint k = 0; k < n_sim; k++) {
+                    RectangleObstacle* robst_j = dynamic_cast<RectangleObstacle*>(sim_obst[k]);
+                    center += (1. / (n_sim + 1)) * robst_j->center();
+                    size += (1. / (n_sim + 1)) * cv::Point2f(robst_j->width(), robst_j->height());
+                    angle += (1. / (n_sim + 1)) * robst_j->angle();
+                    time += sim_t_obst[k] / (n_sim + 1);
+                }
+                obstacles.push_back(new RectangleObstacle(center, size, angle));
+                times_obstacles.push_back(time);
+            }
+            if (cobst_i != NULL) {
+                int n_sim = sim_obst.size();
+                cv::Point2f center = (1. / (n_sim + 1)) * cobst_i->center();
+                double radius = (1. / (n_sim + 1)) * cobst_i->radius();
+                uint32_t time = t_obst[i] / (n_sim + 1);
+                if (_verbose >= 1 && n_sim > 0) {
+                    std::cout << "merging " << n_sim + 1 << " circular obstacles";
+                    std::cout << " (" << t_obst[i];
+                    for (uint k = 0; k < n_sim; k++) {
+                        std::cout << "," << sim_t_obst[k];
+                    }
+                    std::cout << ")" << std::endl;
+                }
+                for (uint k = 0; k < n_sim; k++) {
+                    CircleObstacle* cobst_j = dynamic_cast<CircleObstacle*>(sim_obst[k]);
+                    center += (1. / (n_sim + 1)) * cobst_j->center();
+                    radius += (1. / (n_sim + 1)) * cobst_j->radius();
+                    time += sim_t_obst[k] / (n_sim + 1);
+                }
+                obstacles.push_back(new CircleObstacle(center, radius));
+                times_obstacles.push_back(time);
+            }
         }
     }
 }
