@@ -6,3 +6,4 @@ config.bak/
 todo
 .test
 *.sublime*
+eagle.h
