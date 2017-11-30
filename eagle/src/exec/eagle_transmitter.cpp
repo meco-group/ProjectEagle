@@ -215,7 +215,7 @@ int main(int argc, char* argv[]) {
     // Robot table0(2, 1.1, 1.2, cv::Point3f(-0.4705, -0.4175, 0.), cv::Scalar(64, 64, 169));
     // Robot table1(8, 1.1, 1.2, cv::Point3f(-0.4705, -0.4175, 0.), cv::Scalar(64, 64, 169));
     Robot table0(2, 1.1, 1.1, cv::Point3f(-0.52, -0.405, 0.), cv::Scalar(64, 64, 169));
-    Robot table1(8, 1.4, 0.7, cv::Point3f(-0.7, -0.5, 0.), cv::Scalar(64, 64, 169));
+    Robot table1(8, 1.12, 1.4, cv::Point3f(-0.7, -0.5, 0.), cv::Scalar(64, 64, 169));
     std::vector< Robot* > robots = std::vector< Robot* > {&dave, &krist, &kurt, &table0, &table1};
     std::vector< Obstacle* > obstacles;
 
