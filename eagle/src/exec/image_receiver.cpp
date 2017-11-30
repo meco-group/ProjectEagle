@@ -49,10 +49,16 @@ int main(int argc, char* argv[]) {
                         // 2. read data based on the header
                         if (header.id == eagle::IMAGE) {
                             size_t size = msg.framesize();
-                            uchar buffer[size];
-                            msg.read(buffer);
-                            cv::Mat rawData = cv::Mat( 1, size, CV_8UC1, buffer);
-                            cv::Mat im = cv::imdecode(rawData, 1);
+                            std::vector<uchar> buffer(size);
+                            msg.read(buffer.data());
+
+                            // retrieve metadata
+                            image_t iminfo;
+                            memcpy((uchar*)(&iminfo),buffer.data()+buffer.size()-sizeof(iminfo),sizeof(iminfo));
+                            buffer.resize(size-sizeof(iminfo));
+                            
+                            // decode image
+                            cv::Mat im = cv::imdecode(buffer, 1);
                             imshow(window_name, im);
                             cv::waitKey(1);
                             img_cnt++;

@@ -72,13 +72,17 @@ int main(int argc, char* argv[]) {
                         // 2. read data based on the header
                         if (header.id == eagle::IMAGE) {
                             size_t size = msg.framesize();
-                            uchar buffer[size];
-                            msg.read(buffer);
-                            cv::Mat rawData = cv::Mat( 1, size, CV_8UC1, buffer);
-                            cv::Mat in = cv::imdecode(rawData, 1);
-                            cv::Mat remapped;
-                            remapinf(config_map[pr], in, remapped, pixels_per_meter, img_size, height);
-                            replace(remapped, img, 0.3);
+                            std::vector<uchar> buffer(size);
+                            msg.read(buffer.data());
+
+                            // retrieve metadata
+                            image_t iminfo;
+                            memcpy((uchar*)(&iminfo),buffer.data()+buffer.size()-sizeof(iminfo),sizeof(iminfo));
+                            buffer.resize(size-sizeof(iminfo));
+                            
+                            // decode image
+                            cv::Mat im = cv::imdecode(buffer, 1);
+                            replace(im, cv::Point2f(iminfo.offset.x, iminfo.offset.y), img, 0.3);
                             break;
                         } else {
                             msg.dump_frame();
