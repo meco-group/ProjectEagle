@@ -212,7 +212,7 @@ int main(int argc, char* argv[]) {
     Robot dave(0, 0.55, 0.4, cv::Scalar(138, 110, 17));
     Robot krist(1, 0.55, 0.4, cv::Scalar(17, 31, 138));
     Robot kurt(9, 0.55, 0.4, cv::Scalar(19, 138, 17));
-    Robot table0(2, 1.1, 1.2, cv::Point3f(-0.52, -0.405, 0.), cv::Scalar(64, 64, 169));
+    Robot table0(2, 0.8, 1.2, cv::Point3f(-0.52, -0.405, 0.), cv::Scalar(64, 64, 169));
     Robot table1(8, 1.1, 1.8, cv::Point3f(-0.5, -0.7, 0.1), cv::Scalar(64, 64, 169));
     std::vector< Robot* > robots = std::vector< Robot* > {&dave, &krist, &kurt, &table0, &table1};
     std::vector< Obstacle* > obstacles;
