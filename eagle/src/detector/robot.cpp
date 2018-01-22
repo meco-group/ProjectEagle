@@ -9,7 +9,7 @@ Robot::Robot(unsigned int id, double dx, double dy, const cv::Point3f& marker_tr
     Robot(id, dx, dy, marker_translation, cv::Point3f(0, 0, 0), color) {}
 
 Robot::Robot(unsigned int id, double dx, double dy, const cv::Point3f& marker_translation, const cv::Point3f& marker_rotation, const cv::Scalar& color) :
-    _id(id), _dx(dx), _dy(dy), _marker_translation(marker_translation), _marker_rotation(marker_rotation), _color(color), _detected(false) {}
+    _id(id), _dx(dx), _dy(dy), _marker_translation(marker_translation), _marker_rotation(marker_rotation), _color(color), _detected(false), _is_obstacle(false) {}
 
 void Robot::update(const std::vector<cv::Point3f>& markers) {
     _markers = markers;
@@ -150,4 +150,11 @@ cv::Point3f Robot::ez(const std::vector<cv::Point3f>& markers) const {
     ez /= cv::norm(ez);
 
     return ez;
+}
+
+Obstacle* Robot::to_obstacle() const {
+    cv::Point2f center(_translation.x, _translation.y);
+    cv::Point2f size(_dx, _dy);
+    double angle = _rotation.z;
+    return new RectangleObstacle(center, size, angle);
 }

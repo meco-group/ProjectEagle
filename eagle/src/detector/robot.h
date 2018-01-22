@@ -11,6 +11,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include "obstacle_rectangle.h"
 
 namespace eagle {
 
@@ -27,6 +28,7 @@ class Robot {
     std::vector<cv::Point3f> _markers;
     cv::Point3f _translation;
     cv::Point3f _rotation;
+    bool _is_obstacle;
 
     cv::Point3f ex(const std::vector<cv::Point3f>& markers) const;
     cv::Point3f ey(const std::vector<cv::Point3f>& markers) const;
@@ -47,6 +49,7 @@ class Robot {
     void draw_markers(cv::Mat& frame, Projection& projection) const;
     void draw_id(cv::Mat& frame, Projection& projection) const;
     void draw_box(cv::Mat& frame, Projection& projection) const;
+    void set_obstacle(bool obstacle) { _is_obstacle = obstacle; }
 
     // getters
     std::string to_string() const;
@@ -55,11 +58,13 @@ class Robot {
     cv::Scalar color() const { return _color; }
     std::vector<cv::Point3f> markers() const { return _markers; }
     bool detected() const { return _detected; }
+    bool is_obstacle() const { return _is_obstacle; }
 
     cv::Point3f translation() const;
     cv::Point3f rotation() const;
     std::vector<cv::Point3f> vertices() const;
     eagle::marker_t serialize() const;
+    Obstacle* to_obstacle() const;
 };
 
 };

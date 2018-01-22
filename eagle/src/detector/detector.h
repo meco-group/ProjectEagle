@@ -35,10 +35,11 @@ class Detector {
     void detect_obstacles(const cv::Mat& frame, const std::vector<std::vector<cv::Point> >& contours, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
     void filter_obstacles(const std::vector<std::vector<cv::Point>>& contours, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
     void sort_obstacles(std::vector<Obstacle*>& obstacles);
+    void convert_robots(const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
 
   public:
     Detector(const std::string& config_path, const cv::Mat& background = cv::Mat(0, 0, CV_8UC3));
-    void search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles);
+    void search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles, bool obstacle_detection=true);
     cv::Mat draw(cv::Mat& frame, const std::vector<Robot*>& robots, const std::vector<Obstacle*>& obstacles);
     void set_background(const cv::Mat& bg);
     void verbose(int verbose);

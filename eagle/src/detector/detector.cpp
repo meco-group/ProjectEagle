@@ -35,7 +35,7 @@ Detector::Detector(const std::string& config_path, const cv::Mat& background):
     _extr = new PnpPatternExtractor3(_pat, _projection.camera_matrix(), cv::Mat(0, 0, CV_32F), T);
 }
 
-void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles) {
+void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles, bool obstacle_detection) {
     for (uint k = 0; k < robots.size(); k++) {
         robots[k]->reset();
     }
@@ -46,9 +46,14 @@ void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, s
     std::vector<std::vector<cv::Point>> contours = get_contours(mask);
     if (!contours.empty()) {
         detect_robots(undist, contours, robots);
-        subtract_robots(mask, robots);
-        contours = get_contours(mask);
-        detect_obstacles(undist, contours, robots, obstacles);
+        if (obstacle_detection) {
+            subtract_robots(mask, robots);
+            contours = get_contours(mask);
+            detect_obstacles(undist, contours, robots, obstacles);
+        } else {
+            obstacles.clear();
+        }
+        convert_robots(robots, obstacles);
         if (_verbose >= 2) {
             std::cout << "* Detected robots:" << std::endl;
             for (int k=0; k<robots.size(); k++) {
@@ -64,6 +69,15 @@ void Detector::search(const cv::Mat& frame, const std::vector<Robot*>& robots, s
     } else {
         if (_verbose >= 1) {
             std::cout << "No contours detected!" << std::endl;
+        }
+    }
+}
+
+void Detector::convert_robots(const std::vector<Robot*>& robots, std::vector<Obstacle*>& obstacles) {
+    for (int k=0; k<robots.size(); k++) {
+        if (robots[k]->detected() && robots[k]->is_obstacle()) {
+            obstacles.push_back(robots[k]->to_obstacle());
+            robots[k]->reset();
         }
     }
 }
