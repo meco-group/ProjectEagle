@@ -214,7 +214,9 @@ int main(int argc, char* argv[]) {
     Robot kurt(9, 0.55, 0.4, cv::Scalar(19, 138, 17));
     Robot table0(2, 0.8, 1.2, cv::Point3f(-0.52, -0.405, 0.), cv::Scalar(64, 64, 169));
     Robot table1(8, 1.1, 1.8, cv::Point3f(-0.5, -0.7, 0.1), cv::Scalar(64, 64, 169));
-    std::vector< Robot* > robots = std::vector< Robot* > {&dave, &krist, &kurt, &table0, &table1};
+    Robot obstacle(11, 0.7, 0.3, cv::Point3f(0.3, 0., 0.), cv::Scalar(64, 64, 169));
+    obstacle.set_obstacle(true); // this 'robot' act as an obstacle (i.e. marked obstacle)
+    std::vector< Robot* > robots = std::vector< Robot* > {&dave, &krist, &kurt, &table0, &table1, &obstacle};
     std::vector< Obstacle* > obstacles;
 
     if (settings.image_viewer_on) {
@@ -302,7 +304,8 @@ int main(int argc, char* argv[]) {
 
         if (settings.detection_on) {
             // detect the robots/obstacles
-            TIMING(detector.search(im, robots, obstacles););
+            // TIMING(detector.search(im, robots, obstacles););
+            TIMING(detector.search(im, robots, obstacles, false););  // no obstacle detection
             t_det = DURATION;
             // send detected robots/obstacles
             TIMING(transmit_detected(com, robots, obstacles, group, capture_time););
