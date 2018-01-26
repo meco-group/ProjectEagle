@@ -1,6 +1,4 @@
-<img src="doc/logo/logo.png" align="right" width="250"/>
-
-# Project Eagle
+<img width=850 src="https://cdn.rawgit.com/meco-group/ProjectEagle/master/doc/logo/logo.svg" alt="fly!"/>
 
 Project Eagle provides a holistic solution to the free space localization problem, often encountered both in academia and industry. Project Eagle's key features are:
 * multiple camera modules work seemlessly together to oversee an area larger than their individual fields of view
