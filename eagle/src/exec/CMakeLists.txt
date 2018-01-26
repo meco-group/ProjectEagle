@@ -1,6 +1,3 @@
-# Look for all source files in src and add them to the library
-file(GLOB_RECURSE SOURCE_FILES *.cpp)
-
 # Define an executable
 add_executable(TestCommunicator test_communicator.cpp)
 add_executable(Calibrate calibrate.cpp)
@@ -13,9 +10,8 @@ add_executable(EagleTransmitter eagle_transmitter.cpp)
 add_executable(Background background.cpp)
 add_executable(GroundCalibrate calibrate_ground.cpp)
 
-set(LIBS ${LIBRARIES} Communicator Camera Calibrator Detector)
-
 # Define the libraries this project depends upon
+set(LIBS ${LIBRARIES} eagle)
 target_link_libraries(TestCommunicator ${LIBS})
 target_link_libraries(Calibrate ${LIBS})
 target_link_libraries(StereoCalibrate ${LIBS})
@@ -26,3 +22,15 @@ target_link_libraries(Snapshot ${LIBS})
 target_link_libraries(EagleTransmitter ${LIBS})
 target_link_libraries(Background ${LIBS})
 target_link_libraries(GroundCalibrate ${LIBS})
+
+# Install executables
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/TestCommunicator DESTINATION bin RENAME ${PROJECT_NAME}_testcommunicator)
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Calibrate DESTINATION bin RENAME ${PROJECT_NAME}_calibrate)
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/StereoCalibrate DESTINATION bin RENAME ${PROJECT_NAME}_stereocalibrate)
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Viewer DESTINATION bin RENAME ${PROJECT_NAME}_viewer)
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ImageReceiver DESTINATION bin RENAME ${PROJECT_NAME}_imagereceiver)
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ImageTransmitter DESTINATION bin RENAME ${PROJECT_NAME}_imagetransmitter)
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Snapshot DESTINATION bin RENAME ${PROJECT_NAME}_snapshot)
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/EagleTransmitter DESTINATION bin RENAME ${PROJECT_NAME}_eagletransmitter)
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Background DESTINATION bin RENAME ${PROJECT_NAME}_background)
+install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/GroundCalibrate DESTINATION bin RENAME ${PROJECT_NAME}_groundcalibrate)

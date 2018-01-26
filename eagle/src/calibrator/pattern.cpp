@@ -1,10 +1,10 @@
-#include <pattern.h>
+#include "pattern.h"
 #include <stdio.h>
 #include <iostream>
 
 using namespace eagle;
 
-Pattern::Pattern(const type_t type, const int rows, const int cols, const double dimension) : 
+Pattern::Pattern(const type_t type, const int rows, const int cols, const double dimension) :
     _type(type), _rows(rows), _cols(cols), _dimension(dimension)
 {
     //do nothing
@@ -66,7 +66,7 @@ std::vector<cv::Point2f> Pattern::find(const cv::Mat& img, bool display)
             found = findCirclesGrid(img, size(), points, cv::CALIB_CB_ASYMMETRIC_GRID);
             break;
     }
-    
+
     if(display) {
         imshow("Image", img);
         cv::waitKey(500);

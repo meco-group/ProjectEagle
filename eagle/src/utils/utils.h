@@ -1,7 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#define CONFIG_PATH "/home/odroid/ProjectEagle/eagle/config/config.xml"
+// #define CONFIG_PATH "/home/odroid/ProjectEagle/eagle/config/config.xml"
+#define CONFIG_PATH "/home/ruben/Documents/Work/Repositories/ProjectEagle/eagle/config/config.xml"
 #define CAL_IMAGES_PATH "/home/odroid/ProjectEagle/eagle/config/calibration/"
 
 #include <cstdio>

@@ -1,6 +1,4 @@
-#include "communicator.h"
-#include "utils.h"
-#include "protocol.h"
+#include <eagle.h>
 
 using namespace eagle;
 

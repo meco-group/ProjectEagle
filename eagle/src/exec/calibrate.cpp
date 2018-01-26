@@ -1,23 +1,20 @@
+#include <eagle.h>
 #include <iostream>
 #include <fstream>
 #include <map>
 #include <opencv/cv.hpp>
 
-#include <pattern_extractor.h>
-#include <utils.h>
-#include <config_helper.h>
-
 using namespace eagle;
 
 /*
- * Compute the internal calibration matrix together with the distortion vector. 
+ * Compute the internal calibration matrix together with the distortion vector.
  * These are saved in the provided config file.
  */
 
 int main(int argc, char* argv[]) {
     std::string config_path = (argc > 1) ? argv[1] : CONFIG_PATH;
     std::string images_path = (argc > 2) ? argv[2] : CAL_IMAGES_PATH;
-    
+
     // extract pattern from images
     PatternExtractor extractor(config_path);
     std::vector<cloud2_t> image_pnts = extractor.extract(images_path, false);
