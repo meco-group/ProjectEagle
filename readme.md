@@ -32,7 +32,7 @@ Install the following packages:
 Clone the repo:
 ```
 git clone https://github.com/meco-group/ProjectEagle.git
-cd ProjectEagle
+cd ProjectEagle/eagle
 ```
 Next, build and install the source:
 ```
