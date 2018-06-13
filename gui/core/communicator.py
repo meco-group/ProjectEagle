@@ -54,6 +54,7 @@ class Communicator(Pyre):
                 return img, peer
             else:
                 return None, None
+        return None, None
 
     def send_cmd(self, cmd, peer):
         h_id = 3
