@@ -11,7 +11,9 @@ class DeviceManager:
         self.deviceTree = device_tree
         self.devices = {}
 
-    def add_device(self, name, ip, username, password, origin, root_dir, index):
+    def add_device(self, name, ip, username, password, origin, root_dir, index = -1):
+        if index < 0:
+            index = self.deviceTree.topLevelItemCount()
         self.devices[name] = Device(self, name, ip, username, password, origin, root_dir, index)
         self.deviceTree.add_device(self.devices[name])
 
@@ -57,7 +59,8 @@ class DeviceManager:
                 'username': device.username,
                 'password': device.password,
                 'origin': device.is_origin(),
-                'root_dir': device.remote_root_dir
+                'root_dir': device.remote_root_dir,
+                'index': device.index
             })
         with open(path, 'w') as file:
             config.write(file)
@@ -73,7 +76,7 @@ class DeviceManager:
         for k, device in enumerate(config['Devices'].values()):
             device_parsed = json.loads(device)
             self.add_device(device_parsed['name'], device_parsed['ip'], device_parsed['username'],
-                device_parsed['password'], device_parsed['origin'], device_parsed['root_dir'], k)
+                device_parsed['password'], device_parsed['origin'], device_parsed['root_dir'], device_parsed['index'])
         self.deviceTree.update()
         print "Loaded " + path
 
