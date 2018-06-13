@@ -25,22 +25,12 @@ class ImageStream(QtGui.QLabel):
         self.image_receiver.moveToThread(self.receiver_thread)
         self.connect(self.image_receiver, self.image_receiver.signal, self.update_image)
 
-        self.transmitter_thread = QThread()
-        self.transmitter_thread.start()
-
-        self.image_transmitter = ImageTransmitter(self.device)
-        self.image_transmitter.moveToThread(self.transmitter_thread)
-        self.connect(self.image_transmitter, self.image_transmitter.signal, self.reload)
-
     def finish(self):
         self.stop()
         self.receiver_thread.quit()
         self.receiver_thread.wait()
-        self.transmitter_thread.quit()
-        self.transmitter_thread.wait()
 
     def start(self):
-        QtCore.QTimer.singleShot(0, self.image_transmitter.task)
         QtCore.QTimer.singleShot(0, self.image_receiver.task)
 
     def update_image(self):
@@ -52,7 +42,6 @@ class ImageStream(QtGui.QLabel):
         #       otherwise zyre will keep waiting for a message from the
         #       transmitter indefinitely
         self.image_receiver.stop()
-        self.image_transmitter.stop()
 
     def snap(self):
         # give command to take snapshot
@@ -71,33 +60,6 @@ class ImageStream(QtGui.QLabel):
         # Start ImageTransmitter again
         self.start()
         self.emit(self.signal_reload, 'reload')
-
-
-class ImageTransmitter(QObject):
-    def __init__(self, device):
-        super(ImageTransmitter, self).__init__()
-        self.device = device
-
-        self._isRunning = False
-        self._isDead = False
-        self.signal = QtCore.SIGNAL('hanging')
-
-    def task(self):
-        if not self._isRunning:
-            # start image transmitter
-            cmd = os.path.join(paths.get_remote_bin_dir(self.device), 'ImageTransmitter')
-            if (not self.device.ssh_manager.start_process('image_transmitter', cmd, self.device.name, '1', '1', os.path.join(paths.get_remote_config_dir(self.device), 'snapshot.png'))):
-                print 'Image transmission could not be started on ' + self.device.name + '.'
-                self.device.set_online(False)
-                return
-            self.device.set_online(True)
-            self._isRunning = True
-
-    def stop(self):
-        self._isRunning = False
-        self.device.ssh_manager.end_process('image_transmitter')
-        print 'Stopped image transmission.'
-
 
 class ImageReceiver(QObject):
     def __init__(self, device, group):
