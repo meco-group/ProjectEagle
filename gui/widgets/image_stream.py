@@ -5,6 +5,7 @@ import time
 from xml.etree import ElementTree as ET
 import core.paths as paths
 from core.communicator import Communicator
+import sys
 
 
 class ImageStream(QtGui.QLabel):
@@ -44,15 +45,31 @@ class ImageStream(QtGui.QLabel):
         self.image_receiver.stop()
 
     def snap(self):
-        # give command to take snapshot
-        self.image_receiver.snap()
-        # download snapshot
         ssh = self.device.ssh_manager.get_ssh()
         sftp = ssh.open_sftp()
-        sftp.get(os.path.join(paths.get_remote_config_dir(self.device), 'snapshot.png'), self.cal_wizard.get_next_snap_path(self.device))
-        sftp.remove(os.path.join(paths.get_remote_config_dir(self.device), 'snapshot.png'))
-        ssh.close()
-        self.emit(self.signal_snap, 'snapshot taken')
+
+        try: # seems there is no way of asking whether the file exists
+            sftp.remove(os.path.join(paths.get_remote_config_dir(self.device), 'snapshot.png'))
+        except:
+            pass
+
+        # give command to take snapshot
+        self.image_receiver.snap()
+
+        # download snapshot
+        timer = 0
+        while timer < 3: # wait 3 seconds
+            try:
+                sftp.get(os.path.join(paths.get_remote_output_dir(self.device), 'snapshot.png'), self.cal_wizard.get_next_snap_path(self.device))
+                sftp.remove(os.path.join(paths.get_remote_output_dir(self.device), 'snapshot.png'))
+                ssh.close()
+                self.emit(self.signal_snap, 'snapshot taken')
+                break
+            except:
+                # print sys.exc_info()[0]
+                timer += 0.1
+                time.sleep(0.1)
+
 
     def reload(self):
         # Stop ImageTransmitter/Receiver
@@ -95,6 +112,8 @@ class ImageReceiver(QObject):
                 return
 
         time.sleep(1)
+        self.com.send_cmd(10, self.device.name) # enable the image transmission
+        self.com.send_cmd(40, self.device.name) # enable the chessboard detection
         #time.sleep(1)
 
         print 'Started image receiving from %s.' % self.device.name
@@ -118,6 +137,7 @@ class ImageReceiver(QObject):
         self._isDead = True
 
     def stop(self):
+        self.com.send_cmd(11, self.device.name) # enable the image transmission
         self._isRunning = False
         while not self._isDead:
             time.sleep(.01)
