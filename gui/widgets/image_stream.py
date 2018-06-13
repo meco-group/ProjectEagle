@@ -121,7 +121,7 @@ class ImageReceiver(QObject):
 
             # start communicator
             self.com.start()
-            time.sleep(0.1)
+            time.sleep(1)
 
             # Wait for peers to connect
             if (not self.com.wait_for_peer(self.device.name, 2)):
@@ -131,6 +131,9 @@ class ImageReceiver(QObject):
                 self._isDead = True
                 self.stop()
                 return
+
+        time.sleep(1)
+        #time.sleep(1)
 
         print 'Started image receiving from %s.' % self.device.name
         while self._isRunning:

@@ -3,14 +3,16 @@
 
 #include "../communicator/communicator.h"
 #include "protocol.h"
+#include <unistd.h>
 
 namespace eagle {
 
 bool send_command(cmd_t cmd, const std::string& iface, const int port, const std::string& shout_or_whisper, const std::string& group_or_peer) {
     Communicator com("commander", iface, port);
     com.start(100);
-    header_t header = {CMD, 0}; //set time
+    usleep(1000000);
 
+    header_t header = {CMD, 0}; //set time
     // set peer
     bool succes;
     if (strcmp(shout_or_whisper.c_str(), "-g") == 0) {

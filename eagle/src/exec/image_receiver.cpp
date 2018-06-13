@@ -1,4 +1,5 @@
 #include <eagle.h>
+#include <unistd.h>
 
 using namespace eagle;
 
@@ -11,6 +12,7 @@ int main(int argc, char* argv[]) {
     // start communicator
     Communicator com("receiver", iface, 5670);
     com.start(100.);
+    usleep(1000000);
     com.join(group);
 
     bool receive_all = (peer.compare("all") == 0);
@@ -25,6 +27,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << "Start receiving video stream." << std::endl;
+    std::cout << "Press any key to exit" << std::endl;
 
     // start acquiring video stream
     std::string window_name = "";
