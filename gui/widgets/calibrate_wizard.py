@@ -48,6 +48,7 @@ class CalibrateWizard(QtGui.QDialog):
         self.reload_stream_button = QtGui.QPushButton('Refresh Stream', self)
         snap_list_layout.addWidget(self.reload_stream_button)
         self.reload_stream_button.clicked.connect(self.handle_reload)
+        self.reload_stream_button.setEnabled(False)
 
         self.cal_button = QtGui.QPushButton('Calibrate', self)
         snap_list_layout.addWidget(self.cal_button)
@@ -82,7 +83,7 @@ class CalibrateWizard(QtGui.QDialog):
 
     def handle_snapshot(self):
         self.snapshot_button.setEnabled(False)
-        self.reload_stream_button.setEnabled(False)
+        #self.reload_stream_button.setEnabled(False)
         self.cal_button.setEnabled(False)
 
         # remove all pending mouseclicks
@@ -95,7 +96,7 @@ class CalibrateWizard(QtGui.QDialog):
 
         # enable button
         self.snapshot_button.setEnabled(True)
-        self.reload_stream_button.setEnabled(True)
+        #self.reload_stream_button.setEnabled(True)
         self.cal_button.setEnabled(True)
 
         # update snapshot list
@@ -104,7 +105,7 @@ class CalibrateWizard(QtGui.QDialog):
 
     def handle_reload(self):
         self.snapshot_button.setEnabled(False)
-        self.reload_stream_button.setEnabled(False)
+        #self.reload_stream_button.setEnabled(False)
         self.cal_button.setEnabled(False)
 
         # remove all pending mouseclicks
@@ -118,7 +119,7 @@ class CalibrateWizard(QtGui.QDialog):
 
         # enable button
         self.snapshot_button.setEnabled(True)
-        self.reload_stream_button.setEnabled(True)
+        #self.reload_stream_button.setEnabled(True)
         self.cal_button.setEnabled(True)
 
     def handle_calibrate(self):
