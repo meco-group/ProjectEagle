@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
         for (uint j = 0; j < distances.size(); j++) {
             if (distances[j] < 0.05) { //consider it to be an inlier
                 noi++;
-                cv::vconcat(Ain, cv::Mat(points[k].size(), 3, CV_32F, points[k].data()), Ain);
+                cv::vconcat(Ain, cv::Mat(points[j].size(), 3, CV_32F, points[j].data()), Ain);
             }
         }
 
