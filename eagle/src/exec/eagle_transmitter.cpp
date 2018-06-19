@@ -265,6 +265,7 @@ int main(int argc, char* argv[]) {
             std::time_t t = std::time(NULL);
             std::strftime(filename, sizeof(filename), "/snapshot_%Y_%m_%d_%H_%M_%S.png", std::localtime(&t));
             cv::imwrite(OUTPUT_PATH + std::string(filename), im);
+            cv::imwrite(OUTPUT_PATH + std::string("snapshot.png"), im);
 
             std::cout << "Snapshot taken. (" << OUTPUT_PATH + std::string(filename) << ")" << std::endl;
         }
