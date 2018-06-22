@@ -2,6 +2,7 @@
 #include <string>
 #include <chrono>
 #include <ctime>
+#include <unistd.h>
 
 using namespace eagle;
 
@@ -251,6 +252,7 @@ int main(int argc, char* argv[]) {
         //  check time
         auto t = std::chrono::high_resolution_clock::now();
         if (std::chrono::duration_cast<std::chrono::milliseconds>(t - t0).count() < dt) {
+            usleep(5000); //sleep 5ms
             continue;
         }
         t0 = t;
